@@ -24,3 +24,10 @@ resource "google_storage_bucket" "terraform" {
     enabled = true
   }
 }
+
+resource "google_storage_bucket" "terraform-test" {
+  name          = "terraform-test"
+  force_destroy = true
+  location      = "europe-north1"
+  storage_class = "STANDARD"
+}
