@@ -26,7 +26,7 @@ resource "google_storage_bucket" "terraform" {
 }
 
 resource "google_storage_bucket" "terraform-test" {
-  name          = "terraform-test"
+  name          = "flex-terraform-test-op7sdf98"
   force_destroy = true
   location      = "europe-north1"
   storage_class = "STANDARD"
