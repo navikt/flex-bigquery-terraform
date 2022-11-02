@@ -31,3 +31,10 @@ resource "google_storage_bucket" "terraform-test" {
   location      = "europe-north1"
   storage_class = "STANDARD"
 }
+
+resource "google_storage_bucket" "terraform-test-2" {
+  name          = "flex-terraform-test-op7sdf99"
+  force_destroy = true
+  location      = "europe-north1"
+  storage_class = "STANDARD"
+}
