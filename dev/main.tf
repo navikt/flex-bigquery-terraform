@@ -24,17 +24,3 @@ resource "google_storage_bucket" "terraform" {
     enabled = true
   }
 }
-
-resource "google_storage_bucket" "terraform-test" {
-  name          = "flex-terraform-test-op7sdf98"
-  force_destroy = true
-  location      = "europe-north1"
-  storage_class = "STANDARD"
-}
-
-resource "google_storage_bucket" "terraform-test-2" {
-  name          = "flex-terraform-test-op7sdf99"
-  force_destroy = true
-  location      = "europe-north1"
-  storage_class = "STANDARD"
-}
