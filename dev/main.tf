@@ -31,11 +31,26 @@ resource "google_service_account" "federated-query" {
   display_name = "Federated Query"
 }
 
-data "google_secret_manager_secret_version" "spinnsyn_db" {
+data "google_secret_manager_secret_version" "spinnsyn_db_secret" {
   secret = "spinnsyn-db"
 }
 locals {
   spinnsyn_db = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_db.secret_data
+    data.google_secret_manager_secret_version.spinnsyn_db_secret.secret_data
   )
+}
+
+resource "google_bigquery_connection" "spinnsyn-backend" {
+  connection_id = "spinnsyn-backend"
+  location      = "europe-north1"
+
+  cloud_sql {
+    instance_id = "flex-dev-2b16:europe-north1:spinnsyn-backend"
+    database    = "spinnsyn-db"
+    type        = "POSTGRES"
+    credential {
+      username = local.spinnsyn_db.username
+      password = local.spinnsyn_db.password
+    }
+  }
 }
