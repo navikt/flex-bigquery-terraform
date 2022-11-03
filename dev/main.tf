@@ -24,3 +24,9 @@ resource "google_storage_bucket" "terraform" {
     enabled = true
   }
 }
+
+resource "google_service_account" "federated-query" {
+  account_id   = "federated-query"
+  description  = "Bruker til federated query for å oppdatere BigQuery datasett"
+  display_name = "Federated Query"
+}
