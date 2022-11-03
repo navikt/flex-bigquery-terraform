@@ -31,12 +31,12 @@ resource "google_service_account" "federated-query" {
   display_name = "Federated Query"
 }
 
-data "google_secret_manager_secret_version" "spinnsyn_db_secret" {
-  secret = "spinnsyn-db"
+data "google_secret_manager_secret_version" "spinnsyn_db_bigquery" {
+  secret = "spinnsyn-db-bigquery"
 }
 locals {
   spinnsyn_db = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_db_secret.secret_data
+    data.google_secret_manager_secret_version.spinnsyn_db_bigquery.secret_data
   )
 }
 
@@ -54,3 +54,4 @@ resource "google_bigquery_connection" "spinnsyn-backend" {
     }
   }
 }
+
