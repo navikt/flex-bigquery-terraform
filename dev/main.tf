@@ -30,3 +30,12 @@ resource "google_service_account" "federated-query" {
   description  = "Bruker til federated query for å oppdatere BigQuery datasett"
   display_name = "Federated Query"
 }
+
+data "google_secret_manager_secret_version" "spinnsyn_db" {
+  secret = "spinnsyn-db"
+}
+locals {
+  spinnsyn_db = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_db.secret_data
+  )
+}
