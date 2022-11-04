@@ -73,3 +73,41 @@ resource "google_bigquery_dataset" "flex-dataset" {
   }
 }
 
+resource "google_bigquery_table" "spinnsyn_utbetalinger" {
+  dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
+  table_id   = "spinnsyn_utbetalinger"
+
+  schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fnr"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "utbetaling_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "utbetaling_type"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "antall_vedtak"
+        type = "INTEGER"
+      },
+    ]
+  )
+}
+
+
+
+
