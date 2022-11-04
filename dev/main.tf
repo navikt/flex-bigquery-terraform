@@ -108,6 +108,31 @@ resource "google_bigquery_table" "spinnsyn_utbetalinger" {
   )
 }
 
+resource "google_bigquery_table" "spinnsyn_utbetalinger_view" {
+  dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
+  table_id   = "spinnsyn_utbetalinger_view"
 
-
-
+  schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "utbetaling_id"
+        type        = "STRING"
+        description = "Unik ID for utbetalingen."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "antall_vedtak"
+        type        = "INTEGER"
+        description = "Antall vedtak tilhørende utbetalingen."
+      }
+    ]
+  )
+  view {
+    use_legacy_sql = false
+    query          = <<EOF
+SELECT utbetaling_id, antall_vedtak
+FROM `flex-dev-2b16.flex_dataset.spinnsyn_utbetalinger`
+EOF
+  }
+}
