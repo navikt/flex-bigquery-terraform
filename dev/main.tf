@@ -55,3 +55,21 @@ resource "google_bigquery_connection" "spinnsyn-backend" {
   }
 }
 
+resource "google_bigquery_dataset" "flex-dataset" {
+  dataset_id = "flex_dataset"
+  location   = "europe-north1"
+
+  access {
+    role          = "OWNER"
+    special_group = "projectOwners"
+  }
+  access {
+    role          = "READER"
+    special_group = "projectReaders"
+  }
+  access {
+    role          = "WRITER"
+    special_group = "projectWriters"
+  }
+}
+
