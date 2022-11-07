@@ -136,3 +136,22 @@ FROM `flex-dev-2b16.flex_dataset.spinnsyn_utbetalinger`
 EOF
   }
 }
+
+
+resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
+  display_name           = "spinnsyn_utbetalinger_query"
+  location               = "europe-north1"
+  data_source_id         = "scheduled_query"
+  schedule               = "every day 02:00"
+  destination_dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
+  service_account_name   = "federated-query@flex-dev-2b16.iam.gserviceaccount.com"
+  params = {
+    destination_table_name_template = "spinnsyn_utbetalinger"
+    write_disposition               = "WRITE_TRUNCATE"
+    query                           = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('flex-dev-2b16.europe-north1.spinnsyn-backend',
+'SELECT id, fnr, utbetaling_id, utbetaling_type, antall_vedtak FROM utbetaling');
+EOF
+  }
+}
