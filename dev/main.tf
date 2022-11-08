@@ -46,7 +46,7 @@ resource "google_service_account" "federated_query" {
   display_name = "Federated Query"
 }
 
-resource "google_bigquery_connection" "spinnsyn-backend" {
+resource "google_bigquery_connection" "spinnsyn_backend" {
   connection_id = "spinnsyn-backend"
   location      = data.google_client_config.current.region
 
