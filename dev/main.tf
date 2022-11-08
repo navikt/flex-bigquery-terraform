@@ -40,7 +40,7 @@ resource "google_storage_bucket" "terraform" {
   }
 }
 
-resource "google_service_account" "federated-query" {
+resource "google_service_account" "federated_query" {
   account_id   = "federated-query"
   description  = "Service Account brukt av BigQuery Scheduled Queries."
   display_name = "Federated Query"
