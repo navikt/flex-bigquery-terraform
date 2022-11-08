@@ -16,9 +16,24 @@ provider "google" {
   region  = "europe-north1"
 }
 
+data "google_secret_manager_secret_version" "spinnsyn_db_bigquery" {
+  secret = "spinnsyn-db-bigquery"
+}
+
+data "google_client_config" "current" {}
+
+data "google_project" "project" {}
+
+locals {
+  spinnsyn_db = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_db_bigquery.secret_data
+  )
+  test = "scheduled_query"
+}
+
 resource "google_storage_bucket" "terraform" {
   name          = "flex-terraform-state-dev"
-  location      = "europe-north1"
+  location      = data.google_client_config.current.region
   storage_class = "STANDARD"
   versioning {
     enabled = true
@@ -27,25 +42,16 @@ resource "google_storage_bucket" "terraform" {
 
 resource "google_service_account" "federated-query" {
   account_id   = "federated-query"
-  description  = "Bruker til federated query for å oppdatere BigQuery datasett"
+  description  = "Service Account brukt av BigQuery Scheduled Queries."
   display_name = "Federated Query"
-}
-
-data "google_secret_manager_secret_version" "spinnsyn_db_bigquery" {
-  secret = "spinnsyn-db-bigquery"
-}
-locals {
-  spinnsyn_db = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_db_bigquery.secret_data
-  )
 }
 
 resource "google_bigquery_connection" "spinnsyn-backend" {
   connection_id = "spinnsyn-backend"
-  location      = "europe-north1"
+  location      = data.google_client_config.current.region
 
   cloud_sql {
-    instance_id = "flex-dev-2b16:europe-north1:spinnsyn-backend"
+    instance_id = "${data.google_project.project.project_id}:${data.google_client_config.current.region}:spinnsyn-backend"
     database    = "spinnsyn-db"
     type        = "POSTGRES"
     credential {
@@ -57,7 +63,7 @@ resource "google_bigquery_connection" "spinnsyn-backend" {
 
 resource "google_bigquery_dataset" "flex-dataset" {
   dataset_id = "flex_dataset"
-  location   = "europe-north1"
+  location   = data.google_client_config.current.region
 
   access {
     role          = "OWNER"
@@ -132,7 +138,7 @@ resource "google_bigquery_table" "spinnsyn_utbetalinger_view" {
     use_legacy_sql = false
     query          = <<EOF
 SELECT utbetaling_id, antall_vedtak
-FROM `flex-dev-2b16.flex_dataset.spinnsyn_utbetalinger`
+FROM `${data.google_project.project.project_id}.flex_dataset.spinnsyn_utbetalinger`
 EOF
   }
 }
@@ -140,17 +146,17 @@ EOF
 
 resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
   display_name           = "spinnsyn_utbetalinger_query"
-  location               = "europe-north1"
+  location               = data.google_client_config.current.region
   data_source_id         = "scheduled_query"
   schedule               = "every day 02:00"
   destination_dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
-  service_account_name   = "federated-query@flex-dev-2b16.iam.gserviceaccount.com"
+  service_account_name   = "federated-query@${data.google_project.project.project_id}.iam.gserviceaccount.com"
   params = {
     destination_table_name_template = "spinnsyn_utbetalinger"
     write_disposition               = "WRITE_TRUNCATE"
     query                           = <<EOF
 SELECT * FROM
-EXTERNAL_QUERY('flex-dev-2b16.europe-north1.spinnsyn-backend',
+EXTERNAL_QUERY('${data.google_project.project.project_id}.${data.google_client_config.current.region}.spinnsyn-backend',
 'SELECT id, fnr, utbetaling_id, utbetaling_type, antall_vedtak FROM utbetaling');
 EOF
   }
