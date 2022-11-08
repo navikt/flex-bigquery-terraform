@@ -31,6 +31,11 @@ locals {
   google_bigquery_data_transfer_config = {
     data_source_id = "scheduled_query"
   }
+
+  google_project_iam_member = {
+    email = "service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+  }
+
 }
 
 resource "google_storage_bucket" "terraform" {
@@ -46,6 +51,12 @@ resource "google_service_account" "federated_query" {
   account_id   = "federated-query"
   description  = "Service Account brukt av BigQuery Scheduled Queries."
   display_name = "Federated Query"
+}
+
+resource "google_project_iam_member" "permissions" {
+  project = data.google_project.project.project_id
+  role    = "roles/iam.serviceAccountShortTermTokenMinter"
+  member  = "serviceAccount:${local.google_project_iam_member.email}"
 }
 
 resource "google_bigquery_connection" "spinnsyn_backend" {
@@ -71,9 +82,15 @@ resource "google_bigquery_dataset" "flex_dataset" {
     role          = "OWNER"
     special_group = "projectOwners"
   }
+
   access {
     role          = "READER"
     special_group = "projectReaders"
+
+  }
+  access {
+    role          = "WRITER"
+    user_by_email = local.google_project_iam_member.email
   }
   access {
     role          = "WRITER"
@@ -145,24 +162,4 @@ EOF
   }
 }
 
-resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
-  display_name           = "spinnsyn_utbetalinger_query"
-  data_source_id         = local.google_bigquery_data_transfer_config.data_source_id
-  schedule               = "every day 02:00"
-  destination_dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  service_account_name   = "federated-query@${data.google_project.project.project_id}.iam.gserviceaccount.com"
 
-  schedule_options {
-    start_time = "2022-11-09T00:00:00Z"
-  }
-
-  params = {
-    destination_table_name_template = "spinnsyn_utbetalinger"
-    write_disposition               = "WRITE_TRUNCATE"
-    query                           = <<EOF
-SELECT * FROM
-EXTERNAL_QUERY('${data.google_project.project.project_id}.${data.google_client_config.current.region}.spinnsyn-backend',
-'SELECT id, fnr, utbetaling_id, utbetaling_type, antall_vedtak FROM utbetaling');
-EOF
-  }
-}
