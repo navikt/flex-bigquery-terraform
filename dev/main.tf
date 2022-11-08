@@ -28,7 +28,9 @@ locals {
   spinnsyn_db = jsondecode(
     data.google_secret_manager_secret_version.spinnsyn_db_bigquery.secret_data
   )
-  test = "scheduled_query"
+  google_bigquery_data_transfer_config = {
+    data_source_id = "scheduled_query"
+  }
 }
 
 resource "google_storage_bucket" "terraform" {
@@ -143,14 +145,13 @@ EOF
   }
 }
 
-
 resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
   display_name           = "spinnsyn_utbetalinger_query"
-  location               = data.google_client_config.current.region
-  data_source_id         = "scheduled_query"
+  data_source_id         = local.google_bigquery_data_transfer_config.data_source_id
   schedule               = "every day 02:00"
   destination_dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   service_account_name   = "federated-query@${data.google_project.project.project_id}.iam.gserviceaccount.com"
+
   params = {
     destination_table_name_template = "spinnsyn_utbetalinger"
     write_disposition               = "WRITE_TRUNCATE"
