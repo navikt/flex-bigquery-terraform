@@ -61,7 +61,7 @@ resource "google_bigquery_connection" "spinnsyn-backend" {
   }
 }
 
-resource "google_bigquery_dataset" "flex-dataset" {
+resource "google_bigquery_dataset" "flex_dataset" {
   dataset_id = "flex_dataset"
   location   = data.google_client_config.current.region
 
@@ -80,7 +80,7 @@ resource "google_bigquery_dataset" "flex-dataset" {
 }
 
 resource "google_bigquery_table" "spinnsyn_utbetalinger" {
-  dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "spinnsyn_utbetalinger"
 
   schema = jsonencode(
@@ -115,7 +115,7 @@ resource "google_bigquery_table" "spinnsyn_utbetalinger" {
 }
 
 resource "google_bigquery_table" "spinnsyn_utbetalinger_view" {
-  dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "spinnsyn_utbetalinger_view"
 
   schema = jsonencode(
@@ -149,7 +149,7 @@ resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
   location               = data.google_client_config.current.region
   data_source_id         = "scheduled_query"
   schedule               = "every day 02:00"
-  destination_dataset_id = google_bigquery_dataset.flex-dataset.dataset_id
+  destination_dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   service_account_name   = "federated-query@${data.google_project.project.project_id}.iam.gserviceaccount.com"
   params = {
     destination_table_name_template = "spinnsyn_utbetalinger"
