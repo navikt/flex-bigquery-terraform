@@ -1,18 +1,22 @@
-name: 'Terraform'
+name: "Terraform"
 on: push
+
+env:
+  DEV_DIR: './dev'
+  PROD_DIR: './prod'
 
 jobs:
   terraform-plan-dev:
-    name: 'terraform plan gcp-dev'
+    name: "terraform plan gcp-dev"
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./dev
+        working-directory: ${{ env.DEV_DIR }}
 
     env:
       GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
     steps:
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v3
 
       - name: Run 'terraform setup'
@@ -34,23 +38,20 @@ jobs:
         run: terraform plan
 
   terraform-plan-prod:
-    name: 'terraform plan gcp-prod'
+    name: "terraform plan gcp-prod"
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./prod
+        working-directory: ${{ env.PROD_DIR }}
 
     env:
       GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_PROD }}
     steps:
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v3
 
       - name: Run 'terraform setup'
         uses: hashicorp/setup-terraform@v2
-
-      - name: Run 'pwd'
-        run: pwd
 
       - name: Run 'terraform init'
         run: terraform init
@@ -64,27 +65,50 @@ jobs:
       - name: Run 'terraform plan'
         run: terraform plan
 
-
   terraform-apply-dev:
-      needs: terraform-plan-dev
-      if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev-')
-      name: 'terraform apply gcp-dev'
-      runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: ./dev
+    needs: terraform-plan-dev
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev-')
+    name: "terraform apply gcp-dev"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.DEV_DIR }}
 
-      env:
-        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-      steps:
-      - name: 'Checkout code'
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+    steps:
+      - name: "Checkout code"
         uses: actions/checkout@v3
 
       - name: Run 'terraform setup'
         uses: hashicorp/setup-terraform@v2
 
-      - name: Run 'pwd'
-        run: pwd
+      - name: Run 'terraform init'
+        run: terraform init
+
+      - name: Run 'terraform apply'
+        run: terraform apply
+
+  terraform-apply-prod:
+    needs: terraform-plan-prod
+    if: github.ref == 'refs/heads/master'
+    name: "terraform apply gcp-prod"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROD_DIR }}
+
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_PROD }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+
+      - name: Run 'terraform setup'
+        uses: hashicorp/setup-terraform@v2
 
       - name: Run 'terraform init'
         run: terraform init
+
+      - name: Run 'terraform apply'
+        run: terraform apply
