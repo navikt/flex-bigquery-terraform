@@ -15,6 +15,16 @@ provider "google" {
   region  = "europe-north1"
 }
 
+data "google_client_config" "current" {}
+
+data "google_project" "project" {}
+
+locals {
+  google_project_iam_member = {
+    email = "service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+  }
+}
+
 resource "google_storage_bucket" "terraform" {
   name          = "flex-terraform-state-prod"
   location      = "europe-north1"
