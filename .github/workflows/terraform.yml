@@ -14,7 +14,7 @@ jobs:
         working-directory: ${{ env.DEV_DIR }}
 
     env:
-      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_DEV }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v3
@@ -72,7 +72,7 @@ jobs:
         working-directory: ${{ env.DEV_DIR }}
 
     env:
-      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_DEV }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v3
