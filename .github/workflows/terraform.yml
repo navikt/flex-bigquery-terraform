@@ -32,3 +32,35 @@ jobs:
 
       - name: Run 'terraform plan'
         run: terraform plan
+
+  terraform-plan-prod:
+    name: 'Terraform Plan Prod'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./prod
+
+    env:
+      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_PROD }}
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+
+      - name: Run 'terraform setup'
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Run 'pwd'
+        run: pwd
+
+      - name: Run 'terraform init'
+        run: terraform init
+
+      - name: Run 'terraform fmt'
+        run: terraform fmt -check
+
+      - name: Run 'terraform validate'
+        run: terraform validate
+
+      - name: Run 'terraform plan'
+        run: terraform plan
+
