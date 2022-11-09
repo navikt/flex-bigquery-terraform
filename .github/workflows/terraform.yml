@@ -22,9 +22,6 @@ jobs:
       - name: Run 'terraform setup'
         uses: hashicorp/setup-terraform@v2
 
-      - name: Run 'pwd'
-        run: pwd
-
       - name: Run 'terraform init'
         run: terraform init
 
