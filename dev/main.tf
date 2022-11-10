@@ -217,3 +217,88 @@ EXTERNAL_QUERY('${var.project}.${var.region}.spinnsyn-backend',
 EOF
   }
 }
+
+resource "google_bigquery_table" "spinnsyn_annullering" {
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "spinnsyn_annullering"
+  deletion_protection = false
+
+  schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fnr"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "annullering"
+        type = "JSON"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprettet"
+        type = "TIMESTAMP"
+      },
+    ]
+  )
+}
+
+resource "google_bigquery_table" "spinnsyn_annullering_view" {
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "spinnsyn_annullering_view"
+  deletion_protection = false
+
+  schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "id"
+        type        = "STRING"
+        description = "Unik ID for annulleringen."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når annulleringen ble opprettet."
+      },
+    ]
+  )
+  view {
+    use_legacy_sql = false
+    query          = <<EOF
+SELECT id, opprettet
+FROM `${var.project}.${google_bigquery_table.spinnsyn_annullering.dataset_id}.${google_bigquery_table.spinnsyn_annullering.table_id}`
+EOF
+  }
+}
+
+resource "google_bigquery_data_transfer_config" "spinnsyn_annullering_query" {
+  display_name           = "spinnsyn_annullering_query"
+  data_source_id         = var.scheduled_query
+  location               = var.region
+  schedule               = "every day 02:00"
+  destination_dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  service_account_name   = "federated-query@${var.project}.iam.gserviceaccount.com"
+
+
+  schedule_options {
+    start_time = "2022-11-10T00:00:00Z"
+  }
+
+  params = {
+    destination_table_name_template = "spinnsyn_annullering"
+    write_disposition               = "WRITE_TRUNCATE"
+    query                           = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.project}.${var.region}.spinnsyn-backend',
+'SELECT id, fnr, annullering, opprettet FROM annullering');
+EOF
+  }
+}
