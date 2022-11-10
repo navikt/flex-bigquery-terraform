@@ -12,15 +12,13 @@ terraform {
 }
 
 provider "google" {
-  project = "flex-dev-2b16"
-  region  = "europe-north1"
+  project = var.project
+  region  = var.region
 }
 
 data "google_secret_manager_secret_version" "spinnsyn_db_bigquery" {
-  secret = "spinnsyn-db-bigquery"
+  secret = var.spinnsyn_db_secret
 }
-
-data "google_client_config" "current" {}
 
 data "google_project" "project" {}
 
@@ -28,19 +26,15 @@ locals {
   spinnsyn_db = jsondecode(
     data.google_secret_manager_secret_version.spinnsyn_db_bigquery.secret_data
   )
-  google_bigquery_data_transfer_config = {
-    data_source_id = "scheduled_query"
-  }
 
   google_project_iam_member = {
     email = "service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
   }
-
 }
 
 resource "google_storage_bucket" "terraform" {
   name          = "flex-terraform-state-dev"
-  location      = data.google_client_config.current.region
+  location      = var.region
   storage_class = "STANDARD"
   versioning {
     enabled = true
@@ -61,10 +55,10 @@ resource "google_project_iam_member" "permissions" {
 
 resource "google_bigquery_connection" "spinnsyn_backend" {
   connection_id = "spinnsyn-backend"
-  location      = data.google_client_config.current.region
+  location      = var.region
 
   cloud_sql {
-    instance_id = "${data.google_project.project.project_id}:${data.google_client_config.current.region}:spinnsyn-backend"
+    instance_id = "${var.project}:${var.region}:spinnsyn-backend"
     database    = "spinnsyn-db"
     type        = "POSTGRES"
     credential {
@@ -76,7 +70,7 @@ resource "google_bigquery_connection" "spinnsyn_backend" {
 
 resource "google_bigquery_dataset" "flex_dataset" {
   dataset_id = "flex_dataset"
-  location   = data.google_client_config.current.region
+  location   = var.region
 
   access {
     role          = "OWNER"
@@ -164,11 +158,11 @@ EOF
 
 resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
   display_name           = "spinnsyn_utbetalinger_query"
-  data_source_id         = local.google_bigquery_data_transfer_config.data_source_id
-  location               = data.google_client_config.current.region
+  data_source_id         = var.scheduled_query
+  location               = var.region
   schedule               = "every day 02:00"
   destination_dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  service_account_name   = "federated-query@${data.google_project.project.project_id}.iam.gserviceaccount.com"
+  service_account_name   = "federated-query@${var.project}.iam.gserviceaccount.com"
 
 
   schedule_options {
@@ -180,7 +174,7 @@ resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
     write_disposition               = "WRITE_TRUNCATE"
     query                           = <<EOF
 SELECT * FROM
-EXTERNAL_QUERY('${data.google_project.project.project_id}.${data.google_client_config.current.region}.spinnsyn-backend',
+EXTERNAL_QUERY('${var.project}.${var.region}.spinnsyn-backend',
 'SELECT id, fnr, utbetaling_id, utbetaling_type, antall_vedtak FROM utbetaling');
 EOF
   }
