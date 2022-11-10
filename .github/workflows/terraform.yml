@@ -84,7 +84,7 @@ jobs:
         run: terraform init
 
       - name: Run 'terraform apply'
-        run: terraform apply
+        run: terraform apply -auto-approve
 
   terraform-apply-prod:
     needs: terraform-plan-prod
@@ -108,4 +108,4 @@ jobs:
         run: terraform init
 
       - name: Run 'terraform apply'
-        run: terraform apply
+        run: terraform apply -auto-approve
