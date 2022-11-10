@@ -92,9 +92,10 @@ resource "google_bigquery_dataset" "flex_dataset" {
   }
 }
 
-resource "google_bigquery_table" "spinnsyn_utbetalinger" {
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "spinnsyn_utbetalinger"
+resource "google_bigquery_table" "spinnsyn_utbetaling" {
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "spinnsyn_utbetaling"
+  deletion_protection = false
 
   schema = jsonencode(
     [
@@ -120,16 +121,42 @@ resource "google_bigquery_table" "spinnsyn_utbetalinger" {
       },
       {
         mode = "NULLABLE"
+        name = "utbetaling"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprettet"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
         name = "antall_vedtak"
         type = "INTEGER"
+      },
+      {
+        mode = "NULLABLE"
+        name = "lest"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "motatt_publisert"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "skal_vises_til_bruker"
+        type = "BOOLEAN"
       },
     ]
   )
 }
 
-resource "google_bigquery_table" "spinnsyn_utbetalinger_view" {
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "spinnsyn_utbetalinger_view"
+resource "google_bigquery_table" "spinnsyn_utbetaling_view" {
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "spinnsyn_utbetaling_view"
+  deletion_protection = false
 
   schema = jsonencode(
     [
@@ -141,41 +168,52 @@ resource "google_bigquery_table" "spinnsyn_utbetalinger_view" {
       },
       {
         mode        = "NULLABLE"
+        name        = "utbetaling_type"
+        type        = "STRING"
+        description = "Om det er en UTBETALING, ANNULLERING eller en REVURDERING."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når utbetalingen ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
         name        = "antall_vedtak"
         type        = "INTEGER"
-        description = "Antall vedtak tilhørende utbetalingen."
-      }
+        description = "Antall vedtak ubetalingen dekker."
+      },
     ]
   )
   view {
     use_legacy_sql = false
     query          = <<EOF
-SELECT utbetaling_id, antall_vedtak
-FROM `${data.google_project.project.project_id}.flex_dataset.spinnsyn_utbetalinger`
+SELECT utbetaling_id, utbetaling_type, opprettet, antall_vedtak
+FROM `${var.project}.${google_bigquery_table.spinnsyn_utbetaling.dataset_id}.${google_bigquery_table.spinnsyn_utbetaling.table_id}`
 EOF
   }
 }
 
-resource "google_bigquery_data_transfer_config" "spinnsyn_utbetalinger_query" {
-  display_name           = "spinnsyn_utbetalinger_query"
+resource "google_bigquery_data_transfer_config" "spinnsyn_utbetaling_query" {
+  display_name           = "spinnsyn_utbetaling_query"
   data_source_id         = var.scheduled_query
   location               = var.region
   schedule               = "every day 02:00"
   destination_dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   service_account_name   = "federated-query@${var.project}.iam.gserviceaccount.com"
 
-
   schedule_options {
-    start_time = "2022-11-09T00:00:00Z"
+    start_time = "2022-11-10T00:00:00Z"
   }
 
   params = {
-    destination_table_name_template = "spinnsyn_utbetalinger"
+    destination_table_name_template = "spinnsyn_utbetaling"
     write_disposition               = "WRITE_TRUNCATE"
     query                           = <<EOF
 SELECT * FROM
 EXTERNAL_QUERY('${var.project}.${var.region}.spinnsyn-backend',
-'SELECT id, fnr, utbetaling_id, utbetaling_type, antall_vedtak FROM utbetaling');
+'SELECT id, fnr, utbetaling_id, utbetaling_type, utbetaling, opprettet, antall_vedtak, lest, motatt_publisert, skal_vises_til_bruker FROM utbetaling');
 EOF
   }
 }
