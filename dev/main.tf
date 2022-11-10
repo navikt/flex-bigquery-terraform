@@ -93,9 +93,8 @@ resource "google_bigquery_dataset" "flex_dataset" {
 }
 
 resource "google_bigquery_table" "spinnsyn_utbetaling" {
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id            = "spinnsyn_utbetaling"
-  deletion_protection = false
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = "spinnsyn_utbetaling"
 
   schema = jsonencode(
     [
@@ -154,9 +153,8 @@ resource "google_bigquery_table" "spinnsyn_utbetaling" {
 }
 
 resource "google_bigquery_table" "spinnsyn_utbetaling_view" {
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id            = "spinnsyn_utbetaling_view"
-  deletion_protection = false
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = "spinnsyn_utbetaling_view"
 
   schema = jsonencode(
     [
@@ -219,9 +217,8 @@ EOF
 }
 
 resource "google_bigquery_table" "spinnsyn_annullering" {
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id            = "spinnsyn_annullering"
-  deletion_protection = false
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = "spinnsyn_annullering"
 
   schema = jsonencode(
     [
@@ -250,9 +247,8 @@ resource "google_bigquery_table" "spinnsyn_annullering" {
 }
 
 resource "google_bigquery_table" "spinnsyn_annullering_view" {
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id            = "spinnsyn_annullering_view"
-  deletion_protection = false
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = "spinnsyn_annullering_view"
 
   schema = jsonencode(
     [
