@@ -10,16 +10,23 @@ terraform {
   }
 }
 
+
 provider "google" {
-  project = "flex-prod-af40"
-  region  = "europe-north1"
+  project = var.gcp_project["project"]
+  region  = var.gcp_project["region"]
 }
 
-data "google_client_config" "current" {}
+data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
+  secret = var.spinnsyn_bigquery_secret
+}
 
 data "google_project" "project" {}
 
 locals {
+  spinnsyn_db = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_bigquery_secret.secret_data
+  )
+
   google_project_iam_member = {
     email = "service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
   }
@@ -27,7 +34,7 @@ locals {
 
 resource "google_storage_bucket" "terraform" {
   name          = "flex-terraform-state-prod"
-  location      = "europe-north1"
+  location      = var.gcp_project["region"]
   storage_class = "STANDARD"
   versioning {
     enabled = true
