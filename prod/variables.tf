@@ -3,7 +3,7 @@ variable "gcp_project" {
   type        = map(string)
   default = {
     region  = "europe-north1",
-    project = "flex-dev-2b16"
+    project = "flex-prod-af40"
   }
 }
 

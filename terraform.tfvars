@@ -1,0 +1,1 @@
+spinnsyn_bigquery_secret = "spinnsyn-bigquery-credentials"
