@@ -235,7 +235,7 @@ resource "google_bigquery_table" "spinnsyn_annullering" {
       {
         mode = "NULLABLE"
         name = "annullering"
-        type = "JSON"
+        type = "STRING"
       },
       {
         mode = "NULLABLE"
