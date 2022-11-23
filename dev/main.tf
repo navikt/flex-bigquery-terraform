@@ -66,7 +66,7 @@ resource "google_bigquery_connection" "spinnsyn_backend" {
 }
 
 module "google_bigquery_dataset" {
-  source             = "../modules/google-bigquery"
+  source             = "../modules/google-bigquery-dataset"
   dataset_id         = "flex_dataset"
   location           = var.gcp_project["region"]
   dataset_iam_member = local.google_project_iam_member.email
