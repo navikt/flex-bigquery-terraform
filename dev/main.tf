@@ -33,7 +33,8 @@ locals {
 }
 
 module "google_storage_bucket" {
-  source   = "../modules/google-cloud-storage"
+  source = "../modules/google-cloud-storage"
+
   name     = "flex-terraform-state-dev"
   location = var.gcp_project["region"]
 }
@@ -50,23 +51,20 @@ resource "google_project_iam_member" "permissions" {
   member  = "serviceAccount:${local.google_project_iam_member.email}"
 }
 
-resource "google_bigquery_connection" "spinnsyn_backend" {
+module "google_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
   connection_id = "spinnsyn-backend"
   location      = var.gcp_project["region"]
-
-  cloud_sql {
-    instance_id = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:spinnsyn-backend"
-    database    = "spinnsyn-db"
-    type        = "POSTGRES"
-    credential {
-      username = local.spinnsyn_db.username
-      password = local.spinnsyn_db.password
-    }
-  }
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:spinnsyn-backend"
+  database      = "spinnsyn-db"
+  username      = local.spinnsyn_db.username
+  password      = local.spinnsyn_db.password
 }
 
 module "google_bigquery_dataset" {
-  source             = "../modules/google-bigquery-dataset"
+  source = "../modules/google-bigquery-dataset"
+
   dataset_id         = "flex_dataset"
   location           = var.gcp_project["region"]
   dataset_iam_member = local.google_project_iam_member.email
