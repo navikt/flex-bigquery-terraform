@@ -32,13 +32,10 @@ locals {
   }
 }
 
-resource "google_storage_bucket" "terraform" {
-  name          = "flex-terraform-state-dev"
-  location      = var.gcp_project["region"]
-  storage_class = "STANDARD"
-  versioning {
-    enabled = true
-  }
+module "google_storage_bucket" {
+  source   = "../modules/google-cloud-storage"
+  name     = "flex-terraform-state-dev"
+  location = var.gcp_project["region"]
 }
 
 resource "google_service_account" "federated_query" {

@@ -10,7 +10,6 @@ terraform {
   }
 }
 
-
 provider "google" {
   project = var.gcp_project["project"]
   region  = var.gcp_project["region"]
@@ -32,11 +31,8 @@ locals {
   }
 }
 
-resource "google_storage_bucket" "terraform" {
-  name          = "flex-terraform-state-prod"
-  location      = var.gcp_project["region"]
-  storage_class = "STANDARD"
-  versioning {
-    enabled = true
-  }
+module "google_storage_bucket" {
+  source   = "../modules/google-cloud-storage"
+  name     = "flex-terraform-state-prod"
+  location = var.gcp_project["region"]
 }
