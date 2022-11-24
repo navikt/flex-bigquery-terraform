@@ -194,11 +194,13 @@ EOF
   }
 }
 
-resource "google_bigquery_table" "spinnsyn_annullering" {
+module "spinnsyn_annullering" {
+  source = "../modules/google-bigquery-table"
+
+  location   = var.gcp_project["region"]
   dataset_id = module.google_bigquery_dataset.dataset_id
   table_id   = "spinnsyn_annullering"
-
-  schema = jsonencode(
+  table_schema = jsonencode(
     [
       {
         mode = "NULLABLE"
@@ -222,13 +224,9 @@ resource "google_bigquery_table" "spinnsyn_annullering" {
       },
     ]
   )
-}
 
-resource "google_bigquery_table" "spinnsyn_annullering_view" {
-  dataset_id = module.google_bigquery_dataset.dataset_id
-  table_id   = "spinnsyn_annullering_view"
-
-  schema = jsonencode(
+  view_id = "spinnsyn_annullering_view"
+  view_schema = jsonencode(
     [
       {
         mode        = "NULLABLE"
@@ -244,35 +242,24 @@ resource "google_bigquery_table" "spinnsyn_annullering_view" {
       },
     ]
   )
-  view {
-    use_legacy_sql = false
-    query          = <<EOF
+
+  view_query = <<EOF
 SELECT id, opprettet
-FROM `${var.gcp_project["project"]}.${google_bigquery_table.spinnsyn_annullering.dataset_id}.${google_bigquery_table.spinnsyn_annullering.table_id}`
+FROM `${var.gcp_project["project"]}.${module.google_bigquery_dataset.dataset_id}.${module.spinnsyn_annullering.bigquery_table_id}`
 EOF
-  }
-}
 
-resource "google_bigquery_data_transfer_config" "spinnsyn_annullering_query" {
-  display_name           = "spinnsyn_annullering_query"
-  data_source_id         = var.scheduled_query_data_source_id
-  location               = var.gcp_project["region"]
-  schedule               = "every day 02:00"
-  destination_dataset_id = module.google_bigquery_dataset.dataset_id
-  service_account_name   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_display_name      = "spinnsyn_annullering_query"
+  data_transfer_schedule          = "every day 02:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-10T00:00:00Z"
+  data_transfer_destination_table = module.spinnsyn_annullering.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
 
-
-  schedule_options {
-    start_time = "2022-11-10T00:00:00Z"
-  }
-
-  params = {
-    destination_table_name_template = "spinnsyn_annullering"
-    write_disposition               = "WRITE_TRUNCATE"
-    query                           = <<EOF
+  data_transfer_query = <<EOF
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
 'SELECT id, fnr, annullering, opprettet FROM annullering');
 EOF
-  }
+
 }
+
