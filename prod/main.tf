@@ -22,13 +22,13 @@ data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
 data "google_project" "project" {}
 
 locals {
-  spinnsyn_db = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_bigquery_secret.secret_data
-  )
-
   google_project_iam_member = {
     email = "service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
   }
+
+  spinnsyn_db = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_bigquery_secret.secret_data
+  )
 }
 
 module "google_storage_bucket" {
@@ -37,17 +37,13 @@ module "google_storage_bucket" {
   location = var.gcp_project["region"]
 }
 
-resource "google_bigquery_connection" "spinnsyn_backend" {
+module "google_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
   connection_id = "spinnsyn-backend"
   location      = var.gcp_project["region"]
-
-  cloud_sql {
-    instance_id = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:spinnsyn-backend"
-    database    = "spinnsyn-db"
-    type        = "POSTGRES"
-    credential {
-      username = local.spinnsyn_db.username
-      password = local.spinnsyn_db.password
-    }
-  }
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:spinnsyn-backend"
+  database      = "spinnsyn-db"
+  username      = local.spinnsyn_db.username
+  password      = local.spinnsyn_db.password
 }
