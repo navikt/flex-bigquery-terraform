@@ -43,7 +43,7 @@ resource "google_project_iam_member" "permissions" {
   member  = "serviceAccount:${local.google_project_iam_member.email}"
 }
 
-module "google_bigquery_dataset" {
+module "flex_dataset" {
   source = "../modules/google-bigquery-dataset"
 
   dataset_id         = "flex_dataset"
