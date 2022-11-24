@@ -70,11 +70,13 @@ module "google_bigquery_dataset" {
   dataset_iam_member = local.google_project_iam_member.email
 }
 
-resource "google_bigquery_table" "spinnsyn_utbetaling" {
+module "spinnsyn_utbetaling" {
+  source = "../modules/google-bigquery-table"
+
+  location   = var.gcp_project["region"]
   dataset_id = module.google_bigquery_dataset.dataset_id
   table_id   = "spinnsyn_utbetaling"
-
-  schema = jsonencode(
+  table_schema = jsonencode(
     [
       {
         mode = "NULLABLE"
@@ -128,13 +130,9 @@ resource "google_bigquery_table" "spinnsyn_utbetaling" {
       },
     ]
   )
-}
 
-resource "google_bigquery_table" "spinnsyn_utbetaling_view" {
-  dataset_id = module.google_bigquery_dataset.dataset_id
-  table_id   = "spinnsyn_utbetaling_view"
-
-  schema = jsonencode(
+  view_id = "spinnsyn_utbetaling_view"
+  view_schema = jsonencode(
     [
       {
         mode        = "NULLABLE"
@@ -162,36 +160,25 @@ resource "google_bigquery_table" "spinnsyn_utbetaling_view" {
       },
     ]
   )
-  view {
-    use_legacy_sql = false
-    query          = <<EOF
+
+  view_query = <<EOF
 SELECT utbetaling_id, utbetaling_type, opprettet, antall_vedtak
-FROM `${var.gcp_project["project"]}.${google_bigquery_table.spinnsyn_utbetaling.dataset_id}.${google_bigquery_table.spinnsyn_utbetaling.table_id}`
+FROM `${var.gcp_project["project"]}.${module.google_bigquery_dataset.dataset_id}.${module.spinnsyn_utbetaling.bigquery_table_id}`
 EOF
-  }
-}
 
-resource "google_bigquery_data_transfer_config" "spinnsyn_utbetaling_query" {
-  display_name           = "spinnsyn_utbetaling_query"
-  data_source_id         = var.scheduled_query_data_source_id
-  location               = var.gcp_project["region"]
-  schedule               = "every day 02:00"
-  destination_dataset_id = module.google_bigquery_dataset.dataset_id
-  service_account_name   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_display_name      = "spinnsyn_utbetaling_query"
+  data_transfer_schedule          = "every day 02:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-10T00:00:00Z"
+  data_transfer_destination_table = module.spinnsyn_utbetaling.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
 
-  schedule_options {
-    start_time = "2022-11-10T00:00:00Z"
-  }
-
-  params = {
-    destination_table_name_template = "spinnsyn_utbetaling"
-    write_disposition               = "WRITE_TRUNCATE"
-    query                           = <<EOF
+  data_transfer_query = <<EOF
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
 'SELECT id, fnr, utbetaling_id, utbetaling_type, utbetaling, opprettet, antall_vedtak, lest, motatt_publisert, skal_vises_til_bruker FROM utbetaling');
 EOF
-  }
+
 }
 
 module "spinnsyn_annullering" {
