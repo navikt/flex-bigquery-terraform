@@ -36,3 +36,18 @@ module "google_storage_bucket" {
   name     = "flex-terraform-state-prod"
   location = var.gcp_project["region"]
 }
+
+resource "google_bigquery_connection" "spinnsyn_backend" {
+  connection_id = "spinnsyn-backend"
+  location      = var.gcp_project["region"]
+
+  cloud_sql {
+    instance_id = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:spinnsyn-backend"
+    database    = "spinnsyn-db"
+    type        = "POSTGRES"
+    credential {
+      username = local.spinnsyn_db.username
+      password = local.spinnsyn_db.password
+    }
+  }
+}
