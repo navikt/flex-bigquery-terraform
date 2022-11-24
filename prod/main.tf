@@ -37,7 +37,7 @@ module "google_storage_bucket" {
   location = var.gcp_project["region"]
 }
 
-module "google_bigquery_connection" {
+module "spinnsyn_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
   connection_id = "spinnsyn-backend"
