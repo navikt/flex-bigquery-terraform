@@ -377,3 +377,84 @@ EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinn
 EOF
 
 }
+
+module "spinnsyn_vedtak" {
+  source = "../modules/google-bigquery-table"
+
+  location   = var.gcp_project["region"]
+  dataset_id = module.flex_dataset.dataset_id
+  table_id   = "spinnsyn_vedtak"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fnr"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "vedtak"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprettet"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "utbetaling_id"
+        type = "STRING"
+      },
+    ]
+
+  )
+
+  view_id = "spinnsyn_vedtak_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "id"
+        type        = "STRING"
+        description = "Unik ID for vedtaket."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når vedtaket ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "utbetaling_id"
+        type        = "STRING"
+        description = "Unik ID på utbetaling tilhørende vedtaket."
+      },
+    ]
+  )
+
+  view_query = <<EOF
+SELECT id, opprettet, utbetaling_id
+FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.spinnsyn_vedtak.bigquery_table_id}`
+EOF
+
+  data_transfer_display_name      = "spinnsyn_vedtak_query"
+  data_transfer_schedule          = "every day 02:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-26T00:00:00Z"
+  data_transfer_destination_table = module.spinnsyn_vedtak.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
+'SELECT id, fnr, vedtak, opprettet, utbetaling_id FROM vedtak_v2');
+EOF
+
+}
