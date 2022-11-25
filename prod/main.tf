@@ -37,6 +37,14 @@ module "google_storage_bucket" {
   location = var.gcp_project["region"]
 }
 
+module "flex_dataset" {
+  source = "../modules/google-bigquery-dataset"
+
+  dataset_id         = "flex_dataset"
+  location           = var.gcp_project["region"]
+  dataset_iam_member = local.google_project_iam_member.email
+}
+
 module "spinnsyn_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
