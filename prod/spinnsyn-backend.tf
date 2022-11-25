@@ -199,3 +199,78 @@ EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinn
 EOF
 
 }
+
+module "spinnsyn_done_vedtak" {
+  source = "../modules/google-bigquery-table"
+
+  location   = var.gcp_project["region"]
+  dataset_id = module.flex_dataset.dataset_id
+  table_id   = "spinnsyn_done_vedtak"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fnr"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "type"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "done_sendt"
+        type = "TIMESTAMP"
+      },
+    ]
+  )
+
+  view_id = "spinnsyn_done_vedtak_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "id"
+        type        = "STRING"
+        description = "Unik ID for done-meldingen."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "type"
+        type        = "STRING"
+        description = "Om done-meldingen gjelder VEDTAK eller UTBETALING."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "done_sendt"
+        type        = "TIMESTAMP"
+        description = "Når done-melding ble sendt."
+      },
+    ]
+  )
+
+  view_query = <<EOF
+SELECT id, type, done_sendt
+FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.spinnsyn_done_vedtak.bigquery_table_id}`
+EOF
+
+  data_transfer_display_name      = "spinnsyn_done_vedtak_query"
+  data_transfer_schedule          = "every day 02:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-26T00:00:00Z"
+  data_transfer_destination_table = module.spinnsyn_done_vedtak.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
+'SELECT id, fnr, type, done_sendt FROM done_vedtak');
+EOF
+
+}
