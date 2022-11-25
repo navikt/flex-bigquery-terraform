@@ -317,6 +317,7 @@ module "spinnsyn_organisasjon" {
   )
 
   view_id = "spinnsyn_spinnsyn_organisasjon_view"
+  deletion_protection = false
   view_schema = jsonencode(
     [
       {
