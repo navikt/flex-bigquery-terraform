@@ -142,7 +142,7 @@ module "sykepengesoknad_sykepengesoknad" {
       {
         mode = "NULLABLE"
         name = "egenmeldt_sykmelding"
-        type = "BOOL"
+        type = "BOOLEAN"
       },
       {
         mode = "NULLABLE"
@@ -157,7 +157,7 @@ module "sykepengesoknad_sykepengesoknad" {
       {
         mode = "NULLABLE"
         name = "avbrutt_feilinfo"
-        type = "BOOL"
+        type = "BOOLEAN"
       }
     ]
   )
@@ -169,151 +169,151 @@ module "sykepengesoknad_sykepengesoknad" {
         mode        = "NULLABLE"
         name        = "id"
         type        = "STRING"
-        description = ""
+        description = "Database ID for sykepengesøknaden."
       },
       {
         mode        = "NULLABLE"
         name        = "sykepengesoknad_uuid"
         type        = "STRING"
-        description = ""
+        description = "Unik ID for sykepengesøknaden."
       },
       {
         mode        = "NULLABLE"
         name        = "soknadstype"
         type        = "STRING"
-        description = ""
+        description = "Hvilken type sykepengesøknaden er."
       },
       {
         mode        = "NULLABLE"
         name        = "status"
         type        = "STRING"
-        description = ""
+        description = "Sykepengesøknadens status."
       },
       {
         mode        = "NULLABLE"
         name        = "fom"
         type        = "DATE"
-        description = ""
+        description = "Første dag i perioden sykepengesøknaden er for."
       },
       {
         mode        = "NULLABLE"
         name        = "tom"
         type        = "DATE"
-        description = ""
+        description = "Siste dag i perioden sykepengesøknaden er for."
       },
       {
         mode        = "NULLABLE"
         name        = "sykmelding_uuid"
         type        = "STRING"
-        description = ""
+        description = "Unik ID for sykmeldingen som ligger til grunn for sykepengesøknaden."
       },
       {
         mode        = "NULLABLE"
         name        = "aktivert_dato"
         type        = "DATE"
-        description = ""
+        description = "Når sykepengesøknden ble aktivert."
       },
       {
         mode        = "NULLABLE"
         name        = "korrigerer"
         type        = "STRING"
-        description = ""
+        description = "Unik ID til en sykepengesøknad denne søknaden korrigerer."
       },
       {
         mode        = "NULLABLE"
         name        = "korrigert_av"
         type        = "STRING"
-        description = ""
+        description = "Unik ID til en sykepengesøknad som korrigerer denne søknaden."
       },
       {
         mode        = "NULLABLE"
         name        = "avbrutt_dato"
         type        = "DATE"
-        description = ""
+        description = "Dato for en eventuell avbrytelse av søknaden."
       },
       {
         mode        = "NULLABLE"
         name        = "arbeidssituasjon"
         type        = "STRING"
-        description = ""
+        description = "Hvilken arbeidssituason søknaden er for."
       },
       {
         mode        = "NULLABLE"
         name        = "start_sykeforlop"
         type        = "DATE"
-        description = ""
+        description = "Første dag i sykeforløpet som sykepengesøknaden er en del av."
       },
       {
         mode        = "NULLABLE"
         name        = "arbeidsgiver_orgnummer"
         type        = "STRING"
-        description = ""
+        description = "Arbeidsgivers organisasjonsnummer."
       },
       {
         mode        = "NULLABLE"
         name        = "arbeidsgiver_navn"
         type        = "STRING"
-        description = ""
+        description = "Arbeidsgivers navn."
       },
       {
         mode        = "NULLABLE"
         name        = "sendt_arbeidsgiver"
         type        = "TIMESTAMP"
-        description = ""
+        description = "Når søknaden ble sendt til arbeidsgiver."
       },
       {
         mode        = "NULLABLE"
         name        = "sendt_nav"
         type        = "TIMESTAMP"
-        description = ""
+        description = "Når søknaden ble sendt til NAV."
       },
       {
         mode        = "NULLABLE"
         name        = "sykmelding_skrevet"
         type        = "TIMESTAMP"
-        description = ""
+        description = "Når sykmeldingen som ligger til grunn for sykepengesøknaden ble skrevet."
       },
       {
         mode        = "NULLABLE"
         name        = "opprettet"
         type        = "TIMESTAMP"
-        description = ""
+        description = "Når sykepengesøknaden ble opprettet."
       },
       {
         mode        = "NULLABLE"
         name        = "opprinnelse"
         type        = "STRING"
-        description = ""
+        description = "Sykepengesøknadens systemopprinnelse."
       },
       {
         mode        = "NULLABLE"
         name        = "avsendertype"
         type        = "STRING"
-        description = ""
+        description = "Om avsender er BRUKER eller SYSTEM."
       },
       {
         mode        = "NULLABLE"
         name        = "egenmeldt_sykmelding"
-        type        = "BOOL"
-        description = ""
+        type        = "BOOLEAN"
+        description = "Om søknaden er egenmeldt (koronarelatert)."
       },
       {
         mode        = "NULLABLE"
         name        = "merknader_fra_sykmelding"
         type        = "STRING"
-        description = ""
+        description = "Merknader hentet fra sykmeldingen."
       },
       {
         mode        = "NULLABLE"
         name        = "utlopt_publisert"
         type        = "TIMESTAMP"
-        description = ""
+        description = "Når det ble publisert en utløpt melding."
       },
       {
         mode        = "NULLABLE"
         name        = "avbrutt_feilinfo"
-        type        = "BOOL"
-        description = ""
+        type        = "BOOLEAN"
+        description = "Om bruker fikk feil avbrutt-info presentert. Styrer tekst i Gosys-oppgave."
       }
     ]
   )
