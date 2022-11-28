@@ -10,6 +10,7 @@ jobs:
   terraform-plan-dev:
     name: "terraform plan gcp-dev"
     runs-on: ubuntu-latest
+    concurrency: terraform-plan-dev
     defaults:
       run:
         working-directory: ${{ env.DEV_DIR }}
@@ -38,6 +39,7 @@ jobs:
   terraform-plan-prod:
     name: "terraform plan gcp-prod"
     runs-on: ubuntu-latest
+    concurrency: terraform-plan-prod
     defaults:
       run:
         working-directory: ${{ env.PROD_DIR }}
@@ -68,6 +70,7 @@ jobs:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev-')
     name: "terraform apply gcp-dev"
     runs-on: ubuntu-latest
+    concurrency: terraform-apply-dev
     defaults:
       run:
         working-directory: ${{ env.DEV_DIR }}
@@ -92,6 +95,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     name: "terraform apply gcp-prod"
     runs-on: ubuntu-latest
+    concurrency: terraform-apply-prod
     defaults:
       run:
         working-directory: ${{ env.PROD_DIR }}
