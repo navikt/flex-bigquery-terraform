@@ -13,7 +13,7 @@ module "sykepengesoknad_bigquery_connection" {
 
   connection_id = "sykepengesoknad-backend"
   location      = var.gcp_project["region"]
-  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad-backend"
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad"
   database      = "sykepengesoknad"
   username      = local.sykepengesoknad_db.username
   password      = local.sykepengesoknad_db.password
