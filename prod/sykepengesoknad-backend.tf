@@ -20,11 +20,12 @@ module "sykepengesoknad_bigquery_connection" {
 }
 
 module "sykepengesoknad_sykepengesoknad" {
-  source = "../modules/google-bigquery-table"
+  source              = "../modules/google-bigquery-table"
+  deletion_protection = false
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id
-  table_id   = "sykepengesoknad"
+  table_id   = "sykepengesoknad_sykepengesoknad"
   table_schema = jsonencode(
     [
       {
@@ -161,9 +162,9 @@ module "sykepengesoknad_sykepengesoknad" {
   )
 
   data_transfer_display_name      = "sykepengesoknad_sykepengesoknad_query"
-  data_transfer_schedule          = "every day 03:00"
+  data_transfer_schedule          = "every day 06:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-11-28T00:00:00Z"
+  data_transfer_start_time        = "2022-11-29T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sykepengesoknad.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -175,11 +176,11 @@ EOF
 
 }
 module "sykepengesoknad_sykepengesoknad_view" {
-  source = "../modules/google-bigquery-view"
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
 
   dataset_id = module.flex_dataset.dataset_id
-
-  view_id = "sykepengesoknad_view"
+  view_id    = "sykepengesoknad_sykepengesoknad_view"
 
   view_schema = jsonencode(
     [
