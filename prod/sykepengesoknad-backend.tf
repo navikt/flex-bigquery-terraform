@@ -162,7 +162,7 @@ module "sykepengesoknad_sykepengesoknad" {
   )
 
   data_transfer_display_name      = "sykepengesoknad_sykepengesoknad_query"
-  data_transfer_schedule          = "every day 06:00"
+  data_transfer_schedule          = "every day 05:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
   data_transfer_start_time        = "2022-11-29T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sykepengesoknad.bigquery_table_id
@@ -340,6 +340,83 @@ module "sykepengesoknad_sykepengesoknad_view" {
   view_query = <<EOF
 SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo
 FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}`
+EOF
+
+}
+
+module "sykepengesoknad_sporsmal" {
+  source              = "../modules/google-bigquery-table"
+  deletion_protection = false
+
+  location   = var.gcp_project["region"]
+  dataset_id = module.flex_dataset.dataset_id
+  table_id   = "sykepengesoknad_sporsmal"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "under_sporsmal_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tekst"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "undertekst"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tag"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "svartype"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "min"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "MAX"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "kriterie_for_visning"
+        type = "STRING"
+      }
+    ]
+  )
+
+  data_transfer_display_name      = "sykepengesoknad_sporsmal_query"
+  data_transfer_schedule          = "every day 05:10"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-29T12:00:00Z"
+  data_transfer_destination_table = module.sykepengesoknad_sporsmal.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
+'SELECT id, sykepengesoknad_id, under_sporsmal_id, tekst, undertekst, tag, svartype, min, max, kriterie_for_visning FROM sporsmal');
 EOF
 
 }
