@@ -407,9 +407,9 @@ module "sykepengesoknad_sporsmal" {
   )
 
   data_transfer_display_name      = "sykepengesoknad_sporsmal_query"
-  data_transfer_schedule          = "every day 05:10"
+  data_transfer_schedule          = "every day 04:10"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-11-29T12:00:00Z"
+  data_transfer_start_time        = "2022-11-29T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sporsmal.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -417,6 +417,48 @@ module "sykepengesoknad_sporsmal" {
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
 'SELECT id, sykepengesoknad_id, under_sporsmal_id, tekst, undertekst, tag, svartype, min, max, kriterie_for_visning FROM sporsmal');
+EOF
+
+}
+
+module "sykepengesoknad_svar" {
+  source              = "../modules/google-bigquery-table"
+  deletion_protection = false
+
+  location   = var.gcp_project["region"]
+  dataset_id = module.flex_dataset.dataset_id
+  table_id   = "sykepengesoknad_svar"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sporsmal_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "verdi"
+        type = "STRING"
+      }
+    ]
+  )
+
+  data_transfer_display_name      = "sykepengesoknad_svar_query"
+  data_transfer_schedule          = "every day 05:20"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-29T00:00:00Z"
+  data_transfer_destination_table = module.sykepengesoknad_svar.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
+'SELECT id, sporsmal_id, verdi FROM svar');
 EOF
 
 }
