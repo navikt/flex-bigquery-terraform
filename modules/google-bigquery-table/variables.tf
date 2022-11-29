@@ -24,21 +24,6 @@ variable "deletion_protection" {
   default     = true
 }
 
-variable "view_id" {
-  description = "The name of the view to create."
-  type        = string
-}
-
-variable "view_schema" {
-  description = "The view schema."
-  type        = string
-}
-
-variable "view_query" {
-  description = "The SQL used to populate the view."
-  type        = string
-}
-
 variable "data_transfer_display_name" {
   description = "The data transfer identifier"
   type        = string

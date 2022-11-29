@@ -19,8 +19,6 @@ module "sykepengesoknad_bigquery_connection" {
   password      = local.sykepengesoknad_db.password
 }
 
-
-
 module "sykepengesoknad_sykepengesoknad" {
   source = "../modules/google-bigquery-table"
 
@@ -162,7 +160,27 @@ module "sykepengesoknad_sykepengesoknad" {
     ]
   )
 
+  data_transfer_display_name      = "sykepengesoknad_sykepengesoknad_query"
+  data_transfer_schedule          = "every day 03:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-28T00:00:00Z"
+  data_transfer_destination_table = module.sykepengesoknad_sykepengesoknad.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
+'SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, fnr, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo FROM sykepengesoknad');
+EOF
+
+}
+module "sykepengesoknad_sykepengesoknad_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = module.flex_dataset.dataset_id
+
   view_id = "sykepengesoknad_view"
+
   view_schema = jsonencode(
     [
       {
@@ -321,19 +339,6 @@ module "sykepengesoknad_sykepengesoknad" {
   view_query = <<EOF
 SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo
 FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}`
-EOF
-
-  data_transfer_display_name      = "sykepengesoknad_sykepengesoknad_query"
-  data_transfer_schedule          = "every day 03:00"
-  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-11-28T00:00:00Z"
-  data_transfer_destination_table = module.sykepengesoknad_sykepengesoknad.bigquery_table_id
-  data_transfer_mode              = "WRITE_TRUNCATE"
-
-  data_transfer_query = <<EOF
-SELECT * FROM
-EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
-'SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, fnr, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo FROM sykepengesoknad');
 EOF
 
 }
