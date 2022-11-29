@@ -80,6 +80,26 @@ module "spinnsyn_utbetaling" {
     ]
   )
 
+  data_transfer_display_name      = "spinnsyn_utbetaling_query"
+  data_transfer_schedule          = "every day 02:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-10T00:00:00Z"
+  data_transfer_destination_table = module.spinnsyn_utbetaling.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
+'SELECT id, fnr, utbetaling_id, utbetaling_type, utbetaling, opprettet, antall_vedtak, lest, motatt_publisert, skal_vises_til_bruker FROM utbetaling');
+EOF
+
+}
+
+module "spinnsyn_utbetaling_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = module.flex_dataset.dataset_id
+
   view_id = "spinnsyn_utbetaling_view"
   view_schema = jsonencode(
     [
@@ -114,20 +134,6 @@ module "spinnsyn_utbetaling" {
 SELECT utbetaling_id, utbetaling_type, opprettet, antall_vedtak
 FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.spinnsyn_utbetaling.bigquery_table_id}`
 EOF
-
-  data_transfer_display_name      = "spinnsyn_utbetaling_query"
-  data_transfer_schedule          = "every day 02:00"
-  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-11-10T00:00:00Z"
-  data_transfer_destination_table = module.spinnsyn_utbetaling.bigquery_table_id
-  data_transfer_mode              = "WRITE_TRUNCATE"
-
-  data_transfer_query = <<EOF
-SELECT * FROM
-EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
-'SELECT id, fnr, utbetaling_id, utbetaling_type, utbetaling, opprettet, antall_vedtak, lest, motatt_publisert, skal_vises_til_bruker FROM utbetaling');
-EOF
-
 }
 
 module "spinnsyn_annullering" {
@@ -161,6 +167,26 @@ module "spinnsyn_annullering" {
     ]
   )
 
+  data_transfer_display_name      = "spinnsyn_annullering_query"
+  data_transfer_schedule          = "every day 02:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-11-10T00:00:00Z"
+  data_transfer_destination_table = module.spinnsyn_annullering.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
+'SELECT id, fnr, annullering, opprettet FROM annullering');
+EOF
+
+}
+
+module "spinnsyn_annullering_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = module.flex_dataset.dataset_id
+
   view_id = "spinnsyn_annullering_view"
   view_schema = jsonencode(
     [
@@ -182,19 +208,6 @@ module "spinnsyn_annullering" {
   view_query = <<EOF
 SELECT id, opprettet
 FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.spinnsyn_annullering.bigquery_table_id}`
-EOF
-
-  data_transfer_display_name      = "spinnsyn_annullering_query"
-  data_transfer_schedule          = "every day 02:00"
-  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-11-10T00:00:00Z"
-  data_transfer_destination_table = module.spinnsyn_annullering.bigquery_table_id
-  data_transfer_mode              = "WRITE_TRUNCATE"
-
-  data_transfer_query = <<EOF
-SELECT * FROM
-EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend',
-'SELECT id, fnr, annullering, opprettet FROM annullering');
 EOF
 
 }

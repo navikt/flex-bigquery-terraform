@@ -1,4 +1,4 @@
-resource "google_bigquery_table" "bigquery_view" {
+resource "google_bigquery_table" "view" {
   dataset_id          = var.dataset_id
   table_id            = var.view_id
   schema              = var.view_schema

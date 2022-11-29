@@ -5,17 +5,6 @@ resource "google_bigquery_table" "bigquery_table" {
   deletion_protection = var.deletion_protection
 }
 
-resource "google_bigquery_table" "bigquery_view" {
-  dataset_id          = var.dataset_id
-  table_id            = var.view_id
-  schema              = var.view_schema
-  deletion_protection = var.deletion_protection
-  view {
-    use_legacy_sql = false
-    query          = var.view_query
-  }
-}
-
 resource "google_bigquery_data_transfer_config" "data_transfer_config" {
   location               = var.location
   destination_dataset_id = var.dataset_id
