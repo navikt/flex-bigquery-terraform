@@ -99,8 +99,7 @@ module "spinnsyn_utbetaling_view" {
   source = "../modules/google-bigquery-view"
 
   dataset_id = module.flex_dataset.dataset_id
-
-  view_id = "spinnsyn_utbetaling_view"
+  view_id    = "spinnsyn_utbetaling_view"
   view_schema = jsonencode(
     [
       {
@@ -185,8 +184,7 @@ module "spinnsyn_annullering_view" {
   source = "../modules/google-bigquery-view"
 
   dataset_id = module.flex_dataset.dataset_id
-
-  view_id = "spinnsyn_annullering_view"
+  view_id    = "spinnsyn_annullering_view"
   view_schema = jsonencode(
     [
       {
@@ -297,8 +295,7 @@ module "spinnsyn_organisasjon" {
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id
-
-  table_id = "spinnsyn_organisasjon"
+  table_id   = "spinnsyn_organisasjon"
   table_schema = jsonencode(
     [
       {
@@ -352,8 +349,7 @@ module "spinnsyn_organisasjon_view" {
   source = "../modules/google-bigquery-view"
 
   dataset_id = module.flex_dataset.dataset_id
-
-  view_id = "spinnsyn_organisasjon_view"
+  view_id    = "spinnsyn_organisasjon_view"
   view_schema = jsonencode(
     [
       {
@@ -457,8 +453,7 @@ module "spinnsyn_vedtak_view" {
   source = "../modules/google-bigquery-view"
 
   dataset_id = module.flex_dataset.dataset_id
-
-  view_id = "spinnsyn_vedtak_view"
+  view_id    = "spinnsyn_vedtak_view"
   view_schema = jsonencode(
     [
       {

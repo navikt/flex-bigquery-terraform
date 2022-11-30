@@ -458,7 +458,6 @@ EOF
 
 }
 
-
 module "sykepengesoknad_hovedsporsmal_view" {
   source = "../modules/google-bigquery-view"
 
