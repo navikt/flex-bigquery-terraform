@@ -19,3 +19,8 @@ variable "versioning" {
   type        = bool
   default     = true
 }
+variable "force_destroy" {
+  description = "If the bucket can be deleted if it contains content."
+  type        = bool
+  default     = false
+}
