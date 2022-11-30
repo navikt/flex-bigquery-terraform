@@ -179,7 +179,6 @@ module "sykepengesoknad_sykepengesoknad_view" {
 
   dataset_id = module.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_sykepengesoknad_view"
-
   view_schema = jsonencode(
     [
       {
@@ -455,6 +454,86 @@ module "sykepengesoknad_svar" {
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
 'SELECT id, sporsmal_id, verdi FROM svar');
+EOF
+
+}
+
+
+module "sykepengesoknad_hovedsporsmal_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = module.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_hovedsporsmal_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_uuid"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "fom"
+        type        = "DATE"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tom"
+        type        = "DATE"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "soknadstype"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sporsmal_tag"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "verdi"
+        type        = "STRING"
+        description = ""
+      },
+    ]
+  )
+
+  view_query = <<EOF
+SELECT
+  sykepengesoknad.sykepengesoknad_uuid,
+  sykepengesoknad.fom,
+  sykepengesoknad.tom,
+  sykepengesoknad.opprettet,
+  soknadstype,
+  sporsmal.tag AS sporsmal_tag,
+  svar.verdi
+FROM
+  `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` sykepengesoknad
+INNER JOIN
+  `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal
+ON
+  sporsmal.sykepengesoknad_id = sykepengesoknad.id
+INNER JOIN
+  `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
+ON
+  svar.sporsmal_id = sporsmal.id
+WHERE
+  sporsmal.svartype = 'JA_NEI'
+  AND sporsmal.under_sporsmal_id IS NULL
+  AND sykepengesoknad.status = 'SENDT'
 EOF
 
 }
