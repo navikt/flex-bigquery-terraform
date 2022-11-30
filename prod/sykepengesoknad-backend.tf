@@ -21,7 +21,6 @@ module "sykepengesoknad_bigquery_connection" {
 
 module "sykepengesoknad_sykepengesoknad" {
   source              = "../modules/google-bigquery-table"
-  deletion_protection = false
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id
@@ -177,7 +176,6 @@ EOF
 }
 module "sykepengesoknad_sykepengesoknad_view" {
   source              = "../modules/google-bigquery-view"
-  deletion_protection = false
 
   dataset_id = module.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_sykepengesoknad_view"
@@ -346,7 +344,6 @@ EOF
 
 module "sykepengesoknad_sporsmal" {
   source              = "../modules/google-bigquery-table"
-  deletion_protection = false
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id
@@ -423,7 +420,6 @@ EOF
 
 module "sykepengesoknad_svar" {
   source              = "../modules/google-bigquery-table"
-  deletion_protection = false
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id

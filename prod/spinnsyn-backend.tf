@@ -297,7 +297,6 @@ module "spinnsyn_organisasjon" {
 
   location            = var.gcp_project["region"]
   dataset_id          = module.flex_dataset.dataset_id
-  deletion_protection = false
 
   table_id = "spinnsyn_organisasjon"
   table_schema = jsonencode(
@@ -353,7 +352,6 @@ module "spinnsyn_organisasjon_view" {
   source = "../modules/google-bigquery-view"
 
   dataset_id          = module.flex_dataset.dataset_id
-  deletion_protection = false
 
   view_id = "spinnsyn_organisasjon_view"
   view_schema = jsonencode(
