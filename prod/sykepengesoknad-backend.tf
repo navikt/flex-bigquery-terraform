@@ -20,7 +20,7 @@ module "sykepengesoknad_bigquery_connection" {
 }
 
 module "sykepengesoknad_sykepengesoknad" {
-  source              = "../modules/google-bigquery-table"
+  source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id
@@ -175,7 +175,7 @@ EOF
 
 }
 module "sykepengesoknad_sykepengesoknad_view" {
-  source              = "../modules/google-bigquery-view"
+  source = "../modules/google-bigquery-view"
 
   dataset_id = module.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_sykepengesoknad_view"
@@ -343,7 +343,7 @@ EOF
 }
 
 module "sykepengesoknad_sporsmal" {
-  source              = "../modules/google-bigquery-table"
+  source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id
@@ -392,7 +392,7 @@ module "sykepengesoknad_sporsmal" {
       },
       {
         mode = "NULLABLE"
-        name = "MAX"
+        name = "max"
         type = "STRING"
       },
       {
@@ -419,7 +419,7 @@ EOF
 }
 
 module "sykepengesoknad_svar" {
-  source              = "../modules/google-bigquery-table"
+  source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
   dataset_id = module.flex_dataset.dataset_id

@@ -295,8 +295,8 @@ EOF
 module "spinnsyn_organisasjon" {
   source = "../modules/google-bigquery-table"
 
-  location            = var.gcp_project["region"]
-  dataset_id          = module.flex_dataset.dataset_id
+  location   = var.gcp_project["region"]
+  dataset_id = module.flex_dataset.dataset_id
 
   table_id = "spinnsyn_organisasjon"
   table_schema = jsonencode(
@@ -351,7 +351,7 @@ EOF
 module "spinnsyn_organisasjon_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id          = module.flex_dataset.dataset_id
+  dataset_id = module.flex_dataset.dataset_id
 
   view_id = "spinnsyn_organisasjon_view"
   view_schema = jsonencode(
