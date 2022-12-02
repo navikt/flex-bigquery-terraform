@@ -28,11 +28,3 @@ module "google_storage_bucket" {
   name     = "flex-terraform-state-prod"
   location = var.gcp_project["region"]
 }
-
-module "flex_dataset" {
-  source = "../modules/google-bigquery-dataset"
-
-  dataset_id         = "flex_dataset"
-  location           = var.gcp_project["region"]
-  dataset_iam_member = local.google_project_iam_member.email
-}

@@ -43,11 +43,5 @@ resource "google_project_iam_member" "permissions" {
   member  = "serviceAccount:${local.google_project_iam_member.email}"
 }
 
-module "flex_dataset" {
-  source = "../modules/google-bigquery-dataset"
 
-  dataset_id         = "flex_dataset"
-  location           = var.gcp_project["region"]
-  dataset_iam_member = local.google_project_iam_member.email
-}
 

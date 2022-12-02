@@ -23,7 +23,7 @@ module "spinnsyn_utbetaling" {
   source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "spinnsyn_utbetaling"
   table_schema = jsonencode(
     [
@@ -98,7 +98,7 @@ EOF
 module "spinnsyn_utbetaling_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "spinnsyn_utbetaling_view"
   view_schema = jsonencode(
     [
@@ -131,7 +131,7 @@ module "spinnsyn_utbetaling_view" {
 
   view_query = <<EOF
 SELECT utbetaling_id, utbetaling_type, opprettet, antall_vedtak
-FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.spinnsyn_utbetaling.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_utbetaling.bigquery_table_id}`
 EOF
 }
 
@@ -139,7 +139,7 @@ module "spinnsyn_annullering" {
   source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "spinnsyn_annullering"
   table_schema = jsonencode(
     [
@@ -184,7 +184,7 @@ EOF
 module "spinnsyn_annullering_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "spinnsyn_annullering_view"
   view_schema = jsonencode(
     [
@@ -205,7 +205,7 @@ module "spinnsyn_annullering_view" {
 
   view_query = <<EOF
 SELECT id, opprettet
-FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.spinnsyn_annullering.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_annullering.bigquery_table_id}`
 EOF
 
 }

@@ -23,7 +23,7 @@ module "sykepengesoknad_sykepengesoknad" {
   source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_sykepengesoknad"
   table_schema = jsonencode(
     [
@@ -177,7 +177,7 @@ EOF
 module "sykepengesoknad_sykepengesoknad_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_sykepengesoknad_view"
   view_schema = jsonencode(
     [
@@ -336,7 +336,7 @@ module "sykepengesoknad_sykepengesoknad_view" {
 
   view_query = <<EOF
 SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo
-FROM `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}`
 EOF
 
 }
@@ -345,7 +345,7 @@ module "sykepengesoknad_sporsmal" {
   source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_sporsmal"
   table_schema = jsonencode(
     [
@@ -421,7 +421,7 @@ module "sykepengesoknad_svar" {
   source = "../modules/google-bigquery-table"
 
   location   = var.gcp_project["region"]
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_svar"
   table_schema = jsonencode(
     [
@@ -461,7 +461,7 @@ EOF
 module "sykepengesoknad_hovedsporsmal_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id = module.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_hovedsporsmal_view"
   view_schema = jsonencode(
     [
@@ -520,13 +520,13 @@ SELECT
   sporsmal.tag AS sporsmal_tag,
   svar.verdi
 FROM
-  `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` sykepengesoknad
+  `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` sykepengesoknad
 INNER JOIN
-  `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal
+  `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal
 ON
   sporsmal.sykepengesoknad_id = sykepengesoknad.id
 INNER JOIN
-  `${var.gcp_project["project"]}.${module.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
+  `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
 ON
   svar.sporsmal_id = sporsmal.id
 WHERE
