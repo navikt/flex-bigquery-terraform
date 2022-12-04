@@ -156,6 +156,11 @@ module "sykepengesoknad_sykepengesoknad" {
         mode = "NULLABLE"
         name = "avbrutt_feilinfo"
         type = "BOOLEAN"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sendt"
+        type = "TIMESTAMP"
       }
     ]
   )
@@ -170,7 +175,7 @@ module "sykepengesoknad_sykepengesoknad" {
   data_transfer_query = <<EOF
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
-'SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, fnr, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo FROM sykepengesoknad');
+'SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, fnr, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo, sendt FROM sykepengesoknad');
 EOF
 
 }
@@ -330,12 +335,19 @@ module "sykepengesoknad_sykepengesoknad_view" {
         name        = "avbrutt_feilinfo"
         type        = "BOOLEAN"
         description = "Om bruker fikk feil avbrutt-info presentert. Styrer tekst i Gosys-oppgave."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sendt"
+        type        = "TIMESTAMP"
+        description = "Tidspunkt når søknaden først ble sendt til NAV, Arbeidsgiver eller begge."
+
       }
     ]
   )
 
   view_query = <<EOF
-SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo
+SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, arbeidsgiver_orgnummer, arbeidsgiver_navn, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo, sendt
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}`
 EOF
 
@@ -469,43 +481,61 @@ module "sykepengesoknad_hovedsporsmal_view" {
         mode        = "NULLABLE"
         name        = "sykepengesoknad_uuid"
         type        = "STRING"
-        description = ""
+        description = "Unik ID for sykepengesøknaden."
       },
       {
         mode        = "NULLABLE"
         name        = "fom"
         type        = "DATE"
-        description = ""
+        description = "Første dag i perioden sykepengesøknaden er for."
       },
       {
         mode        = "NULLABLE"
         name        = "tom"
         type        = "DATE"
-        description = ""
+        description = "Siste dag i perioden sykepengesøknaden er for."
       },
       {
         mode        = "NULLABLE"
         name        = "opprettet"
         type        = "TIMESTAMP"
-        description = ""
+        description = "Når sykepengesøknaden ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sendt"
+        type        = "TIMESTAMP"
+        description = "Tidspunkt når søknaden først ble sendt til NAV, Arbeidsgiver eller begge."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "status"
+        type        = "STRING"
+        description = "Sykepengesøknadens status."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "korrigerer"
+        type        = "STRING"
+        description = "ID til søknaden den aktuelle søknaden korrigerer."
       },
       {
         mode        = "NULLABLE"
         name        = "soknadstype"
         type        = "STRING"
-        description = ""
+        description = "Hvilken type sykepengesøknaden er."
       },
       {
         mode        = "NULLABLE"
         name        = "sporsmal_tag"
         type        = "STRING"
-        description = ""
+        description = "Hvilket spørsmål det dreier seg om."
       },
       {
         mode        = "NULLABLE"
         name        = "verdi"
         type        = "STRING"
-        description = ""
+        description = "Svaret på det aktuelle spørsmålet."
       },
     ]
   )
@@ -516,6 +546,9 @@ SELECT
   sykepengesoknad.fom,
   sykepengesoknad.tom,
   sykepengesoknad.opprettet,
+  sykepengesoknad.sendt,
+  sykepengesoknad.status,
+  sykepengesoknad.korrigerer,
   soknadstype,
   sporsmal.tag AS sporsmal_tag,
   svar.verdi
@@ -529,10 +562,9 @@ INNER JOIN
   `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
 ON
   svar.sporsmal_id = sporsmal.id
-WHERE
-  sporsmal.svartype = 'JA_NEI'
+WHERE sporsmal.svartype = 'JA_NEI'
   AND sporsmal.under_sporsmal_id IS NULL
-  AND sykepengesoknad.status = 'SENDT'
+  AND sykepengesoknad.status IN ('SENDT', 'KORRIGERT')
 EOF
 
 }
