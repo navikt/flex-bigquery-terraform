@@ -515,9 +515,9 @@ module "sykepengesoknad_hovedsporsmal_view" {
       },
       {
         mode        = "NULLABLE"
-        name        = "er_korrigering"
+        name        = "korrigerer"
         type        = "STRING"
-        description = "Om søknaden korrigerer en annen søknad."
+        description = "ID til søknaden den aktuelle søknaden korrigerer."
       },
       {
         mode        = "NULLABLE"
@@ -548,12 +548,7 @@ SELECT
   sykepengesoknad.opprettet,
   sykepengesoknad.sendt,
   sykepengesoknad.status,
-  CASE
-    WHEN sykepengesoknad.korrigerer IS NULL THEN false
-  ELSE
-    true
-  END
-  AS er_korrigering,
+  sykepengesoknad.korrigerer,
   soknadstype,
   sporsmal.tag AS sporsmal_tag,
   svar.verdi
