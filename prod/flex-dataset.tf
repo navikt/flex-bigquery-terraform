@@ -4,12 +4,24 @@ resource "google_bigquery_dataset" "flex_dataset" {
   friendly_name = "flex_dataset"
 
   access {
-    role          = "OWNER"
-    special_group = "projectOwners"
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_hovedsporsmal_view"
+    }
+  }
+  access {
+    group_by_email = "all-users@nav.no"
+    role           = "roles/bigquery.metadataViewer"
   }
   access {
     role          = "READER"
     special_group = "projectReaders"
+  }
+  access {
+    role          = "OWNER"
+    special_group = "projectOwners"
   }
   access {
     role          = "WRITER"
