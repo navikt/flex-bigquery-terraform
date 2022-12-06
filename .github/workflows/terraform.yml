@@ -70,7 +70,7 @@ jobs:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev-')
     name: "terraform apply gcp-dev"
     runs-on: ubuntu-latest
-    concurrency: terraform-apply-dev
+    concurrency: terraform-plan-dev, terraform-apply-dev
     defaults:
       run:
         working-directory: ${{ env.DEV_DIR }}
@@ -95,7 +95,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     name: "terraform apply gcp-prod"
     runs-on: ubuntu-latest
-    concurrency: terraform-apply-prod
+    concurrency: terraform-plan-prod, terraform-apply-prod
     defaults:
       run:
         working-directory: ${{ env.PROD_DIR }}
