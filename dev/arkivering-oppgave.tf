@@ -22,9 +22,10 @@ module "spinnsyn_arkivering_oppgave_connection" {
 module "sykepengesoknad_arkivering_oppgave_innsending" {
   source = "../modules/google-bigquery-table"
 
-  location   = var.gcp_project["region"]
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "sykepengesoknad_arkivering_oppgave_innsending"
+  deletion_protection = false
+  location            = var.gcp_project["region"]
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "sykepengesoknad_arkivering_oppgave_innsending"
   table_schema = jsonencode(
     [
       {
@@ -70,12 +71,51 @@ EOF
 
 }
 
+module "sykepengesoknad_arkivering_oppgave_innsending_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_arkivering_oppgave_innsending_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "journalpost_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "oppgave_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "behandlet"
+        type = "TIMESTAMP"
+      },
+    ]
+  )
+
+  view_query = <<EOF
+SELECT sykepengesoknad_id, journalpost_id, oppgave_id, behandlet
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_innsending.bigquery_table_id}`
+EOF
+
+}
+
 module "sykepengesoknad_arkivering_oppgave_oppgavestyring" {
   source = "../modules/google-bigquery-table"
 
-  location   = var.gcp_project["region"]
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "sykepengesoknad_arkivering_oppgave_oppgavestyring"
+  deletion_protection = false
+  location            = var.gcp_project["region"]
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "sykepengesoknad_arkivering_oppgave_oppgavestyring"
   table_schema = jsonencode(
     [
       {
@@ -110,7 +150,7 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring" {
       },
       {
         mode = "NULLABLE"
-        name = "avstemte"
+        name = "avstemt"
         type = "BOOLEAN"
       },
     ]
@@ -127,6 +167,55 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring" {
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-arkivering-oppgave',
 'SELECT id, sykepengesoknad_id, status, opprettet, modifisert, timeout, avstemt FROM oppgavestyring');
+EOF
+
+}
+
+module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_id"
+        type        = "STRING"
+        description = "Unik ID for sykepengesoknaden."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "status"
+        type        = "STRING"
+        description = "Status som forteller om det skal opprettet oppgave eller om vi venter på melding fra Speil."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når status ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "modifisert"
+        type        = "TIMESTAMP"
+        description = "Når status sist ble modifisert."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "timeout"
+        type        = "TIMESTAMP"
+        description = "Tidspunkt for når vi har ventet for lenge og opprettet Gosys-oppgave uansett."
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT sykepengesoknad_id, status, opprettet, modifisert, timeout
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
+WHERE avstemt = true
 EOF
 
 }
