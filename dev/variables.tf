@@ -17,3 +17,14 @@ variable "spinnsyn_bigquery_secret" {
   description = "The key of the GCP secret that provides the spinnsyn database credentials."
   type        = string
 }
+
+variable "sykepengesoknad_bigquery_secret" {
+  description = "The key of the GCP secret that provides the sykepengesoknad database credentials."
+  type        = string
+}
+
+variable "arkivering_oppgave_bigquery_secret" {
+  description = "The key of the GCP secret that provides the sykepengesoknad-arkivering-oppgave database credentials."
+  type        = string
+}
+
