@@ -80,24 +80,29 @@ module "sykepengesoknad_arkivering_oppgave_innsending_view" {
   view_schema = jsonencode(
     [
       {
-        mode = "NULLABLE"
-        name = "sykepengesoknad_id"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_id"
+        type        = "STRING"
+        description = "Unik ID for sykepengesoknaden."
+
       },
       {
-        mode = "NULLABLE"
-        name = "journalpost_id"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "journalpost_id"
+        type        = "STRING"
+        description = "ID til journalført sykepengesøknad."
       },
       {
-        mode = "NULLABLE"
-        name = "oppgave_id"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "oppgave_id"
+        type        = "STRING"
+        description = "ID til oppgave opprettet i Gosys."
       },
       {
-        mode = "NULLABLE"
-        name = "behandlet"
-        type = "TIMESTAMP"
+        mode        = "NULLABLE"
+        name        = "behandlet"
+        type        = "TIMESTAMP"
+        description = "Når oppgave ble opprettet og journalført."
       },
     ]
   )
