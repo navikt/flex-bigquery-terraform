@@ -195,21 +195,21 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
       },
       {
         mode        = "NULLABLE"
-        name        = "opprettet"
+        name        = "modifisert"
         type        = "TIMESTAMP"
-        description = "Når status ble opprettet."
+        description = "Når status ble endret til nåværende status."
       },
       {
         mode        = "NULLABLE"
         name        = "timeout"
         type        = "TIMESTAMP"
-        description = "Tidspunkt for når vi har ventet for lenge og opprettet Gosys-oppgave uansett."
+        description = "Tidspunkt for når vi har ventet for lenge på oppgaver med status utsett og opprettet Gosys-oppgave."
       }
     ]
   )
 
   view_query = <<EOF
-SELECT sykepengesoknad_id, status, opprettet, timeout
+SELECT sykepengesoknad_id, status, modifisert, timeout
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
 WHERE avstemt = true
 EOF
