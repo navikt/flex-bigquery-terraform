@@ -618,7 +618,7 @@ module "sykepengesoknad_klippet_sykepengesoknad" {
   data_transfer_display_name      = "sykepengesoknad_klippet_sykepengesoknad_query"
   data_transfer_schedule          = "every day 05:10"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-12-07T00:00:00Z"
+  data_transfer_start_time        = "2022-12-08T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_klippet_sykepengesoknad.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -629,6 +629,7 @@ EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykep
 EOF
 
 }
+
 module "sykepengesoknad_klippet_sykepengesoknad_view" {
   source = "../modules/google-bigquery-view"
 
