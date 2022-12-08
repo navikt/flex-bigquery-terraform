@@ -219,12 +219,12 @@ EOF
 
 }
 
-module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet" {
+module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view" {
   source = "../modules/google-bigquery-view"
 
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet"
+  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
   view_schema = jsonencode(
     [
       {
@@ -249,21 +249,21 @@ module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet" {
   )
 
   view_query = <<EOF
-SELECT sykepengesoknad_id::text, status, modifisert AS opprettet
+SELECT sykepengesoknad_id, status, modifisert AS opprettet
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
 WHERE status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
-  AND modifisert >= '2022-03-07 12:37:17.000000 +00:00'
+  AND modifisert >= '2022-03-07 12:37:17.000'
 ORDER BY modifisert
 EOF
 
 }
 
-module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert" {
+module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view" {
   source = "../modules/google-bigquery-view"
 
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet"
+  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
   view_schema = jsonencode(
     [
       {
@@ -280,7 +280,7 @@ module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert" {
       },
       {
         mode        = "NULLABLE"
-        name        = "opprettet"
+        name        = "antall"
         type        = "INTEGER"
         description = "Antall grupperte vedtak."
       }
@@ -292,8 +292,8 @@ SELECT date(modifisert) AS dato,
        status,
        count(*) AS antall
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
-WHERE modifisert > '2022-03-07 13:37:17.000 +01:00'
-  AND status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
+WHERE status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
+  AND modifisert >= '2022-03-07 13:37:17.000'
 GROUP BY date(modifisert), status;
 EOF
 
