@@ -637,33 +637,33 @@ module "sykepengesoknad_klippet_sykepengesoknad_view" {
   view_schema = jsonencode(
     [
       {
-        mode = "NULLABLE"
-        name = "id"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "id"
+        type        = "STRING"
         description = "Unik ID for en klippet søknad eller sykmelding."
       },
       {
-        mode = "NULLABLE"
-        name = "sykepengesoknad_uuid"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_uuid"
+        type        = "STRING"
         description = "ID for søknaden som overlappet med en sykmelding."
       },
       {
-        mode = "NULLABLE"
-        name = "sykmelding_uuid"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "sykmelding_uuid"
+        type        = "STRING"
         description = "ID for sykmeldingen som overlappet med en søknad."
       },
       {
-        mode = "NULLABLE"
-        name = "klipp_variant"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "klipp_variant"
+        type        = "STRING"
         description = "Varianten av klipp som sier om det er en søknad eller sykmelding som ble klippet og hvilke del som var overlappende."
       },
       {
-        mode = "NULLABLE"
-        name = "timestamp"
-        type = "TIMESTAMP"
+        mode        = "NULLABLE"
+        name        = "timestamp"
+        type        = "TIMESTAMP"
         description = "Tidspunktet klippen skjedde."
       },
     ]
