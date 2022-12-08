@@ -218,3 +218,42 @@ WHERE avstemt = true
 EOF
 
 }
+
+module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_id"
+        type        = "STRING"
+        description = "Unik ID for sykepengesoknaden."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "status"
+        type        = "STRING"
+        description = "Status som angir årsakt til at oppgaven ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når oppgave ble opprettet i Gosys."
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT sykepengesoknad_id::text, status, modifisert AS opprettet
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
+WHERE status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
+  AND modifisert >= '2022-03-07 12:37:17.000000 +00:00'
+ORDER BY modifisert
+EOF
+
+}
