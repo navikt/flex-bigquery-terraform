@@ -20,6 +20,14 @@ resource "google_bigquery_dataset" "flex_dataset" {
   }
 
   access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
+    }
+  }
+
+  access {
     group_by_email = "all-users@nav.no"
     role           = "roles/bigquery.metadataViewer"
   }
@@ -46,9 +54,5 @@ resource "google_bigquery_dataset" "flex_dataset" {
   access {
     role          = "roles/bigquery.metadataViewer"
     user_by_email = "nada-metabase@nada-prod-6977.iam.gserviceaccount.com"
-  }
-  access {
-    group_by_email = "all-users@nav.no"
-    role           = "roles/bigquery.metadataViewer"
   }
 }
