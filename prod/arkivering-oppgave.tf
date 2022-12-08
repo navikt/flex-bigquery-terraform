@@ -176,9 +176,8 @@ EOF
 module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
   source = "../modules/google-bigquery-view"
 
-  deletion_protection = false
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
   view_schema = jsonencode(
     [
       {
@@ -225,9 +224,8 @@ EOF
 module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view" {
   source = "../modules/google-bigquery-view"
 
-  deletion_protection = false
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
   view_schema = jsonencode(
     [
       {
@@ -264,9 +262,8 @@ EOF
 module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view" {
   source = "../modules/google-bigquery-view"
 
-  deletion_protection = false
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
   view_schema = jsonencode(
     [
       {
