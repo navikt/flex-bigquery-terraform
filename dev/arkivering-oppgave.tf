@@ -198,6 +198,12 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
       },
       {
         mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når søknaden status gjelder for ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
         name        = "modifisert"
         type        = "TIMESTAMP"
         description = "Når status ble endret til nåværende status."
@@ -212,7 +218,7 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
   )
 
   view_query = <<EOF
-SELECT sykepengesoknad_id, status, modifisert, timeout
+SELECT sykepengesoknad_id, status, opprettet, modifisert, timeout
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
 WHERE avstemt = true
 EOF
