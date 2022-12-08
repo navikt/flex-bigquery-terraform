@@ -4,40 +4,44 @@ resource "google_bigquery_dataset" "flex_dataset" {
   friendly_name = "flex_dataset"
 
   access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "sykepengesoknad_hovedsporsmal_view"
-    }
-  }
 
-  access {
     view {
       dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "sykepengesoknad_sykepengesoknad_view"
-    }
-  }
-
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
+      project_id = "flex-prod-af40"
       table_id   = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
     }
   }
-
   access {
-    group_by_email = "all-users@nav.no"
-    role           = "roles/bigquery.metadataViewer"
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_hovedsporsmal_view"
+    }
   }
   access {
-    role          = "READER"
-    special_group = "projectReaders"
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_klippet_sykepengesoknad_view"
+    }
+  }
+  access {
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_sykepengesoknad_view"
+    }
   }
   access {
     role          = "OWNER"
     special_group = "projectOwners"
+  }
+  access {
+    role          = "READER"
+    special_group = "projectReaders"
   }
   access {
     role          = "WRITER"
@@ -54,5 +58,9 @@ resource "google_bigquery_dataset" "flex_dataset" {
   access {
     role          = "roles/bigquery.metadataViewer"
     user_by_email = "nada-metabase@nada-prod-6977.iam.gserviceaccount.com"
+  }
+  access {
+    group_by_email = "all-users@nav.no"
+    role           = "roles/bigquery.metadataViewer"
   }
 }
