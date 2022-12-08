@@ -257,3 +257,44 @@ ORDER BY modifisert
 EOF
 
 }
+
+module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "dato"
+        type        = "DATE"
+        description = "Vedtaksdato det er gruppert på."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "status"
+        type        = "STRING"
+        description = "Vedtaksstatus det er gruppert på."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "INTEGER"
+        description = "Antall grupperte vedtak."
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT date(modifisert) AS dato,
+       status,
+       count(*) AS antall
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
+WHERE modifisert > '2022-03-07 13:37:17.000 +01:00'
+  AND status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
+GROUP BY date(modifisert), status;
+EOF
+
+}
