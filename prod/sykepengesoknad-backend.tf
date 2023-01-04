@@ -697,3 +697,102 @@ FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.datas
 EOF
 
 }
+
+
+module "sykepengesoknad_klipp_metrikk" {
+  source = "../modules/google-bigquery-table"
+
+  location   = var.gcp_project["region"]
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = "sykepengesoknad_klipp_metrikk"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sykmelding_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "variant"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "soknadstatus"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "timestamp"
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+
+  data_transfer_display_name      = "sykepengesoknad_klipp_metrikk_query"
+  data_transfer_schedule          = "every day 05:10"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2022-12-08T00:00:00Z"
+  data_transfer_destination_table = module.sykepengesoknad_klipp_metrikk.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
+'SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp FROM klipp_metrikk');
+EOF
+
+}
+
+module "sykepengesoknad_klipp_metrikk_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_klipp_metrikk_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "id"
+        type        = "STRING"
+        description = "Unik ID i tabellen."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sykmelding_uuid"
+        type        = "STRING"
+        description = "ID for sykmeldingen som overlappet med en søknad."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "variant"
+        type        = "STRING"
+        description = "Varianten av klipp som kunne skje."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "soknadstatus"
+        type        = "STRING"
+        description = "Status på søknad som ligger i databasen."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "timestamp"
+        type        = "TIMESTAMP"
+        description = "Tidspunktet sykmeldingen som overlappet kom inn."
+      },
+    ]
+  )
+
+  view_query = <<EOF
+SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_klipp_metrikk.bigquery_table_id}`
+EOF
+
+}
