@@ -698,9 +698,10 @@ EOF
 module "sykepengesoknad_klipp_metrikk" {
   source = "../modules/google-bigquery-table"
 
-  location   = var.gcp_project["region"]
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "sykepengesoknad_klipp_metrikk"
+  deletion_protection = false
+  location            = var.gcp_project["region"]
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "sykepengesoknad_klipp_metrikk"
   table_schema = jsonencode(
     [
       {
@@ -764,8 +765,9 @@ EOF
 module "sykepengesoknad_klipp_metrikk_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "sykepengesoknad_klipp_metrikk_view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_klipp_metrikk_view"
   view_schema = jsonencode(
     [
       {
@@ -800,17 +802,17 @@ module "sykepengesoknad_klipp_metrikk_view" {
       },
       {
         mode = "NULLABLE"
-        name = "EKSISTERENDE_SYKEPENGESOKNAD_ID"
+        name = "eksisterende_sykepengesoknad_id"
         type = "STRING"
       },
       {
         mode = "NULLABLE"
-        name = "ENDRING_I_UFOREGRAD"
+        name = "endring_i_uforegrad"
         type = "STRING"
       },
       {
         mode = "NULLABLE"
-        name = "KLIPPET"
+        name = "klippet"
         type = "BOOLEAN"
       }
     ]
