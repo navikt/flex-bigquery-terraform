@@ -731,6 +731,21 @@ module "sykepengesoknad_klipp_metrikk" {
         mode = "NULLABLE"
         name = "timestamp"
         type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "EKSISTERENDE_SYKEPENGESOKNAD_ID"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ENDRING_I_UFOREGRAD"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "KLIPPET"
+        type = "BOOLEAN"
       }
     ]
   )
@@ -745,7 +760,7 @@ module "sykepengesoknad_klipp_metrikk" {
   data_transfer_query = <<EOF
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
-'SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp FROM klipp_metrikk');
+'SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp, eksisterende_sykepengesoknad_id, endring_i_uforegrad, klippet FROM klipp_metrikk');
 EOF
 
 }
@@ -787,11 +802,26 @@ module "sykepengesoknad_klipp_metrikk_view" {
         type        = "TIMESTAMP"
         description = "Tidspunktet sykmeldingen som overlappet kom inn."
       },
+      {
+        mode = "NULLABLE"
+        name = "EKSISTERENDE_SYKEPENGESOKNAD_ID"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ENDRING_I_UFOREGRAD"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "KLIPPET"
+        type = "BOOLEAN"
+      }
     ]
   )
 
   view_query = <<EOF
-SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp
+SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp, eksisterende_sykepengesoknad_id, endring_i_uforegrad, klippet
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_klipp_metrikk.bigquery_table_id}`
 EOF
 
