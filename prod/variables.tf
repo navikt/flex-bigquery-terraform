@@ -18,6 +18,10 @@ variable "spinnsyn_bigquery_secret" {
   type        = string
 }
 
+variable "sykepengesoknad_sak_status_bigquery_secret" {
+  description = "The key of the GCP secret that provides the sykepengesoknad-sak-status-metrikk database credentials."
+  type        = string
+}
 
 variable "sykepengesoknad_bigquery_secret" {
   description = "The key of the GCP secret that provides the sykepengesoknad database credentials."
