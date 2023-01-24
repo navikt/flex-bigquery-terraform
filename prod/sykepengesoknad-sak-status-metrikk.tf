@@ -44,7 +44,7 @@ module "sykepengesoknad_sak_status_metrikk_sykepengesoknad_id" {
   data_transfer_display_name      = "sykepengesoknad_sak_status_metrikk_sykepengesoknad_id_query"
   data_transfer_schedule          = "every day 02:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-23T00:00:00Z"
+  data_transfer_start_time        = "2023-01-24T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_id.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -81,7 +81,7 @@ module "sykepengesoknad_sak_status_metrikk_sykepengesoknad_vedtaksperiode" {
   data_transfer_display_name      = "sykepengesoknad_sak_status_metrikk_sykepengesoknad_vedtaksperiode_query"
   data_transfer_schedule          = "every day 02:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-23T00:00:00Z"
+  data_transfer_start_time        = "2023-01-24T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_vedtaksperiode.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -113,7 +113,7 @@ module "sykepengesoknad_sak_status_metrikk_vedtaksperiode_forkastet" {
   data_transfer_display_name      = "sykepengesoknad_sak_status_metrikk_vedtaksperiode_forkastet_query"
   data_transfer_schedule          = "every day 02:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-23T00:00:00Z"
+  data_transfer_start_time        = "2023-01-24T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_forkastet.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -160,7 +160,7 @@ module "sykepengesoknad_sak_status_metrikk_vedtaksperiode_funksjonell_feil" {
   data_transfer_display_name      = "sykepengesoknad_sak_status_metrikk_vedtaksperiode_funksjonell_feil_query"
   data_transfer_schedule          = "every day 02:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-23T00:00:00Z"
+  data_transfer_start_time        = "2023-01-24T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_funksjonell_feil.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -207,7 +207,7 @@ module "sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand" {
   data_transfer_display_name      = "sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand_query"
   data_transfer_schedule          = "every day 02:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-23T00:00:00Z"
+  data_transfer_start_time        = "2023-01-24T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
