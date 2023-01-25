@@ -837,3 +837,54 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_klipp_metrikk_view
     "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
   ]
 }
+
+module "sykepengesoknad_soknadperiode" {
+  source = "../modules/google-bigquery-table"
+
+  location   = var.gcp_project["region"]
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = "sykepengesoknad_soknadperiode"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "grad"
+        type = "INT64"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sykmeldingstype"
+        type = "STRING"
+      }
+    ]
+  )
+
+  data_transfer_display_name      = "sykepengesoknad_soknadperiode_query"
+  data_transfer_schedule          = "every day 05:20"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2023-01-25T00:00:00Z"
+  data_transfer_destination_table = module.sykepengesoknad_soknadperiode.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT * FROM
+EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
+'SELECT sykepengesoknad_id, fom, tom, grad, sykmeldingstype FROM soknadperiode');
+EOF
+
+}
