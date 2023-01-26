@@ -218,3 +218,109 @@ EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykep
 EOF
 
 }
+
+module "sykepengesoknad_sak_status_metrikk_tilstand_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_sak_status_metrikk_tilstand_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_uuid"
+        type        = "STRING"
+        description = "Unik ID for sykepengesøknaden opprettet av Team Flex."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_at_id"
+        type        = "STRING"
+        description = "Unik ID for sykepengesøknaden opprettet av Bømlo."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "vedtaksperiode_id"
+        type        = "STRING"
+        description = "Unik ID for vedtaksperiode opprettet av Bømlo."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tilstand"
+        type        = "STRING"
+        description = "Tilstand i vedtaksperiodens tilstandshistorikk."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tidspunkt"
+        type        = "TIMESTAMP"
+        description = "Tildpunktet tilstanden ble opprettet."
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT a.sykepengesoknad_uuid, a.sykepengesoknad_at_id, c.vedtaksperiode_id, c.tilstand, c.tidspunkt
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_id.bigquery_table_id}` a
+  INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_vedtaksperiode.bigquery_table_id}` b ON b.sykepengesoknad_at_id = a.sykepengesoknad_at_id
+  INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand.bigquery_table_id}` c on c.vedtaksperiode_id = b.vedtaksperiode_id
+EOF
+
+}
+
+module "sykepengesoknad_sak_status_metrikk_siste_tilstand_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_sak_status_metrikk_siste_tilstand_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_uuid"
+        type        = "STRING"
+        description = "Unik ID for sykepengesøknaden opprettet av Team Flex."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_at_id"
+        type        = "STRING"
+        description = "Unik ID for sykepengesøknaden opprettet av Bømlo."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "vedtaksperiode_id"
+        type        = "STRING"
+        description = "Unik ID for vedtaksperiode opprettet av Bømlo."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tilstand"
+        type        = "STRING"
+        description = "Tilstand i vedtaksperiodens tilstandshistorikk."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tidspunkt"
+        type        = "TIMESTAMP"
+        description = "Tildpunktet tilstanden ble opprettet."
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT a.sykepengesoknad_uuid, a.sykepengesoknad_at_id, c.vedtaksperiode_id, c.tilstand, c.tidspunkt
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_id.bigquery_table_id}` a
+  INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_vedtaksperiode.bigquery_table_id}` b ON b.sykepengesoknad_at_id = a.sykepengesoknad_at_id
+  INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand.bigquery_table_id}` c on c.vedtaksperiode_id = b.vedtaksperiode_id
+  INNER JOIN (
+    SELECT vedtaksperiode_id, max(tidspunkt) AS tidspunkt
+    FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand.bigquery_table_id}`
+    GROUP BY vedtaksperiode_id
+  ) d ON c.vedtaksperiode_id = d.vedtaksperiode_id AND d.tidspunkt = c.tidspunkt
+EOF
+
+}
+
