@@ -693,8 +693,6 @@ EOF
 
 }
 
-
-
 module "sykepengesoknad_klipp_metrikk" {
   source = "../modules/google-bigquery-table"
 
