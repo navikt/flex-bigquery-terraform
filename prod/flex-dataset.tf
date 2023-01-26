@@ -44,6 +44,22 @@ resource "google_bigquery_dataset" "flex_dataset" {
     }
   }
   access {
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_sak_status_metrikk_tilstand_view"
+    }
+  }
+  access {
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_sak_status_metrikk_siste_tilstand_view"
+    }
+  }
+  access {
     role          = "OWNER"
     special_group = "projectOwners"
   }
