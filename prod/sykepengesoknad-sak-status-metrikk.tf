@@ -318,12 +318,24 @@ module "sykepengesoknad_sak_status_metrikk_siste_tilstand_view" {
         name        = "tidspunkt"
         type        = "TIMESTAMP"
         description = "Tildpunktet tilstanden ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "funksjonell_feil"
+        type        = "STRING"
+        description = "Alle distincte funksjonelle feil concatet med komma."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "forkastet"
+        type        = "BOOLEAN"
+        description = "Om vedtaksperioden er forkastet."
       }
     ]
   )
 
   view_query = <<EOF
-SELECT a.sykepengesoknad_uuid, a.sykepengesoknad_at_id, c.vedtaksperiode_id, c.tilstand, c.tidspunkt
+SELECT a.sykepengesoknad_uuid, a.sykepengesoknad_at_id, c.vedtaksperiode_id, c.tilstand, c.tidspunkt, f.funksjonell_feil, IFNULL(t.forkastet, false) forkastet
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_id.bigquery_table_id}` a
   INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_sykepengesoknad_vedtaksperiode.bigquery_table_id}` b ON b.sykepengesoknad_at_id = a.sykepengesoknad_at_id
   INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand.bigquery_table_id}` c on c.vedtaksperiode_id = b.vedtaksperiode_id
@@ -332,6 +344,13 @@ FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.datas
     FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_tilstand.bigquery_table_id}`
     GROUP BY vedtaksperiode_id
   ) d ON c.vedtaksperiode_id = d.vedtaksperiode_id AND d.tidspunkt = c.tidspunkt
+  LEFT OUTER JOIN (SELECT vedtaksperiode_id,
+                         string_agg(distinct melding, "," order by melding) funksjonell_feil
+                   FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_funksjonell_feil.bigquery_table_id}`
+                   group by vedtaksperiode_id) f on f.vedtaksperiode_id = b.vedtaksperiode_id
+  LEFT OUTER JOIN (SELECT vedtaksperiode_id, true forkastet
+                   FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_vedtaksperiode_forkastet.bigquery_table_id}`
+                   group by vedtaksperiode_id) t on t.vedtaksperiode_id = b.vedtaksperiode_id
 EOF
 
 }
