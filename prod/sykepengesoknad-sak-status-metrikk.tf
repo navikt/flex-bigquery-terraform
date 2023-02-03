@@ -366,4 +366,3 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_sak_status_metrikk
     "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
   ]
 }
-
