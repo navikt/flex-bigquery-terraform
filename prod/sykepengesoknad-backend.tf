@@ -888,3 +888,87 @@ EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykep
 EOF
 
 }
+
+module "sykepengesoknad_hovedsporsmal_pivot" {
+  source = "../modules/google-bigquery-table"
+
+  deletion_protection = false
+  location            = var.gcp_project["region"]
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "sykepengesoknad_hovedsporsmal_pivot"
+  table_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "status"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "verdi"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sporsmal_tag"
+        type = "STRING"
+      }
+    ]
+  )
+
+  data_transfer_display_name      = "sykepengesoknad_hovedsporsmal_pivot_query"
+  data_transfer_schedule          = "every day 06:00"
+  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
+  data_transfer_start_time        = "2023-02-07T00:00:00Z"
+  data_transfer_destination_table = module.sykepengesoknad_hovedsporsmal_pivot.bigquery_table_id
+  data_transfer_mode              = "WRITE_TRUNCATE"
+
+  data_transfer_query = <<EOF
+SELECT *
+FROM (SELECT sykepengesoknad_uuid,
+             fom,
+             tom,
+             sendt,
+             status,
+             verdi,
+             sporsmal_tag
+      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_hovedsporsmal_view`) PIVOT
+         (max(verdi)
+FOR sporsmal_tag in (
+'FRAVAR_FOR_SYKMELDINGEN',
+'TILBAKE_I_ARBEID',
+'FERIE_V2',
+'PERMISJON_V2',
+'UTLAND_V2',
+'UTLANDSOPPHOLD_SOKT_SYKEPENGER',
+'ARBEID_UNDERVEIS_100_PROSENT_0',
+'JOBBET_DU_GRADERT_0',
+'JOBBET_DU_100_PROSENT_0',
+'ARBEID_UTENFOR_NORGE',
+'ANDRE_INNTEKTSKILDER',
+'ANDRE_INNTEKTSKILDER_V2',
+'UTDANNING'
+))
+EOF
+
+}
