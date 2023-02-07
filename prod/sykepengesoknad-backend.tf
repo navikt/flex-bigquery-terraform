@@ -926,6 +926,11 @@ module "sykepengesoknad_hovedsporsmal_pivot" {
       },
       {
         mode = "NULLABLE"
+        name = "verdi"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
         name = "FRAVAR_FOR_SYKMELDINGEN"
         type = "STRING"
       },
@@ -1060,6 +1065,11 @@ module "sykepengesoknad_hovedsporsmal_pivot_view" {
       {
         mode = "NULLABLE"
         name = "status"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "verdi"
         type = "STRING"
       },
       {
