@@ -1031,10 +1031,10 @@ EOF
 
 
 module "sykepengesoknad_hovedsporsmal_pivot_view" {
-  source = "../modules/google-bigquery-view"
+  source              = "../modules/google-bigquery-view"
   deletion_protection = "false"
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "sykepengesoknad_hovedsporsmal_pivot_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_hovedsporsmal_pivot_view"
   view_schema = jsonencode(
     [
       {
