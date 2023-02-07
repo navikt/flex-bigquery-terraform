@@ -916,7 +916,67 @@ module "sykepengesoknad_hovedsporsmal_pivot" {
       },
       {
         mode = "NULLABLE"
-        name = "sporsmal_tag"
+        name = "FRAVAR_FOR_SYKMELDINGEN"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "TILBAKE_I_ARBEID"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "FERIE_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "PERMISJON_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "UTLAND_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "UTLANDSOPPHOLD_SOKT_SYKEPENGER"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ARBEID_UNDERVEIS_100_PROSENT_0"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "JOBBET_DU_GRADERT_0"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "JOBBET_DU_100_PROSENT_0"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ARBEID_UTENFOR_NORGE"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ANDRE_INNTEKTSKILDER"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ANDRE_INNTEKTSKILDER_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "UTDANNING"
         type = "STRING"
       }
     ]
@@ -957,4 +1017,127 @@ FOR sporsmal_tag in (
 ))
 EOF
 
+}
+
+module "sykepengesoknad_hovedsporsmal_pivot_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_hovedsporsmal_pivot_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "status"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "verdi"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "FRAVAR_FOR_SYKMELDINGEN"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "TILBAKE_I_ARBEID"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "FERIE_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "PERMISJON_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "UTLAND_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "UTLANDSOPPHOLD_SOKT_SYKEPENGER"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ARBEID_UNDERVEIS_100_PROSENT_0"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "JOBBET_DU_GRADERT_0"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "JOBBET_DU_100_PROSENT_0"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ARBEID_UTENFOR_NORGE"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ANDRE_INNTEKTSKILDER"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "ANDRE_INNTEKTSKILDER_V2"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "UTDANNING"
+        type = "STRING"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT *
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_hovedsporsmal_pivot.bigquery_table_id}`
+EOF
+
+}
+
+resource "google_bigquery_table_iam_binding" "sykepengesoknad_hovedsporsmal_pivot_view_iam_binding" {
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.sykepengesoknad_hovedsporsmal_pivot_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "group:all-users@nav.no",
+    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+  ]
 }
