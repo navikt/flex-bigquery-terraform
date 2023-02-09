@@ -1189,7 +1189,7 @@ module "sykepengesoknad_andre_inntektskilder_view" {
       {
         mode = "NULLABLE"
         name = "svar"
-        type = "STRING"
+        type = "BOOLEAN"
       }
     ]
   )
