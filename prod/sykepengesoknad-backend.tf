@@ -1148,3 +1148,108 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_hovedsporsmal_pivo
   ]
 }
 
+
+module "sykepengesoknad_andre_inntektskilder_view" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_andre_inntektskilder_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "korrigerer"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "korrigert_av"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "status"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tag"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "svar"
+        type = "STRING"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+with ja_hovedspm as (SELECT sporsmal.id
+                     FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal
+                              INNER JOIN
+                          `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
+                          ON
+                              svar.sporsmal_id = sporsmal.id
+                     WHERE svar.verdi = 'JA'
+                       AND sporsmal.tag = "ANDRE_INNTEKTSKILDER_V2"),
+
+
+     ja_hovedspm_gruppen as (SELECT sporsmal.id
+                             FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal,
+                                  ja_hovedspm
+                             WHERE under_sporsmal_id = ja_hovedspm.id),
+
+     checkboxider as (SELECT sporsmal.id,
+                             sporsmal.tag,
+                             sporsmal.sykepengesoknad_id
+                      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal,
+                           ja_hovedspm_gruppen
+                      WHERE under_sporsmal_id = ja_hovedspm_gruppen.id),
+
+     checkboxmedsvar as (SELECT checkboxider.*,
+                                svar.verdi
+                         FROM checkboxider
+                                  left outer join `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
+                                                  on checkboxider.id = svar.sporsmal_id)
+
+SELECT soknad.sykepengesoknad_uuid,
+       soknad.sendt,
+       soknad.korrigerer,
+       soknad.korrigert_av,
+       soknad.status,
+       checkboxmedsvar.tag,
+       CASE verdi
+           WHEN "CHECKED" THEN true
+           ELSE false
+           END
+           AS svar
+FROM checkboxmedsvar
+         inner join `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` soknad
+                    on checkboxmedsvar.sykepengesoknad_id = soknad.id
+
+
+EOF
+
+}
+
+resource "google_bigquery_table_iam_binding" "sykepengesoknad_andre_inntektskilder_view_iam_binding" {
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.sykepengesoknad_andre_inntektskilder_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "group:all-users@nav.no",
+    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+  ]
+}
