@@ -1253,3 +1253,111 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_andre_inntektskild
     "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
   ]
 }
+
+
+module "korrigerte_sporsmal_tilstand_view" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "korrigerte_sporsmal_tilstand_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprettet"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "korrigeringSendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprinneligSendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "endring"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tag"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "hovedsvar"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tilstand"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tidspunkt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "funksjonell_feil"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "forkastet"
+        type = "BOOLEAN"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT stv.sykepengesoknad_uuid,
+       ks.opprettet,
+       ks.korrigeringSendt,
+       ks.opprinneligSendt,
+       ks.endring,
+       ks.tag,
+       ks.fom,
+       ks.tom,
+       ks.hovedsvar,
+       stv.tilstand,
+       stv.tidspunkt,
+       stv.funksjonell_feil,
+       stv.forkastet
+FROM `flex-prod-af40.korrigering_metrikk.korrigerte_sporsmal` ks,
+     `flex-prod-af40.flex_dataset.sykepengesoknad_sak_status_metrikk_siste_tilstand_view` stv
+where ks.sykepengesoknadId = stv.sykepengesoknad_uuid
+EOF
+
+}
+
+resource "google_bigquery_table_iam_binding" "korrigerte_sporsmal_tilstand_view_iam_binding" {
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.korrigerte_sporsmal_tilstand_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "group:all-users@nav.no",
+    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+  ]
+}
