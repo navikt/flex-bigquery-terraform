@@ -60,6 +60,30 @@ resource "google_bigquery_dataset" "flex_dataset" {
     }
   }
   access {
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_hovedsporsmal_pivot_view"
+    }
+  }
+  access {
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "korrigerte_sporsmal_tilstand_view"
+    }
+  }
+  access {
+
+    view {
+      dataset_id = "flex_dataset"
+      project_id = "flex-prod-af40"
+      table_id   = "sykepengesoknad_andre_inntektskilder_view"
+    }
+  }
+  access {
     role          = "OWNER"
     special_group = "projectOwners"
   }
