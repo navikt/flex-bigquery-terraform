@@ -31,7 +31,7 @@ module "google_storage_bucket" {
   location = var.gcp_project["region"]
 }
 
-resource "-" "federated_query" {
+resource "google_service_account" "federated_query" {
   account_id   = "federated-query"
   description  = "Service Account brukt av BigQuery Scheduled Queries."
   display_name = "Federated Query"
