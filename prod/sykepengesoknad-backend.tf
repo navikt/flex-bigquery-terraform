@@ -620,17 +620,17 @@ module "sykepengesoknad_klipp_metrikk" {
       },
       {
         mode = "NULLABLE"
-        name = "EKSISTERENDE_SYKEPENGESOKNAD_ID"
+        name = "eksisterende_sykepengesoknad_id"
         type = "STRING"
       },
       {
         mode = "NULLABLE"
-        name = "ENDRING_I_UFOREGRAD"
+        name = "endring_i_uforegrad"
         type = "STRING"
       },
       {
         mode = "NULLABLE"
-        name = "KLIPPET"
+        name = "klippet"
         type = "BOOLEAN"
       }
     ]
