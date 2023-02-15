@@ -994,7 +994,7 @@ FROM (SELECT sykepengesoknad_uuid,
              status,
              verdi,
              sporsmal_tag
-      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_hovedsporsmal_view`) PIVOT
+      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_hovedsporsmal_view.bigquery_view_id}`) PIVOT
          (max(verdi)
 FOR sporsmal_tag in (
 'FRAVAR_FOR_SYKMELDINGEN',
@@ -1170,7 +1170,7 @@ module "sykepengesoknad_andre_inntektskilder_view" {
   )
 
   view_query = <<EOF
-with ja_hovedspm as (SELECT sporsmal.id
+WITH ja_hovedspm AS (SELECT sporsmal.id
                      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal
                               INNER JOIN
                           `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
@@ -1179,21 +1179,17 @@ with ja_hovedspm as (SELECT sporsmal.id
                      WHERE svar.verdi = 'JA'
                        AND sporsmal.tag = "ANDRE_INNTEKTSKILDER_V2"),
 
-
-     ja_hovedspm_gruppen as (SELECT sporsmal.id
+     ja_hovedspm_gruppen AS (SELECT sporsmal.id
                              FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal,
                                   ja_hovedspm
                              WHERE under_sporsmal_id = ja_hovedspm.id),
 
-     checkboxider as (SELECT sporsmal.id,
-                             sporsmal.tag,
-                             sporsmal.sykepengesoknad_id
+     checkboxider AS (SELECT sporsmal.id, sporsmal.tag, sporsmal.sykepengesoknad_id
                       FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal,
                            ja_hovedspm_gruppen
                       WHERE under_sporsmal_id = ja_hovedspm_gruppen.id),
 
-     checkboxmedsvar as (SELECT checkboxider.*,
-                                svar.verdi
+     checkboxmedsvar AS (SELECT checkboxider.*, svar.verdi
                          FROM checkboxider
                                   left outer join `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
                                                   on checkboxider.id = svar.sporsmal_id)
@@ -1210,10 +1206,8 @@ SELECT soknad.sykepengesoknad_uuid,
            END
            AS svar
 FROM checkboxmedsvar
-         inner join `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` soknad
+         INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` soknad
                     on checkboxmedsvar.sykepengesoknad_id = soknad.id
-
-
 EOF
 
 }
@@ -1308,8 +1302,8 @@ SELECT stv.sykepengesoknad_uuid,
        stv.tidspunkt,
        stv.funksjonell_feil,
        stv.forkastet
-FROM `flex-prod-af40.korrigering_metrikk.korrigerte_sporsmal` ks,
-     `flex-prod-af40.flex_dataset.sykepengesoknad_sak_status_metrikk_siste_tilstand_view` stv
+FROM `${var.gcp_project["project"]}.korrigering_metrikk.korrigerte_sporsmal` ks,
+     `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_siste_tilstand_view.bigquery_view_id}` stv
 where ks.sykepengesoknadId = stv.sykepengesoknad_uuid
 EOF
 
