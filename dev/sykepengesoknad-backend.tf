@@ -174,7 +174,7 @@ module "sykepengesoknad_sykepengesoknad" {
   data_transfer_display_name      = "sykepengesoknad_sykepengesoknad_query"
   data_transfer_schedule          = "every day 05:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-12-08T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sykepengesoknad.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -431,7 +431,7 @@ module "sykepengesoknad_sporsmal" {
   data_transfer_display_name      = "sykepengesoknad_sporsmal_query"
   data_transfer_schedule          = "every day 04:10"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-12-08T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_sporsmal.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -473,7 +473,7 @@ module "sykepengesoknad_svar" {
   data_transfer_display_name      = "sykepengesoknad_svar_query"
   data_transfer_schedule          = "every day 05:20"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-12-08T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_svar.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -588,6 +588,7 @@ EOF
 module "sykepengesoknad_klippet_sykepengesoknad" {
   source = "../modules/google-bigquery-table"
 
+  deletion_protection = false
   location   = var.gcp_project["region"]
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_klippet_sykepengesoknad"
@@ -634,7 +635,7 @@ module "sykepengesoknad_klippet_sykepengesoknad" {
   data_transfer_display_name      = "sykepengesoknad_klippet_sykepengesoknad_query"
   data_transfer_schedule          = "every day 05:10"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2022-12-08T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_klippet_sykepengesoknad.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -649,6 +650,7 @@ EOF
 module "sykepengesoknad_klippet_sykepengesoknad_view" {
   source = "../modules/google-bigquery-view"
 
+  deletion_protection = false
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_klippet_sykepengesoknad_view"
   view_schema = jsonencode(
@@ -748,7 +750,7 @@ module "sykepengesoknad_klipp_metrikk" {
   data_transfer_display_name      = "sykepengesoknad_klipp_metrikk_query"
   data_transfer_schedule          = "every day 05:10"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-05T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_klipp_metrikk.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -826,6 +828,7 @@ EOF
 module "sykepengesoknad_soknadperiode" {
   source = "../modules/google-bigquery-table"
 
+  deletion_protection = false
   location   = var.gcp_project["region"]
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_soknadperiode"
@@ -862,7 +865,7 @@ module "sykepengesoknad_soknadperiode" {
   data_transfer_display_name      = "sykepengesoknad_soknadperiode_query"
   data_transfer_schedule          = "every day 05:20"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-01-25T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_soknadperiode.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -980,7 +983,7 @@ module "sykepengesoknad_hovedsporsmal_pivot" {
   data_transfer_display_name      = "sykepengesoknad_hovedsporsmal_pivot_query"
   data_transfer_schedule          = "every day 06:00"
   data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-02-07T00:00:00Z"
+  data_transfer_start_time        = "2023-02-15T00:00:00Z"
   data_transfer_destination_table = module.sykepengesoknad_hovedsporsmal_pivot.bigquery_table_id
   data_transfer_mode              = "WRITE_TRUNCATE"
 
@@ -1016,6 +1019,7 @@ EOF
 
 module "sykepengesoknad_hovedsporsmal_pivot_view" {
   source              = "../modules/google-bigquery-view"
+
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
   view_id             = "sykepengesoknad_hovedsporsmal_pivot_view"
@@ -1119,15 +1123,4 @@ SELECT *
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_hovedsporsmal_pivot.bigquery_table_id}`
 EOF
 
-}
-
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_hovedsporsmal_pivot_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.sykepengesoknad_hovedsporsmal_pivot_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
 }
