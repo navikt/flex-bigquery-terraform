@@ -348,7 +348,6 @@ module "sykepengesoknad_sykepengesoknad_view" {
         name        = "sendt"
         type        = "TIMESTAMP"
         description = "Tidspunkt når søknaden først ble sendt til NAV, Arbeidsgiver eller begge."
-
       },
       {
         mode        = "NULLABLE"
@@ -770,7 +769,6 @@ EOF
 
 }
 
-
 module "sykepengesoknad_hovedsporsmal_pivot" {
   source = "../modules/google-bigquery-table"
 
@@ -889,7 +887,7 @@ FROM (SELECT sykepengesoknad_uuid,
              status,
              verdi,
              sporsmal_tag
-      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_hovedsporsmal_view`) PIVOT
+      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_hovedsporsmal_view.bigquery_view_id}`) PIVOT
          (max(verdi)
 FOR sporsmal_tag in (
 'FRAVAR_FOR_SYKMELDINGEN',
@@ -1014,6 +1012,192 @@ module "sykepengesoknad_hovedsporsmal_pivot_view" {
   view_query = <<EOF
 SELECT *
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_hovedsporsmal_pivot.bigquery_table_id}`
+EOF
+
+}
+
+module "sykepengesoknad_andre_inntektskilder_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_andre_inntektskilder_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "korrigerer"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "korrigert_av"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "status"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tag"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "svar"
+        type = "BOOLEAN"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+WITH ja_hovedspm AS (SELECT sporsmal.id
+                     FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal
+                              INNER JOIN
+                          `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
+                          ON
+                              svar.sporsmal_id = sporsmal.id
+                     WHERE svar.verdi = 'JA'
+                       AND sporsmal.tag = "ANDRE_INNTEKTSKILDER_V2"),
+
+     ja_hovedspm_gruppen AS (SELECT sporsmal.id
+                             FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal,
+                                  ja_hovedspm
+                             WHERE under_sporsmal_id = ja_hovedspm.id),
+
+     checkboxider AS (SELECT sporsmal.id, sporsmal.tag, sporsmal.sykepengesoknad_id
+                      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sporsmal.bigquery_table_id}` sporsmal,
+                           ja_hovedspm_gruppen
+                      WHERE under_sporsmal_id = ja_hovedspm_gruppen.id),
+
+     checkboxmedsvar AS (SELECT checkboxider.*, svar.verdi
+                         FROM checkboxider
+                                  left outer join `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_svar.bigquery_table_id}` svar
+                                                  on checkboxider.id = svar.sporsmal_id)
+
+SELECT soknad.sykepengesoknad_uuid,
+       soknad.sendt,
+       soknad.korrigerer,
+       soknad.korrigert_av,
+       soknad.status,
+       checkboxmedsvar.tag,
+       CASE verdi
+           WHEN "CHECKED" THEN true
+           ELSE false
+           END
+           AS svar
+FROM checkboxmedsvar
+         INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sykepengesoknad.bigquery_table_id}` soknad
+                    on checkboxmedsvar.sykepengesoknad_id = soknad.id
+EOF
+
+}
+
+module "korrigerte_sporsmal_tilstand_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "korrigerte_sporsmal_tilstand_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprettet"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "korrigeringSendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprinneligSendt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "endring"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tag"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "hovedsvar"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tilstand"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tidspunkt"
+        type = "TIMESTAMP"
+      },
+      {
+        mode = "NULLABLE"
+        name = "funksjonell_feil"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "forkastet"
+        type = "BOOLEAN"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT stv.sykepengesoknad_uuid,
+       ks.opprettet,
+       ks.korrigeringSendt,
+       ks.opprinneligSendt,
+       ks.endring,
+       ks.tag,
+       ks.fom,
+       ks.tom,
+       ks.hovedsvar,
+       stv.tilstand,
+       stv.tidspunkt,
+       stv.funksjonell_feil,
+       stv.forkastet
+FROM `${var.gcp_project["project"]}.korrigering_metrikk.korrigerte_sporsmal` ks,
+     `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_sak_status_metrikk_siste_tilstand_view.bigquery_view_id}` stv
+where ks.sykepengesoknadId = stv.sykepengesoknad_uuid
 EOF
 
 }
