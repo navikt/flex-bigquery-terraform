@@ -31,7 +31,7 @@ module "google_storage_bucket" {
   location = var.gcp_project["region"]
 }
 
-resource "google_service_account" "federated_query" {
+resource "-" "federated_query" {
   account_id   = "federated-query"
   description  = "Service Account brukt av BigQuery Scheduled Queries."
   display_name = "Federated Query"
@@ -42,6 +42,3 @@ resource "google_project_iam_member" "permissions" {
   role    = "roles/iam.serviceAccountShortTermTokenMinter"
   member  = "serviceAccount:${local.google_project_iam_member.email}"
 }
-
-
-
