@@ -28,3 +28,15 @@ module "google_storage_bucket" {
   name     = "flex-terraform-state-prod"
   location = var.gcp_project["region"]
 }
+
+resource "google_service_account" "federated_query" {
+  account_id   = "federated-query"
+  description  = "Service Account brukt av BigQuery Scheduled Queries."
+  display_name = "Federated Query"
+}
+
+resource "google_project_iam_member" "permissions" {
+  project = data.google_project.project.project_id
+  role    = "roles/iam.serviceAccountShortTermTokenMinter"
+  member  = "serviceAccount:${local.google_project_iam_member.email}"
+}
