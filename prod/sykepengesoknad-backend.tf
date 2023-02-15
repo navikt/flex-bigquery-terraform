@@ -365,17 +365,6 @@ EOF
 
 }
 
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.sykepengesoknad_sykepengesoknad_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
 module "sykepengesoknad_sporsmal" {
   source = "../modules/google-bigquery-table"
 
@@ -705,7 +694,6 @@ EOF
 
 }
 
-
 module "sykepengesoknad_klipp_metrikk" {
   source = "../modules/google-bigquery-table"
 
@@ -836,17 +824,6 @@ EOF
 
 }
 
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_klipp_metrikk_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.sykepengesoknad_klipp_metrikk_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
 module "sykepengesoknad_soknadperiode" {
   source = "../modules/google-bigquery-table"
 
@@ -898,7 +875,6 @@ EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykep
 EOF
 
 }
-
 
 module "sykepengesoknad_hovedsporsmal_pivot" {
   source = "../modules/google-bigquery-table"
@@ -1039,7 +1015,6 @@ EOF
 
 }
 
-
 module "sykepengesoknad_hovedsporsmal_pivot_view" {
   source = "../modules/google-bigquery-view"
 
@@ -1148,17 +1123,6 @@ EOF
 
 }
 
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_hovedsporsmal_pivot_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.sykepengesoknad_hovedsporsmal_pivot_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
 module "sykepengesoknad_andre_inntektskilder_view" {
   source = "../modules/google-bigquery-view"
 
@@ -1253,18 +1217,6 @@ FROM checkboxmedsvar
 EOF
 
 }
-
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_andre_inntektskilder_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.sykepengesoknad_andre_inntektskilder_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
 
 module "korrigerte_sporsmal_tilstand_view" {
   source = "../modules/google-bigquery-view"
@@ -1361,15 +1313,4 @@ FROM `flex-prod-af40.korrigering_metrikk.korrigerte_sporsmal` ks,
 where ks.sykepengesoknadId = stv.sykepengesoknad_uuid
 EOF
 
-}
-
-resource "google_bigquery_table_iam_binding" "korrigerte_sporsmal_tilstand_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.korrigerte_sporsmal_tilstand_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
 }
