@@ -800,19 +800,22 @@ module "sykepengesoknad_klipp_metrikk_view" {
         description = "Tidspunktet sykmeldingen som overlappet kom inn."
       },
       {
-        mode = "NULLABLE"
-        name = "eksisterende_sykepengesoknad_id"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "eksisterende_sykepengesoknad_id"
+        type        = "STRING"
+        description = "ID på sykepengesøknad som eksisterte når overlappet kom inn."
       },
       {
-        mode = "NULLABLE"
-        name = "endring_i_uforegrad"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "endring_i_uforegrad"
+        type        = "STRING"
+        description = "Endring i uføregrad for den overlappend perioden."
       },
       {
-        mode = "NULLABLE"
-        name = "klippet"
-        type = "BOOLEAN"
+        mode        = "NULLABLE"
+        name        = "klippet"
+        type        = "BOOLEAN"
+        description = "Om søknaden ble klippet eller ikke."
       }
     ]
   )
