@@ -4,6 +4,6 @@ resource "google_bigquery_table" "view" {
   deletion_protection = var.deletion_protection
 
   materialized_view {
-    query          = var.view_query
+    query = var.view_query
   }
 }

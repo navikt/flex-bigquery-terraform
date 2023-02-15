@@ -589,9 +589,9 @@ module "sykepengesoknad_klippet_sykepengesoknad" {
   source = "../modules/google-bigquery-table"
 
   deletion_protection = false
-  location   = var.gcp_project["region"]
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "sykepengesoknad_klippet_sykepengesoknad"
+  location            = var.gcp_project["region"]
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "sykepengesoknad_klippet_sykepengesoknad"
   table_schema = jsonencode(
     [
       {
@@ -651,8 +651,8 @@ module "sykepengesoknad_klippet_sykepengesoknad_view" {
   source = "../modules/google-bigquery-view"
 
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "sykepengesoknad_klippet_sykepengesoknad_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_klippet_sykepengesoknad_view"
   view_schema = jsonencode(
     [
       {
@@ -829,9 +829,9 @@ module "sykepengesoknad_soknadperiode" {
   source = "../modules/google-bigquery-table"
 
   deletion_protection = false
-  location   = var.gcp_project["region"]
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = "sykepengesoknad_soknadperiode"
+  location            = var.gcp_project["region"]
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id            = "sykepengesoknad_soknadperiode"
   table_schema = jsonencode(
     [
       {
@@ -1018,7 +1018,7 @@ EOF
 }
 
 module "sykepengesoknad_hovedsporsmal_pivot_view" {
-  source              = "../modules/google-bigquery-view"
+  source = "../modules/google-bigquery-view"
 
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
