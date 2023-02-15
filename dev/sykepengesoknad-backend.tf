@@ -585,116 +585,6 @@ EOF
 
 }
 
-module "sykepengesoknad_klippet_sykepengesoknad" {
-  source = "../modules/google-bigquery-table"
-
-  deletion_protection = false
-  location            = var.gcp_project["region"]
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id            = "sykepengesoknad_klippet_sykepengesoknad"
-  table_schema = jsonencode(
-    [
-      {
-        mode = "NULLABLE"
-        name = "id"
-        type = "STRING"
-      },
-      {
-        mode = "NULLABLE"
-        name = "sykepengesoknad_uuid"
-        type = "STRING"
-      },
-      {
-        mode = "NULLABLE"
-        name = "sykmelding_uuid"
-        type = "STRING"
-      },
-      {
-        mode = "NULLABLE"
-        name = "klipp_variant"
-        type = "STRING"
-      },
-      {
-        mode = "NULLABLE"
-        name = "periode_for"
-        type = "STRING"
-      },
-      {
-        mode = "NULLABLE"
-        name = "periode_etter"
-        type = "STRING"
-      },
-      {
-        mode = "NULLABLE"
-        name = "timestamp"
-        type = "TIMESTAMP"
-      }
-    ]
-  )
-
-  data_transfer_display_name      = "sykepengesoknad_klippet_sykepengesoknad_query"
-  data_transfer_schedule          = "every day 05:10"
-  data_transfer_service_account   = "federated-query@${var.gcp_project["project"]}.iam.gserviceaccount.com"
-  data_transfer_start_time        = "2023-02-15T00:00:00Z"
-  data_transfer_destination_table = module.sykepengesoknad_klippet_sykepengesoknad.bigquery_table_id
-  data_transfer_mode              = "WRITE_TRUNCATE"
-
-  data_transfer_query = <<EOF
-SELECT * FROM
-EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
-'SELECT id, sykepengesoknad_uuid, sykmelding_uuid, klipp_variant, periode_for, periode_etter, timestamp FROM klippet_sykepengesoknad');
-EOF
-
-}
-
-module "sykepengesoknad_klippet_sykepengesoknad_view" {
-  source = "../modules/google-bigquery-view"
-
-  deletion_protection = false
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykepengesoknad_klippet_sykepengesoknad_view"
-  view_schema = jsonencode(
-    [
-      {
-        mode        = "NULLABLE"
-        name        = "id"
-        type        = "STRING"
-        description = "Unik ID for en klippet søknad eller sykmelding."
-      },
-      {
-        mode        = "NULLABLE"
-        name        = "sykepengesoknad_uuid"
-        type        = "STRING"
-        description = "ID for søknaden som overlappet med en sykmelding."
-      },
-      {
-        mode        = "NULLABLE"
-        name        = "sykmelding_uuid"
-        type        = "STRING"
-        description = "ID for sykmeldingen som overlappet med en søknad."
-      },
-      {
-        mode        = "NULLABLE"
-        name        = "klipp_variant"
-        type        = "STRING"
-        description = "Varianten av klipp som sier om det er en søknad eller sykmelding som ble klippet og hvilke del som var overlappende."
-      },
-      {
-        mode        = "NULLABLE"
-        name        = "timestamp"
-        type        = "TIMESTAMP"
-        description = "Tidspunktet klippen skjedde."
-      },
-    ]
-  )
-
-  view_query = <<EOF
-SELECT id, sykepengesoknad_uuid, sykmelding_uuid, klipp_variant, timestamp
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_klippet_sykepengesoknad.bigquery_table_id}`
-EOF
-
-}
-
 module "sykepengesoknad_klipp_metrikk" {
   source = "../modules/google-bigquery-table"
 
@@ -801,19 +691,22 @@ module "sykepengesoknad_klipp_metrikk_view" {
         description = "Tidspunktet sykmeldingen som overlappet kom inn."
       },
       {
-        mode = "NULLABLE"
-        name = "eksisterende_sykepengesoknad_id"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "eksisterende_sykepengesoknad_id"
+        type        = "STRING"
+        description = "ID på sykepengesøknad som eksisterte når overlappet kom inn."
       },
       {
-        mode = "NULLABLE"
-        name = "endring_i_uforegrad"
-        type = "STRING"
+        mode        = "NULLABLE"
+        name        = "endring_i_uforegrad"
+        type        = "STRING"
+        description = "Endring i uføregrad for den overlappend perioden."
       },
       {
-        mode = "NULLABLE"
-        name = "klippet"
-        type = "BOOLEAN"
+        mode        = "NULLABLE"
+        name        = "klippet"
+        type        = "BOOLEAN"
+        description = "Om søknaden ble klippet eller ikke."
       }
     ]
   )
