@@ -22,6 +22,7 @@ module "sykepengesoknad_bigquery_connection" {
 module "sykepengesoknad_sykepengesoknad" {
   source = "../modules/google-bigquery-table"
 
+  deletion_protection = false
   location   = var.gcp_project["region"]
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_sykepengesoknad"
@@ -187,6 +188,7 @@ EOF
 module "sykepengesoknad_sykepengesoknad_view" {
   source = "../modules/google-bigquery-view"
 
+  deletion_protection = false
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_sykepengesoknad_view"
   view_schema = jsonencode(
@@ -377,6 +379,7 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_view_iam_binding" 
 module "sykepengesoknad_sporsmal" {
   source = "../modules/google-bigquery-table"
 
+  deletion_protection = false
   location   = var.gcp_project["region"]
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_sporsmal"
@@ -453,6 +456,7 @@ EOF
 module "sykepengesoknad_svar" {
   source = "../modules/google-bigquery-table"
 
+  deletion_protection = false
   location   = var.gcp_project["region"]
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_svar"
@@ -494,6 +498,7 @@ EOF
 module "sykepengesoknad_hovedsporsmal_view" {
   source = "../modules/google-bigquery-view"
 
+  deletion_protection = false
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   view_id    = "sykepengesoknad_hovedsporsmal_view"
   view_schema = jsonencode(
@@ -845,6 +850,7 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_klipp_metrikk_view
 module "sykepengesoknad_soknadperiode" {
   source = "../modules/google-bigquery-table"
 
+  deletion_protection = false
   location   = var.gcp_project["region"]
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = "sykepengesoknad_soknadperiode"
@@ -1036,6 +1042,7 @@ EOF
 
 module "sykepengesoknad_hovedsporsmal_pivot_view" {
   source              = "../modules/google-bigquery-view"
+
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
   view_id             = "sykepengesoknad_hovedsporsmal_pivot_view"
@@ -1152,9 +1159,9 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_hovedsporsmal_pivo
   ]
 }
 
-
 module "sykepengesoknad_andre_inntektskilder_view" {
   source              = "../modules/google-bigquery-view"
+
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
   view_id             = "sykepengesoknad_andre_inntektskilder_view"
@@ -1261,6 +1268,7 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_andre_inntektskild
 
 module "korrigerte_sporsmal_tilstand_view" {
   source              = "../modules/google-bigquery-view"
+  
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
   view_id             = "korrigerte_sporsmal_tilstand_view"
