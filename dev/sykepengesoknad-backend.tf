@@ -729,17 +729,17 @@ module "sykepengesoknad_klipp_metrikk" {
       },
       {
         mode = "NULLABLE"
-        name = "EKSISTERENDE_SYKEPENGESOKNAD_ID"
+        name = "eksisterende_sykepengesoknad_id"
         type = "STRING"
       },
       {
         mode = "NULLABLE"
-        name = "ENDRING_I_UFOREGRAD"
+        name = "endring_i_uforegrad"
         type = "STRING"
       },
       {
         mode = "NULLABLE"
-        name = "KLIPPET"
+        name = "klippet"
         type = "BOOLEAN"
       }
     ]
@@ -755,7 +755,7 @@ module "sykepengesoknad_klipp_metrikk" {
   data_transfer_query = <<EOF
 SELECT * FROM
 EXTERNAL_QUERY('${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-backend',
-'SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp FROM klipp_metrikk');
+'SELECT id, sykmelding_uuid, variant, soknadstatus, timestamp, eksisterende_sykepengesoknad_id, endring_i_uforegrad, klippet FROM klipp_metrikk');
 EOF
 
 }
