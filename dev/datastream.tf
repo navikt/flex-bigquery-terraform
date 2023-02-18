@@ -58,7 +58,7 @@ module "cloud_sql_auth_proxy_container_datastream" {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
     args = ["-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:5432",
-      "-ip_address_types=PRIVATE"]
+    "-ip_address_types=PRIVATE"]
   }
   restart_policy = "Always"
 }
@@ -97,3 +97,35 @@ resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
     container-vm = module.cloud_sql_auth_proxy_container_datastream.vm_container_label
   }
 }
+
+// Datastrean connectiom profile for PostgreSQL source. Used to create the Datastream.
+resource "google_datastream_connection_profile" "sykepengesoknad_postgresql_connection_profile" {
+  location              = var.gcp_project["region"]
+  display_name          = "sykepengesoknad-postgresql-connection-profile"
+  connection_profile_id = "sykepengesoknad-postgresql-connection-profile"
+
+  postgresql_profile {
+    hostname = google_compute_instance.flex_datastream_cloud_sql_proxy_vm.network_interface[0].network_ip
+    port     = 5432
+    username = local.sykepengesoknad_datastream_credentials["username"]
+    password = local.sykepengesoknad_datastream_credentials["password"]
+    database = "sykepengesoknad"
+  }
+
+  private_connectivity {
+    private_connection = google_datastream_private_connection.flex_datastream_private_connection.id
+  }
+}
+
+// Datastream connection profile for BigQuery target.
+resource "google_datastream_connection_profile" "sykepengesoknad_bigquery_connection_profile" {
+  display_name          = "sykepengesoknad-bigquery-connection-profile"
+  location              = var.gcp_project["region"]
+  connection_profile_id = "sykepengesoknad-bigquery-connection-profile"
+
+  bigquery_profile {}
+}
+
+// Creating a Datastream Stream with PostgreSQL source and BigQuery target is not yet supported by Terraform.
+// Terraform resource: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/datastream_stream
+// There is an open issue for PostgreSQL support: https://github.com/hashicorp/terraform-provider-google/issues/13599)
