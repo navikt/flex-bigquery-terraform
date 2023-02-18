@@ -21,13 +21,6 @@ resource "google_bigquery_dataset" "flex_dataset" {
     view {
       dataset_id = "flex_dataset"
       project_id = "flex-prod-af40"
-      table_id   = "sykepengesoknad_klippet_sykepengesoknad_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = "flex-prod-af40"
       table_id   = "sykepengesoknad_sykepengesoknad_view"
     }
   }
