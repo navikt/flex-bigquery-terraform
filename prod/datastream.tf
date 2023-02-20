@@ -58,7 +58,7 @@ module "cloud_sql_auth_proxy_container_datastream" {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
     args = ["-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:5432",
-      "-ip_address_types=PRIVATE"]
+    "-ip_address_types=PRIVATE"]
   }
   restart_policy = "Always"
 }
