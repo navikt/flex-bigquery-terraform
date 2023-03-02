@@ -1,7 +1,7 @@
 variable "gcp_project" {
   description = "GCP project and region defaults."
   type        = map(string)
-  default = {
+  default     = {
     region  = "europe-north1",
     zone    = "europe-north1-a",
     project = "flex-dev-2b16"
@@ -37,5 +37,17 @@ variable "arkivering_oppgave_bigquery_secret" {
 variable "sykepengesoknad_datastream_secret" {
   description = "The key of the GCP secret that provides the sykepengesoknad datastream credentials."
   type        = string
+}
+
+variable "sykepengesoknad_cloud_sql_port" {
+  description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
+  type        = string
+  default     = "5432"
+}
+
+variable "datastream_vpc_ip_range" {
+  description = "The IP-range used to provide SQL instances with a private IP address."
+  type        = string
+  default     = "10.96.112.0"
 }
 
