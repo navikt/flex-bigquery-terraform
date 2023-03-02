@@ -17,8 +17,6 @@ locals {
   )
 }
 
-// TODO:  Sjekk om det er mulig å definere "flex-datastream-vpc-ip-range" tilhørende VPC her.
-
 // Private connectivity lets you create a peered configuration between your VPC and Datastream’s private network.
 // A single configuration can be used by all streams and connection profiles within a single region.
 resource "google_datastream_private_connection" "flex_datastream_private_connection" {
@@ -32,7 +30,7 @@ resource "google_datastream_private_connection" "flex_datastream_private_connect
   }
 }
 
-// VPX Firewall rules control incoming or outgoing traffic to an instance. By default, incoming traffic from outside
+// VPC Firewall rules control incoming or outgoing traffic to an instance. By default, incoming traffic from outside
 // your network is blocked. Since we are using a Cloud SQL reverse proxy, we need to then create an ingress firewall
 // rule that allows traffic on the source database port.
 resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
