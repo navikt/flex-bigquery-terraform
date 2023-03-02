@@ -33,5 +33,5 @@ resource "google_datastream_connection_profile" "sykepengesoknad_bigquery_connec
   location              = var.gcp_project["region"]
   connection_profile_id = "sykepengesoknad-bigquery-connection-profile"
 
-  bigquery_profile {}cd provider "" {}
+  bigquery_profile {}
 }
