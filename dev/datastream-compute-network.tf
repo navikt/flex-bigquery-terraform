@@ -53,10 +53,10 @@ module "cloud_sql_auth_proxy_container_datastream" {
   source         = "terraform-google-modules/container-vm/google"
   version        = "3.1.0"
   cos_image_name = "cos-stable-101-17162-127-8"
-  container      = {
+  container = {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
-    args    = [
+    args = [
       "-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port}",
       "-ip_address_types=PRIVATE"
     ]
