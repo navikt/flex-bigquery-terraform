@@ -17,7 +17,17 @@ locals {
   )
 }
 
-// TODO:  Sjekk om det er mulig å definere "flex-datastream-vpc-ip-range" tilhørende VPC her.
+// The IP-range in the VPC used for the Datastream VPC peering.
+resource "google_compute_global_address" "flex_datastream_vpc_ip_range" {
+  name          = "flex-datastream-vpc-ip-range"
+  project       = var.gcp_project["project"]
+  address_type  = "INTERNAL"
+  purpose       = "VPC_PEERING"
+  network       = google_compute_network.flex_datastream_private_vpc.id
+  address       = "10.18.0.0"
+  prefix_length = 20
+
+}
 
 // Private connectivity lets you create a peered configuration between your VPC and Datastream’s private network.
 // A single configuration can be used by all streams and connection profiles within a single region.
@@ -32,7 +42,7 @@ resource "google_datastream_private_connection" "flex_datastream_private_connect
   }
 }
 
-// VPX Firewall rules control incoming or outgoing traffic to an instance. By default, incoming traffic from outside
+// VPC Firewall rules control incoming or outgoing traffic to an instance. By default, incoming traffic from outside
 // your network is blocked. Since we are using a Cloud SQL reverse proxy, we need to then create an ingress firewall
 // rule that allows traffic on the source database port.
 resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
