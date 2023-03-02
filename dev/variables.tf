@@ -39,3 +39,15 @@ variable "sykepengesoknad_datastream_secret" {
   type        = string
 }
 
+variable "sykepengesoknad_cloud_sql_port" {
+  description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
+  type        = string
+  default     = "5432"
+}
+
+variable "datastream_vpc_ip_range" {
+  description = "The IP-range used to provide SQL instances with a private IP address."
+  type        = string
+  default     = "10.96.112.0"
+}
+

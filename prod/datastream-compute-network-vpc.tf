@@ -3,20 +3,6 @@ resource "google_compute_network" "flex_datastream_private_vpc" {
   project = var.gcp_project["project"]
 }
 
-data "google_sql_database_instance" "sykepengesoknad_db" {
-  name = "sykepengesoknad"
-}
-
-data "google_secret_manager_secret_version" "sykepengesoknad_datastream_secret" {
-  secret = var.sykepengesoknad_datastream_secret
-}
-
-locals {
-  sykepengesoknad_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.sykepengesoknad_datastream_secret.secret_data
-  )
-}
-
 // The IP-range in the VPC used for the Datastream VPC peering.
 resource "google_compute_global_address" "flex_datastream_vpc_ip_range" {
   name          = "flex-datastream-vpc-ip-range"
@@ -24,7 +10,7 @@ resource "google_compute_global_address" "flex_datastream_vpc_ip_range" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   network       = google_compute_network.flex_datastream_private_vpc.id
-  address       = "10.96.112.0"
+  address       = var.datastream_vpc_ip_range
   prefix_length = 20
 }
 
@@ -51,23 +37,29 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports    = ["5432"]
+    ports    = [var.sykepengesoknad_cloud_sql_port]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
 }
 
+data "google_sql_database_instance" "sykepengesoknad_db" {
+  name = "sykepengesoknad"
+}
+
 // This module handles the generation of metadata used to create an instance used to host containers on GCE.
 // The module itself does not launch an instance or managed instance group.
 module "cloud_sql_auth_proxy_container_datastream" {
-  source  = "terraform-google-modules/container-vm/google"
-  version = "3.1.0"
-
+  source         = "terraform-google-modules/container-vm/google"
+  version        = "3.1.0"
+  cos_image_name = "cos-stable-101-17162-127-8"
   container = {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
-    args = ["-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:5432",
-    "-ip_address_types=PRIVATE"]
+    args = [
+      "-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port}",
+      "-ip_address_types=PRIVATE"
+    ]
   }
   restart_policy = "Always"
 }
@@ -106,35 +98,3 @@ resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
     container-vm = module.cloud_sql_auth_proxy_container_datastream.vm_container_label
   }
 }
-
-// Datastrean connectiom profile for PostgreSQL source. Used to create the Datastream.
-resource "google_datastream_connection_profile" "sykepengesoknad_postgresql_connection_profile" {
-  location              = var.gcp_project["region"]
-  display_name          = "sykepengesoknad-postgresql-connection-profile"
-  connection_profile_id = "sykepengesoknad-postgresql-connection-profile"
-
-  postgresql_profile {
-    hostname = google_compute_instance.flex_datastream_cloud_sql_proxy_vm.network_interface[0].network_ip
-    port     = 5432
-    username = local.sykepengesoknad_datastream_credentials["username"]
-    password = local.sykepengesoknad_datastream_credentials["password"]
-    database = "sykepengesoknad"
-  }
-
-  private_connectivity {
-    private_connection = google_datastream_private_connection.flex_datastream_private_connection.id
-  }
-}
-
-// Datastream connection profile for BigQuery target.
-resource "google_datastream_connection_profile" "sykepengesoknad_bigquery_connection_profile" {
-  display_name          = "sykepengesoknad-bigquery-connection-profile"
-  location              = var.gcp_project["region"]
-  connection_profile_id = "sykepengesoknad-bigquery-connection-profile"
-
-  bigquery_profile {}
-}
-
-// Creating a Datastream Stream with PostgreSQL source and BigQuery target is not yet supported by Terraform.
-// Terraform resource: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/datastream_stream
-// There is an open issue for PostgreSQL support: https://github.com/hashicorp/terraform-provider-google/issues/13599)
