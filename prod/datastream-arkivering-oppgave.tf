@@ -26,12 +26,3 @@ resource "google_datastream_connection_profile" "arkivering_oppgave_postgresql_c
     private_connection = google_datastream_private_connection.flex_datastream_private_connection.id
   }
 }
-
-// Datastream connection profile for BigQuery target.
-resource "google_datastream_connection_profile" "arkivering_oppgave_bigquery_connection_profile" {
-  display_name          = "arkivering-oppgave-bigquery-connection-profile"
-  location              = var.gcp_project["region"]
-  connection_profile_id = "arkivering-oppgave-bigquery-connection-profile"
-
-  bigquery_profile {}
-}

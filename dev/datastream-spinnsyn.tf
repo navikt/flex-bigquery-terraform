@@ -26,12 +26,3 @@ resource "google_datastream_connection_profile" "spinnsyn_postgresql_connection_
     private_connection = google_datastream_private_connection.flex_datastream_private_connection.id
   }
 }
-
-// Datastream connection profile for BigQuery target.
-resource "google_datastream_connection_profile" "spinnsyn_bigquery_connection_profile" {
-  display_name          = "spinnsyn-bigquery-connection-profile"
-  location              = var.gcp_project["region"]
-  connection_profile_id = "spinnsyn-bigquery-connection-profile"
-
-  bigquery_profile {}
-}

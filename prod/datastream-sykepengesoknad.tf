@@ -26,12 +26,3 @@ resource "google_datastream_connection_profile" "sykepengesoknad_postgresql_conn
     private_connection = google_datastream_private_connection.flex_datastream_private_connection.id
   }
 }
-
-// Datastream connection profile for BigQuery target.
-resource "google_datastream_connection_profile" "sykepengesoknad_bigquery_connection_profile" {
-  display_name          = "sykepengesoknad-bigquery-connection-profile"
-  location              = var.gcp_project["region"]
-  connection_profile_id = "sykepengesoknad-bigquery-connection-profile"
-
-  bigquery_profile {}
-}
