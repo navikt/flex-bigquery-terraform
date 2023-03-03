@@ -37,14 +37,22 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports    = [var.sykepengesoknad_cloud_sql_port]
+    ports    = [
+      var.sykepengesoknad_cloud_sql_port,
+      var.spinnsyn_cloud_sql_port
+    ]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
 }
 
+
 data "google_sql_database_instance" "sykepengesoknad_db" {
   name = "sykepengesoknad"
+}
+
+data "google_sql_database_instance" "spinnsyn_db" {
+  name = "spinnsyn-backend"
 }
 
 // This module handles the generation of metadata used to create an instance used to host containers on GCE.
@@ -57,7 +65,7 @@ module "cloud_sql_auth_proxy_container_datastream" {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
     args = [
-      "-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port}",
+      "-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port},${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port}",
       "-ip_address_types=PRIVATE"
     ]
   }
@@ -79,9 +87,7 @@ resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
 
   network_interface {
     network = google_compute_network.flex_datastream_private_vpc.name
-    access_config {
-
-    }
+    access_config {}
   }
 
   service_account {

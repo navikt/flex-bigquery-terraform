@@ -55,6 +55,12 @@ variable "sykepengesoknad_cloud_sql_port" {
   default     = "5432"
 }
 
+variable "spinnsyn_cloud_sql_port" {
+  description = "The port exposed by the spinnsyn database Cloud SQL instance."
+  type        = string
+  default     = "5442"
+}
+
 variable "datastream_vpc_ip_range" {
   description = "The IP-range used to provide SQL instances with a private IP address."
   type        = string
