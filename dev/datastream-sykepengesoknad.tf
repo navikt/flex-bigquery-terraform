@@ -16,7 +16,7 @@ resource "google_datastream_connection_profile" "sykepengesoknad_postgresql_conn
 
   postgresql_profile {
     hostname = google_compute_instance.flex_datastream_cloud_sql_proxy_vm.network_interface[0].network_ip
-    port     = 5432
+    port     = var.sykepengesoknad_cloud_sql_port
     username = local.sykepengesoknad_datastream_credentials["username"]
     password = local.sykepengesoknad_datastream_credentials["password"]
     database = "sykepengesoknad"

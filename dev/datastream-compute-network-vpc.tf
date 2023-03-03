@@ -37,7 +37,7 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports    = [
+    ports = [
       var.sykepengesoknad_cloud_sql_port,
       var.spinnsyn_cloud_sql_port
     ]
