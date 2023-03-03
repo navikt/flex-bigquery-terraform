@@ -61,6 +61,12 @@ variable "spinnsyn_cloud_sql_port" {
   default     = "5442"
 }
 
+variable "arkivering_oppgave_cloud_sql_port" {
+  description = "The port exposed by the sykepengesoknad-arkviering-oppgave database Cloud SQL instance."
+  type        = string
+  default     = "5452"
+}
+
 variable "datastream_vpc_ip_range" {
   description = "The IP-range used to provide SQL instances with a private IP address."
   type        = string
