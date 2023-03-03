@@ -44,7 +44,7 @@ variable "spinnsyn_datastream_secret" {
   type        = string
 }
 
-variable "sykepengesoknad_arkivering_oppgave_datastream_secret" {
+variable "arkivering_oppgave_datastream_secret" {
   description = "The key of the GCP secret that provides the sykepengesoknad-arkivering-oppgave datastream credentials."
   type        = string
 }
@@ -53,6 +53,12 @@ variable "sykepengesoknad_cloud_sql_port" {
   description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
   type        = string
   default     = "5432"
+}
+
+variable "spinnsyn_cloud_sql_port" {
+  description = "The port exposed by the spinnsyn database Cloud SQL instance."
+  type        = string
+  default     = "5442"
 }
 
 variable "datastream_vpc_ip_range" {
