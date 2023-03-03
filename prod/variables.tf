@@ -44,7 +44,7 @@ variable "spinnsyn_datastream_secret" {
   type        = string
 }
 
-variable "sykepengesoknad_arkivering_oppgave_datastream_secret" {
+variable "arkivering_oppgave_datastream_secret" {
   description = "The key of the GCP secret that provides the sykepengesoknad-arkivering-oppgave datastream credentials."
   type        = string
 }
