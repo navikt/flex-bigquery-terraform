@@ -1,3 +1,25 @@
+resource "google_bigquery_dataset" "arkivering_oppgave_datastream" {
+  dataset_id = "arkivering_oppgave_datastream"
+  location   = var.gcp_project["region"]
+  project    = var.gcp_project["project"]
+  labels     = {}
+
+  access {
+    role          = "OWNER"
+    special_group = "projectOwners"
+  }
+  access {
+    role          = "READER"
+    special_group = "projectReaders"
+  }
+  access {
+    role          = "WRITER"
+    special_group = "projectWriters"
+  }
+
+  timeouts {}
+}
+
 data "google_secret_manager_secret_version" "arkivering_oppgave_datastream_secret" {
   secret = var.arkivering_oppgave_datastream_secret
 }

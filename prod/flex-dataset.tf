@@ -2,6 +2,7 @@ resource "google_bigquery_dataset" "flex_dataset" {
   dataset_id    = "flex_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "flex_dataset"
+  labels        = {}
 
   access {
     view {
@@ -94,6 +95,8 @@ resource "google_bigquery_dataset" "flex_dataset" {
     group_by_email = "all-users@nav.no"
     role           = "roles/bigquery.metadataViewer"
   }
+
+  timeouts {}
 }
 
 resource "google_bigquery_table_iam_binding" "sykepengesoknad_view_iam_binding" {
