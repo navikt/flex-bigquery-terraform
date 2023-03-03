@@ -46,7 +46,6 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
 }
 
-
 data "google_sql_database_instance" "sykepengesoknad_db" {
   name = "sykepengesoknad"
 }
