@@ -33,7 +33,7 @@ module "spinnsyn_utbetaling_view" {
   )
   view_query = <<EOF
 SELECT utbetaling_id, utbetaling_type, opprettet, antall_vedtak
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_utbetaling.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.spinnsyn_datastream.dataset_id}.public_utbetaling`
 EOF
 
 }
@@ -62,7 +62,7 @@ module "spinnsyn_annullering_view" {
 
   view_query = <<EOF
 SELECT id, opprettet
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_annullering.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.spinnsyn_datastream.dataset_id}.public_annullering`
 EOF
 
 }
@@ -98,7 +98,7 @@ module "spinnsyn_done_vedtak_view" {
 
   view_query = <<EOF
 SELECT id, type, done_sendt
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_done_vedtak.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.spinnsyn_datastream.dataset_id}.public_done_vedtak`
 EOF
 
 }
@@ -151,7 +151,7 @@ module "spinnsyn_organisasjon_view" {
 
   view_query = <<EOF
 SELECT id, orgnummer, navn, opprettet, oppdatert, oppdatert_av
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_organisasjon.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.spinnsyn_datastream.dataset_id}.public_organisasjon`
 EOF
 
 }
@@ -186,7 +186,7 @@ module "spinnsyn_vedtak_view" {
 
   view_query = <<EOF
 SELECT id, opprettet, utbetaling_id
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.spinnsyn_vedtak.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.spinnsyn_datastream.dataset_id}.public_vedtak_v2`
 EOF
 
 }
