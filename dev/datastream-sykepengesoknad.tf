@@ -30,7 +30,6 @@ locals {
   )
 }
 
-// Datastrean connection profile for PostgreSQL source. Used to create the Datastream.
 resource "google_datastream_connection_profile" "sykepengesoknad_postgresql_connection_profile" {
   location              = var.gcp_project["region"]
   display_name          = "sykepengesoknad-postgresql-connection-profile"
