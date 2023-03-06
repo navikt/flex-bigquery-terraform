@@ -20,16 +20,6 @@ resource "google_bigquery_dataset" "spinnsyn_datastream" {
   timeouts {}
 }
 
-data "google_secret_manager_secret_version" "spinnsyn_datastream_secret" {
-  secret = var.spinnsyn_datastream_secret
-}
-
-locals {
-  spinnsyn_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_datastream_secret.secret_data
-  )
-}
-
 resource "google_datastream_connection_profile" "spinnsyn_postgresql_connection_profile" {
   location              = var.gcp_project["region"]
   display_name          = "spinnsyn-postgresql-connection-profile"

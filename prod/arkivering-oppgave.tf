@@ -1,13 +1,3 @@
-data "google_secret_manager_secret_version" "arkivering_oppgave_bigquery_secret" {
-  secret = var.arkivering_oppgave_bigquery_secret
-}
-
-locals {
-  arkivering_oppgave_db = jsondecode(
-    data.google_secret_manager_secret_version.arkivering_oppgave_bigquery_secret.secret_data
-  )
-}
-
 module "spinnsyn_arkivering_oppgave_connection" {
   source = "../modules/google-bigquery-connection"
 

@@ -1,13 +1,3 @@
-data "google_secret_manager_secret_version" "sykepengesoknad_bigquery_secret" {
-  secret = var.sykepengesoknad_bigquery_secret
-}
-
-locals {
-  sykepengesoknad_db = jsondecode(
-    data.google_secret_manager_secret_version.sykepengesoknad_bigquery_secret.secret_data
-  )
-}
-
 module "sykepengesoknad_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 

@@ -1,13 +1,3 @@
-data "google_secret_manager_secret_version" "sykepengesoknad_sak_status_bigquery_secret" {
-  secret = var.sykepengesoknad_sak_status_bigquery_secret
-}
-
-locals {
-  sak_status_metrikk_db = jsondecode(
-    data.google_secret_manager_secret_version.sykepengesoknad_sak_status_bigquery_secret.secret_data
-  )
-}
-
 module "sykepengesoknad_sak-status-metrikk-bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 

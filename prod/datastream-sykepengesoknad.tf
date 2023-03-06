@@ -20,16 +20,6 @@ resource "google_bigquery_dataset" "sykepengesoknad_datastream" {
   timeouts {}
 }
 
-data "google_secret_manager_secret_version" "sykepengesoknad_datastream_secret" {
-  secret = var.sykepengesoknad_datastream_secret
-}
-
-locals {
-  sykepengesoknad_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.sykepengesoknad_datastream_secret.secret_data
-  )
-}
-
 resource "google_datastream_connection_profile" "sykepengesoknad_postgresql_connection_profile" {
   location              = var.gcp_project["region"]
   display_name          = "sykepengesoknad-postgresql-connection-profile"

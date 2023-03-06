@@ -3,7 +3,7 @@ resource "google_compute_network" "flex_datastream_private_vpc" {
   project = var.gcp_project["project"]
 }
 
-// The IP-range in the VPC used for the Datastream VPC peering. If a Cloud SQL instance is assigned a privte
+// The IP-range in the VPC used for the Datastream VPC peering. If a Cloud SQL instance is assigned a private
 // IP address, this is the range it will be assigned from.
 resource "google_compute_global_address" "flex_datastream_vpc_ip_range" {
   name          = "flex-datastream-vpc-ip-range"

@@ -1,13 +1,3 @@
-data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
-  secret = var.spinnsyn_bigquery_secret
-}
-
-locals {
-  spinnsyn_db = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_bigquery_secret.secret_data
-  )
-}
-
 module "spinnsyn_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 

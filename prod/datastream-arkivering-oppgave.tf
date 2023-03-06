@@ -20,16 +20,6 @@ resource "google_bigquery_dataset" "arkivering_oppgave_datastream" {
   timeouts {}
 }
 
-data "google_secret_manager_secret_version" "arkivering_oppgave_datastream_secret" {
-  secret = var.arkivering_oppgave_datastream_secret
-}
-
-locals {
-  arkivering_oppgave_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.arkivering_oppgave_datastream_secret.secret_data
-  )
-}
-
 resource "google_datastream_connection_profile" "arkivering_oppgave_postgresql_connection_profile" {
   location              = var.gcp_project["region"]
   display_name          = "arkivering-oppgave-postgresql-connection-profile"
