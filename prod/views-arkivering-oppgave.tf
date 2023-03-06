@@ -35,7 +35,7 @@ module "sykepengesoknad_arkivering_oppgave_innsending_view" {
 
   view_query = <<EOF
 SELECT sykepengesoknad_id, journalpost_id, oppgave_id, behandlet
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_innsending.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.arkivering_oppgave_datastream.dataset_id}.public_innsending`
 EOF
 
 }
@@ -83,7 +83,7 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
 
   view_query = <<EOF
 SELECT sykepengesoknad_id, status, opprettet, modifisert, timeout
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.arkivering_oppgave_datastream.dataset_id}.public_oppgavestyring`
 WHERE avstemt = true
 EOF
 
@@ -119,7 +119,7 @@ module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view" {
 
   view_query = <<EOF
 SELECT sykepengesoknad_id, status, modifisert AS opprettet
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.arkivering_oppgave_datastream.dataset_id}.public_oppgavestyring`
 WHERE status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
   AND modifisert >= '2022-03-07 12:37:17.000'
 ORDER BY modifisert
@@ -159,7 +159,7 @@ module "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view" {
 SELECT date(modifisert) AS dato,
        status,
        count(*) AS antall
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.${module.sykepengesoknad_arkivering_oppgave_oppgavestyring.bigquery_table_id}`
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.arkivering_oppgave_datastream.dataset_id}.public_oppgavestyring`
 WHERE status IN ('Opprettet', 'OpprettetSpeilRelatert', 'OpprettetTimeout')
   AND modifisert >= '2022-03-07 13:37:17.000'
 GROUP BY date(modifisert), status;
