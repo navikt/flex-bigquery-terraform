@@ -14,14 +14,6 @@ resource "google_bigquery_dataset" "flex_dataset" {
   }
   access {
     role          = "WRITER"
-    user_by_email = "flex-hotjar-flex-uu7nyvy@nais-dev-2e7b.iam.gserviceaccount.com"
-  }
-  access {
-    role          = "WRITER"
-    user_by_email = "service-621342450460@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
-  }
-  access {
-    role          = "WRITER"
     special_group = "projectWriters"
   }
 

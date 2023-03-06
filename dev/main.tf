@@ -18,6 +18,46 @@ provider "google" {
 
 data "google_project" "project" {}
 
+data "google_secret_manager_secret_version" "sykepengesoknad_sak_status_bigquery_secret" {
+  secret = var.sykepengesoknad_sak_status_bigquery_secret
+}
+
+locals {
+  sak_status_metrikk_db = jsondecode(
+    data.google_secret_manager_secret_version.sykepengesoknad_sak_status_bigquery_secret.secret_data
+  )
+}
+
+data "google_secret_manager_secret_version" "sykepengesoknad_bigquery_secret" {
+  secret = var.sykepengesoknad_bigquery_secret
+}
+
+locals {
+  sykepengesoknad_db = jsondecode(
+    data.google_secret_manager_secret_version.sykepengesoknad_bigquery_secret.secret_data
+  )
+}
+
+data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
+  secret = var.spinnsyn_bigquery_secret
+}
+
+locals {
+  spinnsyn_db = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_bigquery_secret.secret_data
+  )
+}
+
+data "google_secret_manager_secret_version" "arkivering_oppgave_bigquery_secret" {
+  secret = var.arkivering_oppgave_bigquery_secret
+}
+
+locals {
+  arkivering_oppgave_db = jsondecode(
+    data.google_secret_manager_secret_version.arkivering_oppgave_bigquery_secret.secret_data
+  )
+}
+
 locals {
   google_project_iam_member = {
     email = "service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
