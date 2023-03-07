@@ -38,7 +38,7 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports    = [
+    ports = [
       var.sykepengesoknad_cloud_sql_port,
       var.spinnsyn_cloud_sql_port,
       var.arkivering_oppgave_cloud_sql_port,
@@ -80,10 +80,10 @@ module "cloud_sql_auth_proxy_container_datastream" {
   source         = "terraform-google-modules/container-vm/google"
   version        = "3.1.0"
   cos_image_name = "cos-stable-101-17162-127-8"
-  container      = {
+  container = {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
-    args    = [
+    args = [
       "-instances=${join(",", local.proxy_instances)}",
       "-ip_address_types=PRIVATE"
     ]
