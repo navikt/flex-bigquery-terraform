@@ -72,3 +72,8 @@ variable "datastream_vpc_ip_range" {
   type        = string
   default     = "10.18.0.0"
 }
+
+variable "sak_status_metrikk_datastream_secret" {
+  description = "The key of the GCP secret that provides the sykepengesoknad-sak-status-metrikk datastream credentials."
+  type        = string
+}

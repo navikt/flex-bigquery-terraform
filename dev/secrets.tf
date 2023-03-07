@@ -67,3 +67,13 @@ locals {
     data.google_secret_manager_secret_version.arkivering_oppgave_datastream_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "sak_status_metrikk_datastream_secret" {
+  secret = var.sak_status_metrikk_datastream_secret
+}
+
+locals {
+  sak_status_metrikk_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.sak_status_metrikk_datastream_secret.secret_data
+  )
+}
