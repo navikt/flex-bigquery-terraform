@@ -60,6 +60,14 @@ data "google_sql_database_instance" "arkivering_oppgave_db" {
   name = "sykepengesoknad-arkivering-oppgave"
 }
 
+locals {
+  proxy_instances = [
+    "${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port}",
+    "${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port}",
+    "${data.google_sql_database_instance.arkivering_oppgave_db.connection_name}=tcp:0.0.0.0:${var.arkivering_oppgave_cloud_sql_port}"
+  ]
+}
+
 // This module handles the generation of metadata used to create an instance used to host containers on GCE.
 // The module itself does not launch an instance or managed instance group.
 module "cloud_sql_auth_proxy_container_datastream" {
@@ -70,7 +78,7 @@ module "cloud_sql_auth_proxy_container_datastream" {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.33.2"
     command = ["/cloud_sql_proxy"]
     args = [
-      "-instances=${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port},${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port},${data.google_sql_database_instance.arkivering_oppgave_db.connection_name}=tcp:0.0.0.0:${var.arkivering_oppgave_cloud_sql_port}",
+      "-instances=${join(",", local.proxy_instances)}",
       "-ip_address_types=PRIVATE"
     ]
   }
