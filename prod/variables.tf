@@ -1,7 +1,7 @@
 variable "gcp_project" {
   description = "GCP project and region defaults."
   type        = map(string)
-  default = {
+  default     = {
     region  = "europe-north1",
     zone    = "europe-north1-a",
     project = "flex-prod-af40"
@@ -76,4 +76,10 @@ variable "arkivering_oppgave_cloud_sql_port" {
   description = "The port exposed by the sykepengesoknad-arkviering-oppgave database Cloud SQL instance."
   type        = string
   default     = "5452"
+}
+
+variable "sak_status_metrikk_cloud_sql_port" {
+  description = "The port exposed by the sykepengesoknad-sak-status-metrikk database Cloud SQL instance."
+  type        = string
+  default     = "5462"
 }
