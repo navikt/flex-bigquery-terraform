@@ -178,28 +178,6 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_sak_status_metrikk
   ]
 }
 
-module "sykepengesoknad_bigquery_connection" {
-  source = "../modules/google-bigquery-connection"
-
-  connection_id = "sykepengesoknad-backend"
-  location      = var.gcp_project["region"]
-  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad"
-  database      = "sykepengesoknad"
-  username      = local.sykepengesoknad_db.username
-  password      = local.sykepengesoknad_db.password
-}
-
-module "spinnsyn_arkivering_oppgave_connection" {
-  source = "../modules/google-bigquery-connection"
-
-  connection_id = "sykepengesoknad-arkivering-oppgave"
-  location      = var.gcp_project["region"]
-  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad-arkivering-oppgave"
-  database      = "sykepengesoknad-arkivering-oppgave-db"
-  username      = local.arkivering_oppgave_db.username
-  password      = local.arkivering_oppgave_db.password
-}
-
 module "spinnsyn_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
@@ -211,7 +189,29 @@ module "spinnsyn_bigquery_connection" {
   password      = local.spinnsyn_db.password
 }
 
-module "sykepengesoknad_sak-status-metrikk-bigquery_connection" {
+module "sykepengesoknad_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
+  connection_id = "sykepengesoknad-backend"
+  location      = var.gcp_project["region"]
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad"
+  database      = "sykepengesoknad"
+  username      = local.sykepengesoknad_db.username
+  password      = local.sykepengesoknad_db.password
+}
+
+module "sykepengesoknad_arkivering_oppgave_connection" {
+  source = "../modules/google-bigquery-connection"
+
+  connection_id = "sykepengesoknad-arkivering-oppgave"
+  location      = var.gcp_project["region"]
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad-arkivering-oppgave"
+  database      = "sykepengesoknad-arkivering-oppgave-db"
+  username      = local.arkivering_oppgave_db.username
+  password      = local.arkivering_oppgave_db.password
+}
+
+module "sykepengesoknad_sak_status_metrikk_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
   connection_id = "sykepengesoknad-sak-status-metrikk"
