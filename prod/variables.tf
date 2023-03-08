@@ -8,6 +8,12 @@ variable "gcp_project" {
   }
 }
 
+variable "metabase_service_account" {
+  description = "The Metabase Service Account used when accessing data. Must have access to tablers underlying vies."
+  type        = string
+  default     = "nada-metabase@nada-prod-6977.iam.gserviceaccount.com"
+}
+
 variable "scheduled_query_data_source_id" {
   description = "The documentation states that this value can be changed, but any other value causes a failure."
   type        = string

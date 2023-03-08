@@ -88,14 +88,13 @@ resource "google_bigquery_dataset" "flex_dataset" {
     special_group = "projectWriters"
   }
   access {
-    role          = "roles/bigquery.metadataViewer"
+    role          = "roles/bigquery.dataViewer"
     user_by_email = "nada-metabase@nada-prod-6977.iam.gserviceaccount.com"
   }
   access {
     group_by_email = "all-users@nav.no"
     role           = "roles/bigquery.metadataViewer"
   }
-
   timeouts {}
 }
 
