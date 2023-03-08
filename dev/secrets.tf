@@ -77,3 +77,13 @@ locals {
     data.google_secret_manager_secret_version.sak_status_metrikk_datastream_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "ditt_sykefravaer_datastream_secret" {
+  secret = var.ditt_sykefravaer_datastream_secret
+}
+
+locals {
+  ditt_sykefravaer_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.ditt_sykefravaer_datastream_secret.secret_data
+  )
+}
