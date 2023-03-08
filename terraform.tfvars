@@ -6,5 +6,4 @@ sak_status_metrikk_bigquery_secret   = "sak-status-metrikk-bigquery-credentials"
 sak_status_metrikk_datastream_secret = "sak-status-metrikk-datastream-credentials"
 arkivering_oppgave_bigquery_secret   = "arkivering-oppgave-bigquery-credentials"
 arkivering_oppgave_datastream_secret = "arkivering-oppgave-datastream-credentials"
-ditt_sykefravaer_datastream_secret   = "ditt-sykefravaer-datastream-credentials"
 

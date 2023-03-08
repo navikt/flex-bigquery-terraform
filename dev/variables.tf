@@ -54,11 +54,6 @@ variable "sak_status_metrikk_datastream_secret" {
   type        = string
 }
 
-variable "ditt_sykefravaer_datastream_secret" {
-  description = "The key of the GCP secret that provides the ditt-sykefravaer-backend datastream credentials."
-  type        = string
-}
-
 variable "sykepengesoknad_cloud_sql_port" {
   description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
   type        = string
