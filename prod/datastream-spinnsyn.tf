@@ -16,10 +16,6 @@ resource "google_bigquery_dataset" "spinnsyn_datastream" {
     role          = "WRITER"
     special_group = "projectWriters"
   }
-  access {
-    role          = "roles/bigquery.dataViewer"
-    user_by_email = var.metabase_service_account
-  }
   timeouts {}
 }
 

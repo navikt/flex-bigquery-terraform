@@ -17,8 +17,32 @@ resource "google_bigquery_dataset" "sykepengesoknad_datastream" {
     special_group = "projectWriters"
   }
   access {
-    role          = "roles/bigquery.dataViewer"
-    user_by_email = var.metabase_service_account
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_sykepengesoknad_view"
+    }
+  }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_hovedsporsmal_view"
+    }
+  }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_andre_inntektskilder_view"
+    }
+  }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_klipp_metrikk_view"
+    }
   }
   timeouts {}
 }

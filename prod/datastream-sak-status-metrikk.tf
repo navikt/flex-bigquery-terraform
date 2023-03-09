@@ -17,8 +17,11 @@ resource "google_bigquery_dataset" "sak_status_metrikk_datastream" {
     special_group = "projectWriters"
   }
   access {
-    role          = "roles/bigquery.dataViewer"
-    user_by_email = var.metabase_service_account
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_sak_status_metrikk_siste_tilstand_view"
+    }
   }
   timeouts {}
 }
