@@ -23,6 +23,20 @@ resource "google_bigquery_dataset" "arkivering_oppgave_datastream" {
       table_id   = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
     }
   }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
+    }
+  }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
+    }
+  }
   timeouts {}
 }
 
