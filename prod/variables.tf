@@ -14,6 +14,12 @@ variable "metabase_service_account" {
   default     = "nada-metabase@nada-prod-6977.iam.gserviceaccount.com"
 }
 
+variable "hotjar_service_account" {
+  description = "The Hotjar Service Account used to write data to a table en the flex_dataset from an application."
+  type        = string
+  default     = "flex-hotjar-flex-uu7nyvy@nais-prod-020f.iam.gserviceaccount.com"
+}
+
 variable "scheduled_query_data_source_id" {
   description = "The documentation states that this value can be changed, but any other value causes a failure."
   type        = string
