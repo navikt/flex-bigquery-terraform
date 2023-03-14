@@ -13,6 +13,10 @@ resource "google_bigquery_dataset" "flex_dataset" {
     special_group = "projectReaders"
   }
   access {
+    role           = "READER"
+    group_by_email = "all-users@nav.no"
+  }
+  access {
     role          = "WRITER"
     special_group = "projectWriters"
   }
@@ -23,10 +27,6 @@ resource "google_bigquery_dataset" "flex_dataset" {
   access {
     role          = "roles/bigquery.metadataViewer"
     user_by_email = var.metabase_service_account
-  }
-  access {
-    role           = "roles/bigquery.metadataViewer"
-    group_by_email = "all-users@nav.no"
   }
   access {
     view {
