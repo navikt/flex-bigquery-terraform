@@ -16,6 +16,10 @@ resource "google_bigquery_dataset" "flex_dataset" {
     role          = "WRITER"
     special_group = "projectWriters"
   }
+  access {
+    role          = "WRITER"
+    user_by_email = var.hotjar_service_account
+  }
 
   timeouts {}
 }

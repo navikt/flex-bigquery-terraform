@@ -8,6 +8,12 @@ variable "gcp_project" {
   }
 }
 
+variable "hotjar_service_account" {
+  description = "The BigQuery Job User used to write data to a table en the flex_dataset from an application."
+  type        = string
+  default     = "flex-hotjar-flex-uu7nyvy@nais-dev-2e7b.iam.gserviceaccount.com"
+}
+
 variable "datastream_vpc_ip_range" {
   description = "The IP-range used to provide SQL instances with a private IP address."
   type        = string

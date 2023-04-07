@@ -15,7 +15,7 @@ variable "metabase_service_account" {
 }
 
 variable "hotjar_service_account" {
-  description = "The Hotjar Service Account used to write data to a table en the flex_dataset from an application."
+  description = "The BigQuery Job User used to write data to a table en the flex_dataset from an application."
   type        = string
   default     = "flex-hotjar-flex-uu7nyvy@nais-prod-020f.iam.gserviceaccount.com"
 }
