@@ -84,4 +84,4 @@ resource "google_datastream_stream" "spinnsyn_datastream" {
       }
     }
   }
-}ll
+}
