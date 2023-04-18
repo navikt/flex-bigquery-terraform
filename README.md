@@ -9,7 +9,7 @@ DDL for clustrering og partisjonering av tabeller.
 ### spinnsyn_datastream.public_utbetaling
 
 ```sql
-CREATE TABLE `flex-dev-2b16.spinnsyn_datastream.public_utbetaling` ( 
+CREATE TABLE `flex-prod-af40.spinnsyn_datastream.public_utbetaling` ( 
     id STRING(36),
     fnr STRING(11),
     utbetaling_id STRING(36),
@@ -30,7 +30,7 @@ CLUSTER BY
   id, fnr OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-dev-2b16.spinnsyn_datastream.public_utbetaling`.
+Slett tabell med `bq rm -t flex-prod-af40:spinnsyn_datastream.public_utbetaling`.
 
 ### sykepengesoknad_datastream.public_dodsmelding
 
@@ -50,7 +50,7 @@ CLUSTER BY
   fnr OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40.sykepengesoknad_datastream.public_dodsmelding`.
+Slett tabell med `bq rm -t flex-prod-af40:sykepengesoknad_datastream.public_dodsmelding`.
 
 ### sykepengesoknad_datastream.public_sykepengesoknad
 
@@ -95,7 +95,7 @@ CLUSTER BY
   sykepengesoknad_uuid, status OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40.sykepengesoknad_datastream.public_sykepengesoknad`.
+Slett tabell med `bq rm -t flex-prod-af40:sykepengesoknad_datastream.public_sykepengesoknad`.
 
 ### arkivering_oppgave__datastream.public_innsending
 
@@ -116,7 +116,7 @@ CLUSTER BY
   id OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40.arkivering_oppgave_datastream.public_innsending`.
+Slett tabell med `bq rm -t flex-prod-af40:arkivering_oppgave_datastream.public_innsending`.
 
 ### arkivering_oppgave_datastream.public_oppgavestyring
 
@@ -139,4 +139,4 @@ CLUSTER BY
   sykepengesoknad_id OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40.arkivering_oppgave_datastream.public_oppgavestyring`.
+Slett tabell med `bq rm -t flex-prod-af40:arkivering_oppgave_datastream.public_oppgavestyring`.
