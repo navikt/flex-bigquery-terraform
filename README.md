@@ -1,10 +1,26 @@
 # flex-biqquery-terraform
 
-Terraform scripts for opprettelse av BigQuery ressurser for Team Flex.
+Terraform-konfigurasjon for å flytte data fra applikasjonsspesifikke database i [Google Cloud SQL]() til [Google BigQuery]() 
+med [Google Datastream]() for Team Flex.
 
-## Partisjonering
+Bakgrunnen for at data flyttes til BigQuery er et ønske om å kunne bruke BigQuery som datakilde for analyse og visualisering. 
 
-DDL for clustrering og partisjonering av tabeller.
+Datastreams er valgt på grunn av at data blir oppdatert så fort de blir skrevet til eller endret i kildedatabasen. Alternativet er
+[Federated Queries](), som typisk flytter data med angitte intervaller, basert på en SQL-spørring. For Team Flex sin del er 
+dataene i kildedatabasen av en sånn art at vi ikke kan avgjøre hva som er nye eller nylig oppdatete data, og dermed må 
+flytte alle data hver gang, noe som medfører flytt av unødveneidg mye data.
+ 
+
+Begrunnelsen for å bruke Terraform i stedet for å opprettet ressursene direkte i [Cloud Console]() er todelt. Først og fremst 
+gir det teamet en deterministisk måte å opprette og slette ressurser på. For det andre fungerer konfigurasjonen fungerer som 
+dokumentasjon på hvlke ressurser som er opprettet.
+
+## Clustering og Partisjonering
+
+DDL for clustrering og partisjonering av enkelte tabeller.
+
+Datastreams kan skrive til eksisterende tabeller, men det er per nå ikke mulig å opprettet partisjonerte tabeller med
+Terraform. Tabeller som skal være partisjonert og clustred må dermed opprettes manuelt med følgende SQL:
 
 ### spinnsyn_datastream.public_utbetaling
 
@@ -30,7 +46,7 @@ CLUSTER BY
   id, fnr OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40:spinnsyn_datastream.public_utbetaling`.
+Tabell kan slettes med `bq rm -t flex-prod-af40:spinnsyn_datastream.public_utbetaling`.
 
 ### sykepengesoknad_datastream.public_dodsmelding
 
@@ -50,7 +66,7 @@ CLUSTER BY
   fnr OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40:sykepengesoknad_datastream.public_dodsmelding`.
+Tabell kan slettes med `bq rm -t flex-prod-af40:sykepengesoknad_datastream.public_dodsmelding`.
 
 ### sykepengesoknad_datastream.public_sykepengesoknad
 
@@ -95,7 +111,7 @@ CLUSTER BY
   sykepengesoknad_uuid, status OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40:sykepengesoknad_datastream.public_sykepengesoknad`.
+Tabell kan slettes med `bq rm -t flex-prod-af40:sykepengesoknad_datastream.public_sykepengesoknad`.
 
 ### arkivering_oppgave__datastream.public_innsending
 
@@ -139,4 +155,4 @@ CLUSTER BY
   sykepengesoknad_id OPTIONS(max_staleness=INTERVAL 15 MINUTE);
 ```
 
-Slett tabell med `bq rm -t flex-prod-af40:arkivering_oppgave_datastream.public_oppgavestyring`.
+Tabell kan slettes med `bq rm -t flex-prod-af40:arkivering_oppgave_datastream.public_oppgavestyring`.
