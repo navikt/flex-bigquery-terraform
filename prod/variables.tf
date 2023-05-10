@@ -72,6 +72,11 @@ variable "sak_status_metrikk_datastream_secret" {
   type        = string
 }
 
+variable "flexjar_datastream_secret" {
+  description = "The key of the GCP secret that provides the flexjar datastream credentials."
+  type        = string
+}
+
 variable "sykepengesoknad_cloud_sql_port" {
   description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
   type        = string
@@ -94,4 +99,10 @@ variable "sak_status_metrikk_cloud_sql_port" {
   description = "The port exposed by the sykepengesoknad-sak-status-metrikk database Cloud SQL instance."
   type        = string
   default     = "5462"
+}
+
+variable "flexjar_cloud_sql_port" {
+  description = "The port exposed by the flexjar-backend database Cloud SQL instance."
+  type        = string
+  default     = "5472"
 }

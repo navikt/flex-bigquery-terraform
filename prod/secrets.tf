@@ -77,3 +77,13 @@ locals {
     data.google_secret_manager_secret_version.sak_status_metrikk_datastream_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "flexjar_datastream_secret" {
+  secret = var.flexjar_datastream_secret
+}
+
+locals {
+  flexjar_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.flexjar_datastream_secret.secret_data
+  )
+}
