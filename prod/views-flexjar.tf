@@ -15,7 +15,7 @@ module "flexjar_feedback_spinnsyn_view" {
         mode        = "NULLABLE"
         name        = "opprettet"
         type        = "TIMESTAMP"
-        description = "Når vedtaket ble gitt"
+        description = "Når feedbacken ble gitt"
       },
       {
         mode        = "NULLABLE"
@@ -59,12 +59,6 @@ module "flexjar_feedback_spinnsyn_view" {
         type        = "BOOLEAN"
         description = "Om vedtaket er revurdert."
       },
-      {
-        mode        = "NULLABLE"
-        name        = "feedback"
-        type        = "STRING"
-        description = "Utdypende feedback."
-      },
     ]
   )
   view_query = <<EOF
@@ -77,8 +71,7 @@ SELECT
   CAST(JSON_VALUE(feedback_json, '$.harAvvisteDager') AS BOOL) AS har_avviste_dager,
   CAST(JSON_VALUE(feedback_json, '$.erDirekteutbetaling') AS BOOL) AS er_direkteutbetaling,
   CAST(JSON_VALUE(feedback_json, '$.annullert') AS BOOL) AS annullert,
-  CAST(JSON_VALUE(feedback_json, '$.revurdert') AS BOOL) AS revurdert ,
-  JSON_VALUE(feedback_json, '$.feedback') AS feedback
+  CAST(JSON_VALUE(feedback_json, '$.revurdert') AS BOOL) AS revurdert
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
 WHERE JSON_VALUE(feedback_json, '$.app') = 'spinnsyn-frontend'
 EOF
@@ -122,3 +115,4 @@ WHERE JSON_VALUE(feedback_json, '$.feedbackId') = 'ditt-sykefravaer-fant-du'
 EOF
 
 }
+
