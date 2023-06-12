@@ -93,17 +93,6 @@ resource "google_bigquery_table_iam_binding" "korrigerte_sporsmal_tilstand_view_
   ]
 }
 
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_yrkesskade_sykmelding_view_iam_binding" {
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.sykepengesoknad_yrkesskade_sykmelding_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
 resource "google_bigquery_table_iam_binding" "sykepengesoknad_sak_status_metrikk_tilstand_view_iam_binding" {
   depends_on = [module.sykepengesoknad_sak_status_metrikk_tilstand_view]
   project    = var.gcp_project.project
@@ -121,30 +110,6 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_sak_status_metrikk
   project    = var.gcp_project.project
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = module.sykepengesoknad_sak_status_metrikk_siste_tilstand_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_spinnsyn_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_spinnsyn_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_spinnsyn_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_ditt_sykefravaer_fant_du_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_ditt_sykefravaer_fant_du_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_ditt_sykefravaer_fant_du_view.bigquery_view_id
   role       = "roles/bigquery.dataViewer"
   members = [
     "group:all-users@nav.no",
