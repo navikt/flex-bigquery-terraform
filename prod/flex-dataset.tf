@@ -93,7 +93,7 @@ resource "google_bigquery_table_iam_binding" "korrigerte_sporsmal_tilstand_view_
   ]
 }
 
-resource "google_bigquery_table_iam_binding" "sykepengesoknad_yrkesskade_sykmelding_view_iam_binding" {
+resource "google_bigquery_table_iam_binding" "sykepengesoknad_yrkesskade_sykmelding_view" {
   project    = var.gcp_project.project
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
   table_id   = module.sykepengesoknad_yrkesskade_sykmelding_view.bigquery_view_id

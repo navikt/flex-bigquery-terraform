@@ -44,13 +44,6 @@ resource "google_bigquery_dataset" "sykepengesoknad_datastream" {
       table_id   = "sykepengesoknad_klipp_metrikk_view"
     }
   }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "sykepengesoknad_yrkesskade_sykmelding_view"
-    }
-  }
   timeouts {}
 }
 
