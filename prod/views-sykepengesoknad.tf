@@ -625,3 +625,28 @@ WHERE ks.sykepengesoknadId = stv.sykepengesoknad_uuid
 EOF
 
 }
+
+module "sykepengesoknad_yrkesskade_sykmelding_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_yrkesskade_sykmelding_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT ss.sykepengesoknad_uuid
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad` ss,
+`${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_yrkesskade_sykmelding` ys
+WHERE ss.sykmelding_uuid = ys.sykmelding_id
+EOF
+
+}
