@@ -87,3 +87,13 @@ locals {
     data.google_secret_manager_secret_version.flexjar_datastream_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "modia_kontakt_metrikk_datastream_secret" {
+  secret = var.modia_kontakt_metrikk_datastream_secret
+}
+
+locals {
+  modia_kontakt_metrikk_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.modia_kontakt_metrikk_datastream_secret.secret_data
+  )
+}
