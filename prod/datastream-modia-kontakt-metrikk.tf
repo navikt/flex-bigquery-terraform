@@ -23,13 +23,6 @@ resource "google_bigquery_dataset" "modia_kontakt_metrikk_datastream" {
       table_id   = "modia_kontakt_metrikk_henvendelse_view"
     }
   }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "modia_sykepengesoknad_kontakt_view"
-    }
-  }
   timeouts {}
 }
 
