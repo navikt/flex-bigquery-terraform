@@ -96,9 +96,7 @@ FROM
 LEFT JOIN
     `${var.gcp_project["project"]}.${google_bigquery_dataset.modia_kontakt_metrikk_datastream.dataset_id}.public_henvendelse` AS h
 ON
-    s.fnr = h.fnr
-WHERE
-    h.tidspunkt >= s.sendt
+  s.fnr = h.fnr AND h.tidspunkt >= s.sendt
 GROUP BY
     s.sykepengesoknad_uuid
 EOF
