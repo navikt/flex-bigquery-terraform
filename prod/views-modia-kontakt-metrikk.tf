@@ -60,6 +60,30 @@ module "modia_sykepengesoknad_kontakt_view" {
       },
       {
         mode        = "NULLABLE"
+        name        = "soknadstype"
+        type        = "STRING"
+        description = "Hvilken type sykepengesøknaden er."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "status"
+        type        = "STRING"
+        description = "Sykepengesøknadens status."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sendt_arbeidsgiver"
+        type        = "TIMESTAMP"
+        description = "Når søknaden ble sendt til arbeidsgiver."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sendt_nav"
+        type        = "TIMESTAMP"
+        description = "Når søknaden ble sendt til NAV."
+      },
+      {
+        mode        = "NULLABLE"
         name        = "henvendelser_innen_1_uke"
         type        = "INTEGER"
         description = "Henvendelser innen 1 uke"
@@ -87,6 +111,10 @@ module "modia_sykepengesoknad_kontakt_view" {
   view_query = <<EOF
 SELECT
     s.sykepengesoknad_uuid,
+    s.soknadstype,
+    s.status,
+    s.sendt_arbeidsgiver,
+    s.sendt_nav,
     COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 7) AS henvendelser_innen_1_uke,
     COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 14) AS henvendelser_innen_2_uker,
     COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 28) AS henvendelser_innen_4_uker,
