@@ -164,7 +164,6 @@ resource "google_bigquery_table_iam_binding" "modia_sykepengesoknad_kontakt_view
   ]
 }
 
-
 module "spinnsyn_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
