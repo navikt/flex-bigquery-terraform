@@ -29,6 +29,10 @@ resource "google_bigquery_dataset" "flex_dataset" {
     user_by_email = var.metabase_service_account
   }
   access {
+    role          = "READER"
+    user_by_email = "terraform@tbd-prod-eacd.iam.gserviceaccount.com"
+  }
+  access {
     view {
       dataset_id = "flex_dataset"
       project_id = var.gcp_project["project"]
