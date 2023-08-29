@@ -266,6 +266,106 @@ EOF
 
 }
 
+
+module "sykepengesoknad_sporsmal_svar_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykepengesoknad_sporsmal_svar_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "sykepengesoknad_uuid"
+        type        = "STRING"
+        description = "Unik ID for sykepengesøknaden."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "fom"
+        type        = "DATE"
+        description = "Første dag i perioden sykepengesøknaden er for."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tom"
+        type        = "DATE"
+        description = "Siste dag i perioden sykepengesøknaden er for."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når sykepengesøknaden ble opprettet."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sendt"
+        type        = "TIMESTAMP"
+        description = "Tidspunkt når søknaden først ble sendt til NAV, Arbeidsgiver eller begge."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "status"
+        type        = "STRING"
+        description = "Sykepengesøknadens status."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "korrigerer"
+        type        = "STRING"
+        description = "ID til søknaden den aktuelle søknaden korrigerer."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "soknadstype"
+        type        = "STRING"
+        description = "Hvilken type sykepengesøknaden er."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sporsmal_tag"
+        type        = "STRING"
+        description = "Hvilket spørsmål det dreier seg om."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "verdi"
+        type        = "STRING"
+        description = "Svaret på det aktuelle spørsmålet."
+      },
+    ]
+  )
+
+  view_query = <<EOF
+SELECT
+  sykepengesoknad.sykepengesoknad_uuid,
+  sykepengesoknad.fom,
+  sykepengesoknad.tom,
+  sykepengesoknad.opprettet,
+  sykepengesoknad.sendt,
+  sykepengesoknad.status,
+  sykepengesoknad.korrigerer,
+  soknadstype,
+  sporsmal.tag AS sporsmal_tag,
+  svar.verdi
+FROM
+  `${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad` sykepengesoknad
+INNER JOIN
+  `${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_sporsmal` sporsmal
+ON
+  sporsmal.sykepengesoknad_id = sykepengesoknad.id
+INNER JOIN
+  `${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_svar` svar
+ON
+  svar.sporsmal_id = sporsmal.id
+WHERE sporsmal.svartype != 'FRITEKST'
+  AND sykepengesoknad.status IN ('SENDT', 'KORRIGERT')
+EOF
+
+}
+
 module "sykepengesoknad_klipp_metrikk_view" {
   source = "../modules/google-bigquery-view"
 
