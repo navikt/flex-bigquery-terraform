@@ -116,3 +116,41 @@ EOF
 
 }
 
+module "flexjar_feedback_sykepengesoknad_sporsmal_view" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "flexjar_feedback_sykepengesoknad_sporsmal_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når feedback ble gitt"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "svar"
+        type        = "STRING"
+        description = "Hva som er svart på feedbacken."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sporsmal"
+        type        = "STRING"
+        description = "Hvilket sporsmål det ble gitt feedback på."
+      },
+    ]
+  )
+  view_query = <<EOF
+SELECT
+  opprettet,
+  JSON_VALUE(feedback_json, '$.svar') AS svar,
+  JSON_VALUE(feedback_json, '$.sporsmal') AS sporsmal
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
+WHERE JSON_VALUE(feedback_json, '$.feedbackId') = 'sykepengesoknad-sporsmal'
+EOF
+
+}
+
