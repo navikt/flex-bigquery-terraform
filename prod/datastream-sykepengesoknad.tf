@@ -34,6 +34,13 @@ resource "google_bigquery_dataset" "sykepengesoknad_datastream" {
     view {
       dataset_id = "flex_dataset"
       project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_sporsmal_svar_view"
+    }
+  }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
       table_id   = "sykepengesoknad_andre_inntektskilder_view"
     }
   }
