@@ -155,12 +155,18 @@ module "sykepengesoknad_sykepengesoknad_view" {
         name        = "utenlandsk_sykmelding"
         type        = "BOOLEAN"
         description = "Om sykmeldingen er en utenlandssykemelding eller ikke."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "forstegangssoknad"
+        type        = "BOOLEAN"
+        description = "Om søknaden var den første i dette sykeforløpet"
       }
     ]
   )
 
   view_query = <<EOF
-SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo, sendt, utenlandsk_sykmelding
+SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo, sendt, utenlandsk_sykmelding, forstegangssoknad
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad`
 EOF
 
