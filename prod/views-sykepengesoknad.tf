@@ -155,6 +155,12 @@ module "sykepengesoknad_sykepengesoknad_view" {
         name        = "utenlandsk_sykmelding"
         type        = "BOOLEAN"
         description = "Om sykmeldingen er en utenlandssykemelding eller ikke."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "forstegangssoknad"
+        type        = "BOOLEAN"
+        description = "Om søknaden var den første i dette sykeforløpet"
       }
     ]
   )
