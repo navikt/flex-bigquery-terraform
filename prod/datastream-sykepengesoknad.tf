@@ -111,6 +111,9 @@ resource "google_datastream_stream" "sykepengesoknad_datastream" {
           postgresql_tables {
             table = "flyway_schema_history"
           }
+          postgresql_tables {
+            table = "sykepengesoknad"
+          }
         }
       }
 
