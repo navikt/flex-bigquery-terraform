@@ -21,10 +21,6 @@ resource "google_bigquery_dataset" "flex_dataset" {
     special_group = "projectWriters"
   }
   access {
-    role          = "WRITER"
-    user_by_email = var.hotjar_service_account
-  }
-  access {
     role          = "roles/bigquery.metadataViewer"
     user_by_email = var.metabase_service_account
   }
