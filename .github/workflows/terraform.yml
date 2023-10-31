@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run 'terraform setup'
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Run 'terraform init'
         run: terraform init
@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run 'terraform setup'
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Run 'terraform init'
         run: terraform init
@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run 'terraform setup'
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Run 'terraform init'
         run: terraform init
@@ -107,7 +107,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run 'terraform setup'
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Run 'terraform init'
         run: terraform init
