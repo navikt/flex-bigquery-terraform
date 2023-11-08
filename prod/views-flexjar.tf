@@ -186,6 +186,12 @@ module "flexjar_feedback_sykmelding_kvittering_view" {
         type        = "STRING"
         description = ""
       },
+      {
+        mode        = "NULLABLE"
+        name        = "feedback_id"
+        type        = "STRING"
+        description = ""
+      },
     ]
   )
   view_query = <<EOF
@@ -193,9 +199,10 @@ SELECT
   opprettet,
   JSON_VALUE(feedback_json, '$.svar') AS svar,
   JSON_VALUE(feedback_json, '$.arbeidssituasjon') AS arbeidssituasjon,
-  JSON_VALUE(feedback_json, '$.segment') AS segment
+  JSON_VALUE(feedback_json, '$.segment') AS segment,
+  JSON_VALUE(feedback_json, '$.feedbackId') AS feedback_id
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
-WHERE JSON_VALUE(feedback_json, '$.feedbackId') = 'sykmelding-kvittering'
+WHERE team = 'teamsykmelding'
 EOF
 
 }
