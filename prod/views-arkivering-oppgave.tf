@@ -77,14 +77,22 @@ module "sykepengesoknad_arkivering_oppgave_oppgavestyring_view" {
         name        = "timeout"
         type        = "TIMESTAMP"
         description = "Tidspunkt for når vi har ventet for lenge på oppgaver med status utsett og opprettet Gosys-oppgave."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "soknadstype"
+        type        = "STRING"
+        description = "Hvilken type sykepengesøknaden har."
       }
     ]
   )
 
   view_query = <<EOF
-SELECT sykepengesoknad_id, status, opprettet, modifisert, timeout
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.arkivering_oppgave_datastream.dataset_id}.public_oppgavestyring`
+SELECT os.sykepengesoknad_id, os.status, os.opprettet, os.modifisert, os.timeout, sv.soknadstype
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.arkivering_oppgave_datastream.dataset_id}.public_oppgavestyring` os,
+`${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_sykepengesoknad_view` sv
 WHERE avstemt = true
+AND os.sykepengesoknad_id = sv.sykepengesoknad_uuid
 EOF
 
 }
