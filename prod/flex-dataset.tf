@@ -35,6 +35,14 @@ resource "google_bigquery_dataset" "flex_dataset" {
       table_id   = "sykepengesoknad_hovedsporsmal_pivot_view"
     }
   }
+  // Gir tilgang til et view eid av tbd/Styringsinfo som bruker data fra dette viewet i en datakvailtetssjekk.
+  access {
+    view {
+      dataset_id = "styringsinfo_dataset"
+      project_id = "tbd-prod-eacd"
+      table_id   = "styringsinfo_datakvalitet_soknadhendelser_view"
+    }
+  }
   timeouts {}
 }
 
