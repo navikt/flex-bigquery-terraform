@@ -224,7 +224,7 @@ module "flexjar_feedback_sykepengesoknad_kvittering_view" {
       {
         mode        = "NULLABLE"
         name        = "svar"
-        type        = "NUMBER"
+        type        = "INTEGER"
         description = "Hva som er svart på feedbacken."
       },
       {
