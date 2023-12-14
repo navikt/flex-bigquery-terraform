@@ -251,7 +251,7 @@ SELECT opprettet, svar, soknadstype, CASE svar
   END svar_emoji
 FROM (SELECT
     opprettet,
-    CAST(JSON_VALUE(feedback_json, '$.svar') AS NUMERIC) AS svar,
+    CAST(JSON_VALUE(feedback_json, '$.svar') AS INTEGER) AS svar,
     JSON_VALUE(feedback_json, '$.soknadstype') AS soknadstype
   FROM  `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
   WHERE JSON_VALUE(feedback_json, '$.feedbackId') = 'sykepengesoknad-kvittering'
