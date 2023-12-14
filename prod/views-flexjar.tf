@@ -208,3 +208,53 @@ EOF
 }
 
 
+module "flexjar_feedback_sykepengesoknad_kvittering_view" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "flexjar_feedback_sykepengesoknad_kvittering_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når feedback ble gitt"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "svar"
+        type        = "NUMBER"
+        description = "Hva som er svart på feedbacken."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "soknadstype"
+        type        = "STRING"
+        description = "Hvilken soknadstype det ble gitt feedback på."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "svar_emoji"
+        type        = "STRING"
+        description = "Hva som er svart på feedbacken som emoji."
+      },
+    ]
+  )
+  view_query = <<EOF
+SELECT opprettet, svar, soknadstype, CASE CAST(svar AS NUMERIC)
+    WHEN 1 THEN '😡'
+    WHEN 2 THEN '🙁'
+    WHEN 3 THEN '😐'
+    WHEN 4 THEN '🙂'
+    WHEN 5 THEN '😍'
+  END svar_emoji
+FROM (SELECT
+    opprettet,
+    JSON_VALUE(feedback_json, '$.svar') AS svar,
+    JSON_VALUE(feedback_json, '$.soknadstype') AS soknadstype
+  FROM  `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
+  WHERE JSON_VALUE(feedback_json, '$.feedbackId') = 'sykepengesoknad-kvittering'
+)
+EOF
+}
