@@ -242,7 +242,7 @@ module "flexjar_feedback_sykepengesoknad_kvittering_view" {
     ]
   )
   view_query = <<EOF
-SELECT opprettet, svar, soknadstype, CASE CAST(svar AS NUMERIC)
+SELECT opprettet, svar, soknadstype, CASE svar
     WHEN 1 THEN '😡'
     WHEN 2 THEN '🙁'
     WHEN 3 THEN '😐'
@@ -251,7 +251,7 @@ SELECT opprettet, svar, soknadstype, CASE CAST(svar AS NUMERIC)
   END svar_emoji
 FROM (SELECT
     opprettet,
-    JSON_VALUE(feedback_json, '$.svar') AS svar,
+    CAST(JSON_VALUE(feedback_json, '$.svar') AS NUMERIC) AS svar,
     JSON_VALUE(feedback_json, '$.soknadstype') AS soknadstype
   FROM  `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
   WHERE JSON_VALUE(feedback_json, '$.feedbackId') = 'sykepengesoknad-kvittering'
