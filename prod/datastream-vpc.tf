@@ -11,7 +11,6 @@ resource "google_compute_global_address" "flex_datastream_vpc_ip_range" {
   address_type  = "INTERNAL"
   purpose       = "VPC_PEERING"
   network       = google_compute_network.flex_datastream_private_vpc.id
-  address       = var.datastream_vpc_ip_range
   prefix_length = 20
 }
 
