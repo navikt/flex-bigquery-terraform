@@ -3,7 +3,7 @@ module "soda_sendt_sykepengesoknad_avstemming" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-sendt-sykepengesoknad-avstemming"
+  view_id    = "soda-sendt-sykepengesoknad-avstemming-view"
   view_schema = jsonencode(
     [
       {
