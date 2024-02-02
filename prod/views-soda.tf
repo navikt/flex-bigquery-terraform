@@ -16,11 +16,11 @@ module "soda_sendt_sykepengesoknad_avstemming" {
 SELECT sykepengesoknad_uuid
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_sykepengesoknad_view`
 WHERE status = 'SENDT'
-  AND sendt < TIMESTAMP_SUB(current_timestamp(), INTERVAL 2 HOUR)
-  AND sendt >= "2024-01-01 00:00:00"
+  AND sendt < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR)
+  AND sendt >= TIMESTAMP_ADD(TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), DAY), INTERVAL -7 DAY)
   AND sykepengesoknad_uuid NOT IN (
     SELECT sykepengesoknad_id FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_arkivering_oppgave_innsending_view`
-    WHERE behandlet >= "2024-01-01 00:00:00"
+    WHERE behandlet >= TIMESTAMP_ADD(TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), DAY), INTERVAL -7 DAY)
   )
 EOF
 
