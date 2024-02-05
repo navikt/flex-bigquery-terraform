@@ -51,13 +51,13 @@ resource "google_bigquery_dataset" "flexjar_datastream" {
       table_id   = "flexjar_feedback_sykepengesoknad_kvittering_view"
     }
   }
-    access {
-      view {
-        dataset_id = "flex_dataset"
-        project_id = var.gcp_project["project"]
-        table_id   = "flexjar_feedback_view"
-      }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "flexjar_feedback_view"
     }
+  }
   access {
     view {
       dataset_id = "flex_dataset"
