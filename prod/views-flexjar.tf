@@ -310,12 +310,6 @@ module "flexjar_feedback_view" {
       },
       {
         mode        = "NULLABLE"
-        name        = "feedbackId"
-        type        = "STRING"
-        description = ""
-      },
-      {
-        mode        = "NULLABLE"
         name        = "arbeidssituasjon"
         type        = "STRING"
         description = ""
