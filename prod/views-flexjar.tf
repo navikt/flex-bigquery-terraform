@@ -286,6 +286,12 @@ module "flexjar_feedback_view" {
       },
       {
         mode        = "NULLABLE"
+        name        = "tags"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
         name        = "svar"
         type        = "STRING"
         description = "Hva som er svart på feedbacken."
@@ -368,6 +374,7 @@ module "flexjar_feedback_view" {
 SELECT opprettet,
        team,
        app,
+       tags,
        JSON_VALUE(feedback_json, '$.svar')                              AS svar,
        SAFE_CAST(JSON_VALUE(feedback_json, '$.svar') AS INTEGER)        AS svar_number,
        JSON_VALUE(feedback_json, '$.soknadstype')                       AS soknadstype,
@@ -388,6 +395,6 @@ SELECT opprettet,
            WHEN 5 THEN '😍'
            END                                                             svar_emoji
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
-where JSON_VALUE(feedback_json, '$.svar') in ('JA', 'NEI', 'FORBEDRING', '1', '2', '3', '4', '5', 'Ja', 'Nei')
+where JSON_VALUE(feedback_json, '$.svar') in ('JA', 'NEI', 'FORBEDRING', '1', '2', '3', '4', '5', 'Ja', 'Nei', 'Mangelfull eller uriktig rapportering til A-ordningen')
 EOF
 }
