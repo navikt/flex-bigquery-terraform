@@ -193,6 +193,7 @@ resource "google_bigquery_table_iam_binding" "flexjar_feedback_view_iam_binding"
   members = [
     "group:all-users@nav.no",
     "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+    "serviceAccount:syfo-71ci@knada-gcp.iam.gserviceaccount.com",
   ]
 }
 
