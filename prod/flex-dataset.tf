@@ -136,54 +136,6 @@ resource "google_bigquery_table_iam_binding" "sykepengesoknad_yrkesskade_sykmeld
   ]
 }
 
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_ditt_sykefravaer_fant_du_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_ditt_sykefravaer_fant_du_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_ditt_sykefravaer_fant_du_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_sykepengesoknad_sporsmal_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_sykepengesoknad_sporsmal_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_sykepengesoknad_sporsmal_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_flexjar_feedback_sykmelding_kvittering_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_sykmelding_kvittering_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_sykmelding_kvittering_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_sykepengesoknad_kvittering_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_sykepengesoknad_kvittering_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_sykepengesoknad_kvittering_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
-  ]
-}
-
 resource "google_bigquery_table_iam_binding" "flexjar_feedback_view_iam_binding" {
   depends_on = [module.flexjar_feedback_view]
   project    = var.gcp_project.project
@@ -194,18 +146,6 @@ resource "google_bigquery_table_iam_binding" "flexjar_feedback_view_iam_binding"
     "group:all-users@nav.no",
     "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
     "serviceAccount:syfo-71ci@knada-gcp.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_bigquery_table_iam_binding" "flexjar_feedback_spinnsyn_view_iam_binding" {
-  depends_on = [module.flexjar_feedback_spinnsyn_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_feedback_spinnsyn_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "group:all-users@nav.no",
-    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
   ]
 }
 
