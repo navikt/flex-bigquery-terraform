@@ -20,49 +20,7 @@ resource "google_bigquery_dataset" "flexjar_datastream" {
     view {
       dataset_id = "flex_dataset"
       project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_spinnsyn_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_ditt_sykefravaer_fant_du_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_sykepengesoknad_sporsmal_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_sykmelding_kvittering_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_sykepengesoknad_kvittering_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
       table_id   = "flexjar_feedback_view"
-    }
-  }
-  access {
-    view {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_spinnsyn_view"
     }
   }
   timeouts {}
