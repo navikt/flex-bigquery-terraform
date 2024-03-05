@@ -23,5 +23,34 @@ WHERE status = 'SENDT'
     WHERE behandlet >= TIMESTAMP_ADD(TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), DAY), INTERVAL -7 DAY)
   )
 EOF
+}
 
+module "soda_spinnsyn_datastream_avstemming" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "soda-spinnsyn-datastream-avstemming"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-backend",
+  '''
+  SELECT id FROM vedtak_v2
+  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
+    AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
+  ''')
+WHERE id NOT IN (
+SELECT id
+FROM `${var.gcp_project["project"]}.spinnsyn_datastream.public_vedtak_v2`
+  WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
+    AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
+)
+EOF
 }
