@@ -109,7 +109,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "modia_kontakt_metrikk_datastream_secret" {
-  secret = "flex-modia-kontakt-metrikk-datastream-credentials"
+  secret = "modia-kontakt-metrikk-datastream-credentials"
 }
 
 locals {
