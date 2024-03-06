@@ -1,5 +1,5 @@
 data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
-  secret = var.spinnsyn_bigquery_secret
+  secret = "spinnsyn-bigquery-credentials"
 }
 
 locals {
@@ -9,7 +9,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "spinnsyn_datastream_secret" {
-  secret = var.spinnsyn_datastream_secret
+  secret = "spinnsyn-datastream-credentials"
 }
 
 locals {
@@ -19,7 +19,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "sykepengesoknad_bigquery_secret" {
-  secret = var.sykepengesoknad_bigquery_secret
+  secret = "sykepengesoknad-bigquery-credentials"
 }
 
 locals {
@@ -29,7 +29,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "sykepengesoknad_datastream_secret" {
-  secret = var.sykepengesoknad_datastream_secret
+  secret = "sykepengesoknad-datastream-credentials"
 }
 
 locals {
@@ -39,7 +39,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "arkivering_oppgave_bigquery_secret" {
-  secret = var.arkivering_oppgave_bigquery_secret
+  secret = "arkivering-oppgave-bigquery-credentials"
 }
 
 locals {
@@ -49,7 +49,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "arkivering_oppgave_datastream_secret" {
-  secret = var.arkivering_oppgave_datastream_secret
+  secret = "arkivering-oppgave-datastream-credentials"
 }
 
 locals {
@@ -59,7 +59,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "sak_status_metrikk_bigquery_secret" {
-  secret = var.sak_status_metrikk_bigquery_secret
+  secret = "sak-status-metrikk-bigquery-credentials"
 }
 
 locals {
@@ -69,7 +69,7 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "sak_status_metrikk_datastream_secret" {
-  secret = var.sak_status_metrikk_datastream_secret
+  secret = "sak-status-metrikk-datastream-credentials"
 }
 
 locals {
@@ -78,8 +78,18 @@ locals {
   )
 }
 
+data "google_secret_manager_secret_version" "flexjar_bigquery_secret" {
+  secret = "flexjar-bigquery-credentials"
+}
+
+locals {
+  flexjar_bigquery_credentials = jsondecode(
+    data.google_secret_manager_secret_version.flexjar_bigquery_secret.secret_data
+  )
+}
+
 data "google_secret_manager_secret_version" "flexjar_datastream_secret" {
-  secret = var.flexjar_datastream_secret
+  secret = "flexjar-datastream-credentials"
 }
 
 locals {
@@ -88,8 +98,18 @@ locals {
   )
 }
 
+data "google_secret_manager_secret_version" "modia_kontakt_metrikk_bigquery_secret" {
+  secret = "modia-kontakt-metrikk-bigquery-credentials"
+}
+
+locals {
+  modia_kontakt_metrikk_bigquery_credentials = jsondecode(
+    data.google_secret_manager_secret_version.modia_kontakt_metrikk_bigquery_secret.secret_data
+  )
+}
+
 data "google_secret_manager_secret_version" "modia_kontakt_metrikk_datastream_secret" {
-  secret = var.modia_kontakt_metrikk_datastream_secret
+  secret = "flex-modia-kontakt-metrikk-datastream-credentials"
 }
 
 locals {
