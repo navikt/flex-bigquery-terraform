@@ -14,12 +14,6 @@ variable "metabase_service_account" {
   default     = "nada-metabase@nada-prod-6977.iam.gserviceaccount.com"
 }
 
-variable "scheduled_query_data_source_id" {
-  description = "The documentation states that this value can be changed, but any other value than the default failes."
-  type        = string
-  default     = "scheduled_query"
-}
-
 variable "sykepengesoknad_cloud_sql_port" {
   description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
   type        = string
