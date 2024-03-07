@@ -204,3 +204,25 @@ module "sykepengesoknad_sak_status_metrikk_bigquery_connection" {
   username      = local.sak_status_metrikk_db.username
   password      = local.sak_status_metrikk_db.password
 }
+
+module "flexjar_backend_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
+  connection_id = "flexjar-backend"
+  location      = var.gcp_project["region"]
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:flexjar-backend"
+  database      = "flexjar-backend-db"
+  username      = local.flexjar_bigquery_credentials.username
+  password      = local.flexjar_bigquery_credentials.password
+}
+
+module "flex-modia-kontakt-metrikk_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
+  connection_id = "flex-modia-kontakt-metrikk"
+  location      = var.gcp_project["region"]
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:flex-modia-kontakt-metrikk"
+  database      = "flex-modia-kontakt-metrikk-db"
+  username      = local.modia_kontakt_metrikk_bigquery_credentials.username
+  password      = local.modia_kontakt_metrikk_bigquery_credentials.password
+}
