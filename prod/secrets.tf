@@ -3,7 +3,7 @@ data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
 }
 
 locals {
-  spinnsyn_db = jsondecode(
+  spinnsyn_bigquery_credentials = jsondecode(
     data.google_secret_manager_secret_version.spinnsyn_bigquery_secret.secret_data
   )
 }
@@ -23,7 +23,7 @@ data "google_secret_manager_secret_version" "sykepengesoknad_bigquery_secret" {
 }
 
 locals {
-  sykepengesoknad_db = jsondecode(
+  sykepengesoknad_bigquery_credentials = jsondecode(
     data.google_secret_manager_secret_version.sykepengesoknad_bigquery_secret.secret_data
   )
 }
@@ -43,7 +43,7 @@ data "google_secret_manager_secret_version" "arkivering_oppgave_bigquery_secret"
 }
 
 locals {
-  arkivering_oppgave_db = jsondecode(
+  arkivering_oppgave_bigquery_credentials = jsondecode(
     data.google_secret_manager_secret_version.arkivering_oppgave_bigquery_secret.secret_data
   )
 }
@@ -63,7 +63,7 @@ data "google_secret_manager_secret_version" "sak_status_metrikk_bigquery_secret"
 }
 
 locals {
-  sak_status_metrikk_db = jsondecode(
+  sak_status_metrikk_bigquery_credentials = jsondecode(
     data.google_secret_manager_secret_version.sak_status_metrikk_bigquery_secret.secret_data
   )
 }
