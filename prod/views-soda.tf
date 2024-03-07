@@ -25,12 +25,12 @@ WHERE status = 'SENDT'
 EOF
 }
 
-module "soda_spinnsyn_datastream_avstemming" {
+module "soda_spinnsyn_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-spinnsyn-datastream-avstemming"
+  view_id    = "soda-spinnsyn-datastream-view"
   view_schema = jsonencode(
     [
       {
@@ -55,12 +55,12 @@ FROM `${var.gcp_project["project"]}.spinnsyn_datastream.public_vedtak_v2`
 EOF
 }
 
-module "soda_sykepengesoknad_datastream_avstemming" {
+module "soda_sykepengesoknad_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-sykepengesoknad-datastream-avstemming"
+  view_id    = "soda-sykepengesoknad-datastream-view"
   view_schema = jsonencode(
     [
       {
@@ -85,12 +85,12 @@ FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_sykepenges
 EOF
 }
 
-module "soda_arkivering_oppgave_datastream_avstemming" {
+module "soda_arkivering_oppgave_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-arkivering-oppgave-datastream-avstemming"
+  view_id    = "soda-arkivering-oppgave-datastream-view"
   view_schema = jsonencode(
     [
       {
@@ -115,12 +115,12 @@ FROM `${var.gcp_project["project"]}.arkivering_oppgave_datastream.public_oppgave
 EOF
 }
 
-module "soda_sak_status_metrikk_datastream_avstemming" {
+module "soda_sak_status_metrikk_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-sak-status-metrikk-datastream-avstemming"
+  view_id    = "soda-sak-status-metrikk-datastream-view"
   view_schema = jsonencode(
     [
       {
@@ -145,12 +145,12 @@ FROM `${var.gcp_project["project"]}.sak_status_metrikk_datastream.public_vedtaks
 EOF
 }
 
-module "soda_flexjar_datastream_avstemming" {
+module "soda_flexjar_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-flexjar-datastream-avstemming"
+  view_id    = "soda-flexjar-datastream-view"
   view_schema = jsonencode(
     [
       {
@@ -175,12 +175,12 @@ FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
 EOF
 }
 
-module "soda_modia_kontakt_metrikk_datastream_avstemming" {
+module "soda_modia_kontakt_metrikk_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-modia-kontakt-metrikk-datastream-avstemming"
+  view_id    = "soda-modia-kontakt-metrikk-datastream-view"
   view_schema = jsonencode(
     [
       {
