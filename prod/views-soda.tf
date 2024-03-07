@@ -174,3 +174,33 @@ FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
 )
 EOF
 }
+
+module "soda_modia_kontakt_metrikk_datastream_avstemming" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "soda-modia-kontakt-metrikk-datastream-avstemming"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-modia-kontakt-metrikk",
+  '''
+  SELECT id FROM henvendelse
+  WHERE tidspunkt < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
+    AND tidspunkt > date_trunc('day', current_timestamp) - INTERVAL '2 days'
+  ''')
+WHERE id NOT IN (
+SELECT id
+FROM `${var.gcp_project["project"]}.modia_kontakt_metrikk_datastream.public_henvendelse`
+  WHERE tidspunkt < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
+    AND tidspunkt >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
+)
+EOF
+}
