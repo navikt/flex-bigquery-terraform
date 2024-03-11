@@ -36,11 +36,11 @@ module "sendt_sykepengesoknad_arkivering_oppgave_avstemming" {
 SELECT sykepengesoknad_uuid
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_sykepengesoknad_view`
 WHERE status = 'SENDT'
-  AND sendt < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR)
-  AND sendt >= TIMESTAMP_ADD(TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), DAY), INTERVAL -7 DAY)
+  AND sendt < timestamp_sub(current_timestamp, INTERVAL 2 HOUR)
+  AND sendt >= timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL -7 DAY)
   AND sykepengesoknad_uuid NOT IN (
     SELECT sykepengesoknad_id FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.sykepengesoknad_arkivering_oppgave_innsending_view`
-    WHERE behandlet >= TIMESTAMP_ADD(TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), DAY), INTERVAL -7 DAY)
+    WHERE behandlet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -7 DAY)
   )
 EOF
 }
