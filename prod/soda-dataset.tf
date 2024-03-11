@@ -1,8 +1,28 @@
+resource "google_bigquery_dataset" "soda_dataset" {
+  dataset_id    = "soda_dataset"
+  location      = var.gcp_project["region"]
+  friendly_name = "soda_dataset"
+  labels        = {}
+
+  access {
+    role          = "OWNER"
+    special_group = "projectOwners"
+  }
+  access {
+    role          = "READER"
+    special_group = "projectReaders"
+  }
+  access {
+    role          = "WRITER"
+    special_group = "projectWriters"
+  }
+}
+
 module "soda_sendt_sykepengesoknad_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
   view_id    = "soda-sendt-sykepengesoknad-avstemming-view"
   view_schema = jsonencode(
     [
@@ -29,7 +49,7 @@ module "soda_spinnsyn_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
   view_id    = "soda-spinnsyn-datastream-view"
   view_schema = jsonencode(
     [
@@ -59,7 +79,7 @@ module "soda_sykepengesoknad_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
   view_id    = "soda-sykepengesoknad-datastream-view"
   view_schema = jsonencode(
     [
@@ -89,7 +109,7 @@ module "soda_arkivering_oppgave_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
   view_id    = "soda-arkivering-oppgave-datastream-view"
   view_schema = jsonencode(
     [
@@ -119,7 +139,7 @@ module "soda_sak_status_metrikk_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
   view_id    = "soda-sak-status-metrikk-datastream-view"
   view_schema = jsonencode(
     [
@@ -145,41 +165,11 @@ FROM `${var.gcp_project["project"]}.sak_status_metrikk_datastream.public_vedtaks
 EOF
 }
 
-module "soda_flexjar_datastream" {
-  source              = "../modules/google-bigquery-view"
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "soda-flexjar-datastream-view"
-  view_schema = jsonencode(
-    [
-      {
-        name = "id"
-        type = "STRING"
-      }
-    ]
-  )
-  view_query = <<EOF
-SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flexjar-backend",
-  '''
-  SELECT id FROM feedback
-  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
-    AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
-  ''')
-WHERE id NOT IN (
-SELECT id
-FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
-  WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
-    AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
-)
-EOF
-}
-
 module "soda_modia_kontakt_metrikk_datastream" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
   view_id    = "soda-modia-kontakt-metrikk-datastream-view"
   view_schema = jsonencode(
     [
@@ -201,6 +191,36 @@ SELECT id
 FROM `${var.gcp_project["project"]}.modia_kontakt_metrikk_datastream.public_henvendelse`
   WHERE tidspunkt < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
     AND tidspunkt >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
+)
+EOF
+}
+
+module "soda_flexjar_datastream" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "soda-flexjar-datastream-view"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flexjar-backend",
+  '''
+  SELECT id FROM feedback
+  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
+    AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
+  ''')
+WHERE id NOT IN (
+SELECT id
+FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
+  WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
+    AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
 )
 EOF
 }
