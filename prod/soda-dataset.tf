@@ -230,7 +230,7 @@ module "manglende_inntektsmelding_varsel_morgendagens_prognose" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "manglende-inntektsmelding-morgendagens_prognose"
+  view_id    = "manglende-inntektsmelding-morgendagens-prognose"
   view_schema = jsonencode(
     [
       {
