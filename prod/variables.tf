@@ -49,3 +49,9 @@ variable "modia_kontakt_metrikk_cloud_sql_port" {
   type        = string
   default     = "5482"
 }
+
+variable "inntektsmelding_status_cloud_sql_port" {
+  description = "The port exposed by the flex-inntektsmelding-status database Cloud SQL instance."
+  type        = string
+  default     = "5492"
+}

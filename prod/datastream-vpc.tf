@@ -43,7 +43,9 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
       var.arkivering_oppgave_cloud_sql_port,
       var.sak_status_metrikk_cloud_sql_port,
       var.flexjar_cloud_sql_port,
-      var.modia_kontakt_metrikk_cloud_sql_port
+      var.modia_kontakt_metrikk_cloud_sql_port,
+      var.inntektsmelding_status_cloud_sql_port
+
     ]
   }
 
@@ -74,6 +76,10 @@ data "google_sql_database_instance" "modia_kontakt_metrikk_db" {
   name = "flex-modia-kontakt-metrikk"
 }
 
+data "google_sql_database_instance" "flex_inntektsmelding_status_db" {
+  name = "flex-inntektsmelding-status"
+}
+
 locals {
   proxy_instances = [
     "${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port}",
@@ -82,6 +88,8 @@ locals {
     "${data.google_sql_database_instance.sak_status_metrikk_db.connection_name}=tcp:0.0.0.0:${var.sak_status_metrikk_cloud_sql_port}",
     "${data.google_sql_database_instance.flexjar_db.connection_name}=tcp:0.0.0.0:${var.flexjar_cloud_sql_port}",
     "${data.google_sql_database_instance.modia_kontakt_metrikk_db.connection_name}=tcp:0.0.0.0:${var.modia_kontakt_metrikk_cloud_sql_port}",
+    "${data.google_sql_database_instance.flex_inntektsmelding_status_db.connection_name}=tcp:0.0.0.0:${var.inntektsmelding_status_cloud_sql_port}",
+
   ]
 }
 

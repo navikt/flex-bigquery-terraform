@@ -117,3 +117,14 @@ locals {
     data.google_secret_manager_secret_version.modia_kontakt_metrikk_datastream_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "inntektsmelding_status_datastream_secret" {
+  secret = "inntektsmelding-status-datastream-credentials"
+}
+
+locals {
+  inntektsmelding_status_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.inntektsmelding_status_datastream_secret.secret_data
+  )
+}
+
