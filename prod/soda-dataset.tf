@@ -224,3 +224,32 @@ FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
 )
 EOF
 }
+
+module "manglende_inntektsmelding_varsel_morgendagens_prognose" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "mangelende-inntektsmelding-morgendagens_prognose"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT im.id
+FROM `flex-prod-af40.inntektsmelding_status_datastream.public_inntektsmelding_status` status
+          INNER JOIN (SELECT inntektsmelding_id, max(opprettet) AS opprettet
+                      FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_inntektsmelding_status`
+                      GROUP BY inntektsmelding_id) max_status
+                    ON status.inntektsmelding_id = max_status.inntektsmelding_id
+                        AND status.opprettet = max_status.opprettet
+          INNER JOIN `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_inntektsmelding` im ON im.id = status.inntektsmelding_id
+WHERE status.status IN ('MANGLER_INNTEKTSMELDING')
+AND status.opprettet between timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 28 DAY)
+AND timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 27 DAY)
+EOF
+}
