@@ -25,6 +25,24 @@ module "spinnsyn_utbetaling_view" {
       },
       {
         mode        = "NULLABLE"
+        name        = "motatt_publisert"
+        type        = "TIMESTAMP"
+        description = "motatt_publisert"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "lest"
+        type        = "TIMESTAMP"
+        description = "når vedtaket er lest"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "skal_vises_til_bruker"
+        type        = "TIMESTAMP"
+        description = "når vedtaket er lest"
+      },
+      {
+        mode        = "NULLABLE"
         name        = "antall_vedtak"
         type        = "INTEGER"
         description = "Antall vedtak ubetalingen dekker."
@@ -32,7 +50,7 @@ module "spinnsyn_utbetaling_view" {
     ]
   )
   view_query = <<EOF
-SELECT utbetaling_id, utbetaling_type, opprettet, antall_vedtak
+SELECT utbetaling_id, utbetaling_type, opprettet, motatt_publisert, lest, skal_vises_til_bruker, antall_vedtak
 FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.spinnsyn_datastream.dataset_id}.public_utbetaling`
 EOF
 
