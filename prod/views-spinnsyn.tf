@@ -38,7 +38,7 @@ module "spinnsyn_utbetaling_view" {
       {
         mode        = "NULLABLE"
         name        = "skal_vises_til_bruker"
-        type        = "TIMESTAMP"
+        type        = "BOOLEAN"
         description = "når vedtaket er lest"
       },
       {
