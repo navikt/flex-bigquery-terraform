@@ -16,6 +16,13 @@ resource "google_bigquery_dataset" "spinnsyn_datastream" {
     role          = "WRITER"
     special_group = "projectWriters"
   }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "spinnsyn_utbetaling_view"
+    }
+  }
   timeouts {}
 }
 
