@@ -1,8 +1,8 @@
 module "spinnsyn_utbetaling_view" {
-  source = "../modules/google-bigquery-view"
+  source              = "../modules/google-bigquery-view"
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "spinnsyn_utbetaling_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "spinnsyn_utbetaling_view"
   view_schema = jsonencode(
     [
       {
