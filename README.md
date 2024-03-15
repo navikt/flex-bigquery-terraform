@@ -13,3 +13,6 @@ flytte alle data hver gang, noe som medfører flytt av unødveneidg mye data.
 Begrunnelsen for å bruke Terraform i stedet for å opprettet ressursene direkte i [Cloud Console]() er todelt. Først og fremst 
 gir det teamet en deterministisk måte å opprette og slette ressurser på. For det andre fungerer konfigurasjonen fungerer som 
 dokumentasjon på hvlke ressurser som er opprettet.
+
+## Hvordan logger jeg inn i gcloud før jeg kjører terraform init?
+`gcloud auth login --update-adc`

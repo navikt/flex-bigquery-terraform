@@ -161,6 +161,18 @@ resource "google_bigquery_table_iam_binding" "modia_sykepengesoknad_kontakt_view
   ]
 }
 
+resource "google_bigquery_table_iam_binding" "spinnsyn_utbetaling_view_iam_binding" {
+  depends_on = [module.spinnsyn_utbetaling_view]
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.spinnsyn_utbetaling_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "group:all-users@nav.no",
+    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+  ]
+}
+
 module "spinnsyn_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
