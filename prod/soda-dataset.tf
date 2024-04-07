@@ -249,7 +249,7 @@ FROM `flex-prod-af40.inntektsmelding_status_datastream.public_inntektsmelding_st
                         AND status.opprettet = max_status.opprettet
           INNER JOIN `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_inntektsmelding` im ON im.id = status.inntektsmelding_id
 WHERE status.status IN ('MANGLER_INNTEKTSMELDING')
-AND status.opprettet between timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 28 DAY)
-AND timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 27 DAY)
+AND status.opprettet between timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 15 DAY)
+AND timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 14 DAY)
 EOF
 }
