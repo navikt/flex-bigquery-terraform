@@ -260,3 +260,14 @@ module "flex_modiakontakt_metrikk_bigquery_connection" {
   username      = local.modia_kontakt_metrikk_bigquery_credentials.username
   password      = local.modia_kontakt_metrikk_bigquery_credentials.password
 }
+
+module "flex_inntektsmelding_status_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
+  connection_id = "flex-inntektsmelding-status"
+  location      = var.gcp_project["region"]
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:flex-inntektsmelding-status"
+  database      = "flex-inntektsmelding-status-db"
+  username      = local.inntektsmelding_status_bigquery_credentials.username
+  password      = local.inntektsmelding_status_bigquery_credentials.password
+}

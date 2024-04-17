@@ -118,6 +118,16 @@ locals {
   )
 }
 
+data "google_secret_manager_secret_version" "inntektsmelding_status_bigquery_secret" {
+  secret = "inntektsmelding-status-bigquery-credentials"
+}
+
+locals {
+  inntektsmelding_status_bigquery_credentials = jsondecode(
+    data.google_secret_manager_secret_version.inntektsmelding_status_bigquery_secret.secret_data
+  )
+}
+
 data "google_secret_manager_secret_version" "inntektsmelding_status_datastream_secret" {
   secret = "inntektsmelding-status-datastream-credentials"
 }
@@ -127,4 +137,5 @@ locals {
     data.google_secret_manager_secret_version.inntektsmelding_status_datastream_secret.secret_data
   )
 }
+
 
