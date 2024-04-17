@@ -270,14 +270,14 @@ module "manglende_inntektsmelding_varsel_morgendagens_prognose" {
     ]
   )
   view_query = <<EOF
-SELECT im.id
-FROM `flex-prod-af40.inntektsmelding_status_datastream.public_inntektsmelding_status` status
-          INNER JOIN (SELECT inntektsmelding_id, max(opprettet) AS opprettet
-                      FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_inntektsmelding_status`
-                      GROUP BY inntektsmelding_id) max_status
-                    ON status.inntektsmelding_id = max_status.inntektsmelding_id
+SELECT vp.id
+FROM `flex-prod-af40.inntektsmelding_status_datastream.public_vedtaksperiode_status` status
+          INNER JOIN (SELECT vedtaksperiode_db_id, max(opprettet) AS opprettet
+                      FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_status`
+                      GROUP BY vedtaksperiode_db_id) max_status
+                    ON status.vedtaksperiode_db_id = max_status.vedtaksperiode_db_id
                         AND status.opprettet = max_status.opprettet
-          INNER JOIN `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_inntektsmelding` im ON im.id = status.inntektsmelding_id
+          INNER JOIN `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode` vp ON vp.id = status.vedtaksperiode_db_id
 WHERE status.status IN ('MANGLER_INNTEKTSMELDING')
 AND status.opprettet between timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 15 DAY)
 AND timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 14 DAY)
