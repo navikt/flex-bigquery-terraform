@@ -250,7 +250,7 @@ module "flexjar_backend_bigquery_connection" {
   password      = local.flexjar_bigquery_credentials.password
 }
 
-module "flex-modia-kontakt-metrikk_bigquery_connection" {
+module "flex_modiakontakt_metrikk_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 
   connection_id = "flex-modia-kontakt-metrikk"
