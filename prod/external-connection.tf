@@ -31,17 +31,6 @@ module "sykepengesoknad_arkivering_oppgave_connection" {
   password      = local.arkivering_oppgave_bigquery_credentials.password
 }
 
-module "sykepengesoknad_sak_status_metrikk_bigquery_connection" {
-  source = "../modules/google-bigquery-connection"
-
-  connection_id = "sykepengesoknad-sak-status-metrikk"
-  location      = var.gcp_project["region"]
-  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:sykepengesoknad-sak-status-metrikk"
-  database      = "sykepengesoknad-sak-status-metrikk-db"
-  username      = local.sak_status_metrikk_bigquery_credentials.username
-  password      = local.sak_status_metrikk_bigquery_credentials.password
-}
-
 module "flexjar_backend_bigquery_connection" {
   source = "../modules/google-bigquery-connection"
 

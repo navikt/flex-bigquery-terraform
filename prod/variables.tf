@@ -27,15 +27,9 @@ variable "spinnsyn_cloud_sql_port" {
 }
 
 variable "arkivering_oppgave_cloud_sql_port" {
-  description = "The port exposed by the sykepengesoknad-arkviering-oppgave database Cloud SQL instance."
+  description = "The port exposed by the sykepengesoknad-arkivering-oppgave database Cloud SQL instance."
   type        = string
   default     = "5452"
-}
-
-variable "sak_status_metrikk_cloud_sql_port" {
-  description = "The port exposed by the sykepengesoknad-sak-status-metrikk database Cloud SQL instance."
-  type        = string
-  default     = "5462"
 }
 
 variable "flexjar_cloud_sql_port" {

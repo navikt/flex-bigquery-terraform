@@ -135,36 +135,6 @@ FROM `${var.gcp_project["project"]}.arkivering_oppgave_datastream.public_oppgave
 EOF
 }
 
-module "sak_status_metrikk_vedtaksperiode_avstemming" {
-  source              = "../modules/google-bigquery-view"
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "sak-status-metrikk-vedtaksperiode-avstemming"
-  view_schema = jsonencode(
-    [
-      {
-        name = "id"
-        type = "STRING"
-      }
-    ]
-  )
-  view_query = <<EOF
-SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.sykepengesoknad-sak-status-metrikk",
-  '''
-  SELECT id FROM vedtaksperiode_tilstand
-  WHERE tidspunkt < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
-    AND tidspunkt > date_trunc('day', current_timestamp) - INTERVAL '2 days'
-  ''')
-WHERE id NOT IN (
-SELECT id
-FROM `${var.gcp_project["project"]}.sak_status_metrikk_datastream.public_vedtaksperiode_tilstand`
-  WHERE tidspunkt < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
-    AND tidspunkt >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
-)
-EOF
-}
-
 module "modia_kontakt_metrikk_henvendelse_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false

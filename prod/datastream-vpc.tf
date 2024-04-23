@@ -41,7 +41,6 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
       var.sykepengesoknad_cloud_sql_port,
       var.spinnsyn_cloud_sql_port,
       var.arkivering_oppgave_cloud_sql_port,
-      var.sak_status_metrikk_cloud_sql_port,
       var.flexjar_cloud_sql_port,
       var.modia_kontakt_metrikk_cloud_sql_port,
       var.inntektsmelding_status_cloud_sql_port

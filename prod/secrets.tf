@@ -58,26 +58,6 @@ locals {
   )
 }
 
-data "google_secret_manager_secret_version" "sak_status_metrikk_bigquery_secret" {
-  secret = "sak-status-metrikk-bigquery-credentials"
-}
-
-locals {
-  sak_status_metrikk_bigquery_credentials = jsondecode(
-    data.google_secret_manager_secret_version.sak_status_metrikk_bigquery_secret.secret_data
-  )
-}
-
-data "google_secret_manager_secret_version" "sak_status_metrikk_datastream_secret" {
-  secret = "sak-status-metrikk-datastream-credentials"
-}
-
-locals {
-  sak_status_metrikk_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.sak_status_metrikk_datastream_secret.secret_data
-  )
-}
-
 data "google_secret_manager_secret_version" "flexjar_bigquery_secret" {
   secret = "flexjar-bigquery-credentials"
 }
