@@ -64,10 +64,6 @@ data "google_sql_database_instance" "arkivering_oppgave_db" {
   name = "sykepengesoknad-arkivering-oppgave"
 }
 
-data "google_sql_database_instance" "sak_status_metrikk_db" {
-  name = "sykepengesoknad-sak-status-metrikk"
-}
-
 data "google_sql_database_instance" "flexjar_db" {
   name = "flexjar-backend"
 }
@@ -85,7 +81,6 @@ locals {
     "${data.google_sql_database_instance.sykepengesoknad_db.connection_name}=tcp:0.0.0.0:${var.sykepengesoknad_cloud_sql_port}",
     "${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port}",
     "${data.google_sql_database_instance.arkivering_oppgave_db.connection_name}=tcp:0.0.0.0:${var.arkivering_oppgave_cloud_sql_port}",
-    "${data.google_sql_database_instance.sak_status_metrikk_db.connection_name}=tcp:0.0.0.0:${var.sak_status_metrikk_cloud_sql_port}",
     "${data.google_sql_database_instance.flexjar_db.connection_name}=tcp:0.0.0.0:${var.flexjar_cloud_sql_port}",
     "${data.google_sql_database_instance.modia_kontakt_metrikk_db.connection_name}=tcp:0.0.0.0:${var.modia_kontakt_metrikk_cloud_sql_port}",
     "${data.google_sql_database_instance.flex_inntektsmelding_status_db.connection_name}=tcp:0.0.0.0:${var.inntektsmelding_status_cloud_sql_port}",
