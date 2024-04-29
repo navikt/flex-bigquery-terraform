@@ -60,6 +60,12 @@ module "modia_sykepengesoknad_kontakt_view" {
       },
       {
         mode        = "NULLABLE"
+        name        = "forstegangssoknad"
+        type        = "BOOLEAN"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
         name        = "soknadstype"
         type        = "STRING"
         description = "Hvilken type sykepengesøknaden er."
@@ -106,11 +112,36 @@ module "modia_sykepengesoknad_kontakt_view" {
         type        = "INTEGER"
         description = "Henvendelser innen 8 uker"
       },
+      {
+        mode        = "NULLABLE"
+        name        = "har_henvendelser_innen_1_uke"
+        type        = "BOOLEAN"
+        description = "Har henvendelser innen 1 uke"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "har_henvendelser_innen_2_uker"
+        type        = "BOOLEAN"
+        description = "Har henvendelser innen 2 uker"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "har_henvendelser_innen_4_uker"
+        type        = "BOOLEAN"
+        description = "Har henvendelser innen 4 uker"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "har_henvendelser_innen_8_uker"
+        type        = "BOOLEAN"
+        description = "Har henvendelser innen 8 uker"
+      },
     ]
   )
   view_query = <<EOF
 SELECT
     s.sykepengesoknad_uuid,
+    max(s.forstegangssoknad) forstegangssoknad,
     max(s.soknadstype) soknadstype,
     max(s.status) status,
     max(s.sendt_arbeidsgiver) sendt_arbeidsgiver,
@@ -118,7 +149,11 @@ SELECT
     COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 7) AS henvendelser_innen_1_uke,
     COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 14) AS henvendelser_innen_2_uker,
     COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 28) AS henvendelser_innen_4_uker,
-    COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 56) AS henvendelser_innen_8_uker
+    COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 56) AS henvendelser_innen_8_uker,
+    COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 7) > 0 AS har_henvendelser_innen_1_uke,
+    COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 14) >0 AS har_henvendelser_innen_2_uker,
+    COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 28) > 0 AS har_henvendelser_innen_4_uker,
+    COUNTIF(TIMESTAMP_DIFF(h.tidspunkt, s.sendt, DAY) <= 56) > 0 AS har_henvendelser_innen_8_uker,
 FROM
     `${var.gcp_project["project"]}.${google_bigquery_dataset.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad` AS s
 LEFT JOIN
