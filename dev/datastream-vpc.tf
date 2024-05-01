@@ -39,10 +39,66 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports    = []
+    ports    = [var.spinnsyn_cloud_sql_port, ]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
+}
+
+data "google_sql_database_instance" "spinnsyn_db" {
+  name = "spinnsyn-backend"
+}
+
+// You can configure a virtual machine (VM) instance or an instance template to deploy and launch a Docker container.
+// This Googe-provided module handles the generation of metadata for deploying containers on GCE instances.
+module "cloud_sql_auth_proxy_container_datastream" {
+  source         = "terraform-google-modules/container-vm/google"
+  version        = "3.1.1"
+  cos_image_name = "cos-101-17162-386-65"
+  container = {
+    // https://github.com/GoogleCloudPlatform/cloud-sql-proxy/releases
+    image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.35.1"
+    command = ["/cloud_sql_proxy"]
+    args = [
+      "-instances=${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port}",
+      "-ip_address_types=PRIVATE"
+    ]
+  }
+  restart_policy = "Always"
+}
+
+resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
+  name = "flex-datastream-cloud-sql-proxy-vm"
+  // Medium machine type with 1 vCPU and 4 GB of memory, backed by a shared physical core.
+  machine_type = "e2-medium"
+  project      = var.gcp_project["project"]
+  zone         = var.gcp_project["zone"]
+
+  boot_disk {
+    initialize_params {
+      image = module.cloud_sql_auth_proxy_container_datastream.source_image
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.flex_datastream_private_vpc.name
+    // Ensures that a Private IP is assigned to the VM.
+    access_config {}
+  }
+
+  service_account {
+    scopes = ["cloud-platform"]
+  }
+
+  metadata = {
+    gce-container-declaration = module.cloud_sql_auth_proxy_container_datastream.metadata_value
+    google-logging-enabled    = "true"
+    google-monitoring-enabled = "true"
+  }
+
+  labels = {
+    container-vm = module.cloud_sql_auth_proxy_container_datastream.vm_container_label
+  }
 }
 
 // Defines a Datastream connection profile for a BigQuery target.
@@ -54,3 +110,4 @@ resource "google_datastream_connection_profile" "datastream_bigquery_connection_
 
   bigquery_profile {}
 }
+
