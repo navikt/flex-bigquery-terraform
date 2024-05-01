@@ -8,50 +8,14 @@ variable "gcp_project" {
   }
 }
 
-variable "spinnsyn_bigquery_secret" {
-  description = "The key of the GCP secret that provides the spinnsyn database credentials."
-  type        = string
-  default     = "spinnsyn-bigquery-credentials"
-}
-
 variable "spinnsyn_datastream_secret" {
-  description = "The key of the GCP secret that provides the spinnsyn datastream credentials."
+  description = "The key of the GCP secret that provides credentials to the spinnsyn-db datastram user."
   type        = string
   default     = "spinnsyn-datastream-credentials"
 }
 
-variable "sykepengesoknad_bigquery_secret" {
-  description = "The key of the GCP secret that provides the sykepengesoknad database credentials."
-  type        = string
-  default     = "sykepengesoknad-bigquery-credentials"
-}
-
-variable "sykepengesoknad_datastream_secret" {
-  description = "The key of the GCP secret that provides the sykepengesoknad datastream credentials."
-  type        = string
-  default     = "sykepengesoknad-datastream-credentials"
-}
-
-variable "arkivering_oppgave_bigquery_secret" {
-  description = "The key of the GCP secret that provides the sykepengesoknad-arkivering-oppgave database credentials."
-  type        = string
-  default     = "arkivering-oppgave-bigquery-credentials"
-}
-
-variable "arkivering_oppgave_datastream_secret" {
-  description = "The key of the GCP secret that provides the sykepengesoknad-arkivering-oppgave datastream credentials."
-  type        = string
-  default     = "arkivering-oppgave-datastream-credentials"
-}
-
-variable "sykepengesoknad_cloud_sql_port" {
-  description = "The port exposed by the sykepengesoknad database Cloud SQL instance."
-  type        = string
-  default     = "5432"
-}
-
 variable "spinnsyn_cloud_sql_port" {
-  description = "The port exposed by the spinnsyn database Cloud SQL instance."
+  description = "The Cloud SQL Auth Proxy port for spinnsyn-db."
   type        = string
   default     = "5442"
 }

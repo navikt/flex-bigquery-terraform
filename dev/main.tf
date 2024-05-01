@@ -33,7 +33,7 @@ module "google_storage_bucket" {
 
 resource "google_service_account" "federated_query" {
   account_id   = "federated-query"
-  description  = "Service Account brukt av BigQuery Scheduled Queries."
+  description  = "Service Account brukt av BigQuery Federated (Scheduled) Queries."
   display_name = "Federated Query"
 }
 
