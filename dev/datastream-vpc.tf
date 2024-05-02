@@ -45,6 +45,19 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
 }
 
+resource "google_compute_firewall" "allow_ssh_to_cloud_sql" {
+  project = var.gcp_project["project"]
+  name    = "allow-ssh-to-cloud-sql"
+  network = google_compute_network.flex_datastream_private_vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22", ]
+  }
+
+  source_ranges = ["0.0.0.0/0", ]
+}
+
 data "google_sql_database_instance" "spinnsyn_db" {
   name = "spinnsyn-backend"
 }
