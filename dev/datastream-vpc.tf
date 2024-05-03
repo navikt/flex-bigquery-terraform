@@ -74,7 +74,6 @@ module "cloud_sql_auth_proxy_container_datastream" {
     command = ["/cloud_sql_proxy"]
     args = [
       "-instances=${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port}",
-      "-ip_address_types=PRIVATE"
     ]
   }
   restart_policy = "Always"
