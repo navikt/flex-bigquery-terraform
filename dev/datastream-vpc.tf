@@ -39,12 +39,14 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports    = [var.spinnsyn_cloud_sql_port, ]
+    // TODO: Med én VM-instanse for hver Cloud SQL Auth Proxy kan vi bruke samme port for alle.
+    ports = [var.spinnsyn_cloud_sql_port, var.flex_datastream_test_cloud_sql_port]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
 }
 
+// TODO: Denne kan fjernes når nytt oppsett er testet.
 resource "google_compute_firewall" "allow_ssh_to_cloud_sql" {
   project = var.gcp_project["project"]
   name    = "allow-ssh-to-cloud-sql"
@@ -63,7 +65,7 @@ data "google_sql_database_instance" "spinnsyn_db" {
 }
 
 // You can configure a virtual machine (VM) instance or an instance template to deploy and launch a Docker container.
-// This Googe-provided module handles the generation of metadata for deploying containers on GCE instances.
+// This Google-provided module handles the generation of metadata for deploying containers on GCE instances.
 module "cloud_sql_auth_proxy_container_datastream" {
   source         = "terraform-google-modules/container-vm/google"
   version        = "3.1.1"
@@ -81,8 +83,8 @@ module "cloud_sql_auth_proxy_container_datastream" {
 
 resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
   name = "flex-datastream-cloud-sql-proxy-vm"
-  // Medium machine type with 1 vCPU and 4 GB of memory, backed by a shared physical core.
-  machine_type              = "e2-medium"
+  // Small machine type with 0.5 vCPU and 2 GB of memory, backed by a shared physical core.
+  machine_type              = "e2-small"
   project                   = var.gcp_project["project"]
   zone                      = var.gcp_project["zone"]
   allow_stopping_for_update = true

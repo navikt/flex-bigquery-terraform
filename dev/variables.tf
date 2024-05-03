@@ -8,15 +8,14 @@ variable "gcp_project" {
   }
 }
 
-variable "spinnsyn_datastream_secret" {
-  description = "The key of the GCP secret that provides credentials to the spinnsyn-db datastram user."
-  type        = string
-  default     = "spinnsyn-datastream-credentials"
-}
-
 variable "spinnsyn_cloud_sql_port" {
   description = "The Cloud SQL Auth Proxy port for spinnsyn-db."
   type        = string
   default     = "5442"
 }
 
+variable "flex_datastream_test_cloud_sql_port" {
+  description = "The Cloud SQL Auth Proxy port for flex-datastream-test-db."
+  type        = string
+  default     = "5452"
+}
