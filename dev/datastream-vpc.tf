@@ -82,9 +82,9 @@ module "cloud_sql_auth_proxy_container_datastream" {
 resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
   name = "flex-datastream-cloud-sql-proxy-vm"
   // Medium machine type with 1 vCPU and 4 GB of memory, backed by a shared physical core.
-  machine_type = "e2-medium"
-  project      = var.gcp_project["project"]
-  zone         = var.gcp_project["zone"]
+  machine_type              = "e2-medium"
+  project                   = var.gcp_project["project"]
+  zone                      = var.gcp_project["zone"]
   allow_stopping_for_update = true
 
   boot_disk {
@@ -105,8 +105,6 @@ resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
 
   metadata = {
     gce-container-declaration = module.cloud_sql_auth_proxy_container_datastream.metadata_value
-    google-logging-enabled    = "true"
-    google-monitoring-enabled = "true"
   }
 
   labels = {
