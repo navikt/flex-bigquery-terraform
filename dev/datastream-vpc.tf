@@ -85,6 +85,7 @@ resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
   machine_type = "e2-medium"
   project      = var.gcp_project["project"]
   zone         = var.gcp_project["zone"]
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
