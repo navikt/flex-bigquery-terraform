@@ -39,8 +39,8 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    // TODO: Med én VM-instanse for hver Cloud SQL Auth Proxy kan vi bruke samme port for alle.
-    ports = [var.spinnsyn_cloud_sql_port, var.flex_datastream_test_cloud_sql_port]
+
+    ports = [var.spinnsyn_cloud_sql_port]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]

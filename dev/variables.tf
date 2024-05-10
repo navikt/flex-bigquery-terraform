@@ -13,9 +13,3 @@ variable "spinnsyn_cloud_sql_port" {
   type        = string
   default     = "5442"
 }
-
-variable "flex_datastream_test_cloud_sql_port" {
-  description = "The Cloud SQL Auth Proxy port for flex-datastream-test-db."
-  type        = string
-  default     = "5452"
-}
