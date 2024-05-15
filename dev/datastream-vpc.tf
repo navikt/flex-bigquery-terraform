@@ -39,8 +39,7 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-
-    ports = [var.spinnsyn_cloud_sql_port]
+    ports = ["5432"]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
@@ -61,7 +60,7 @@ module "cloud_sql_auth_proxy_container_datastream" {
     image   = "eu.gcr.io/cloudsql-docker/gce-proxy:1.35.1"
     command = ["/cloud_sql_proxy"]
     args = [
-      "-instances=${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:${var.spinnsyn_cloud_sql_port}",
+      "-instances=${data.google_sql_database_instance.spinnsyn_db.connection_name}=tcp:0.0.0.0:5432",
     ]
   }
   restart_policy = "Always"

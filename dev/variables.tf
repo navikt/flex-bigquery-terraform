@@ -7,9 +7,3 @@ variable "gcp_project" {
     project = "flex-dev-2b16"
   }
 }
-
-variable "spinnsyn_cloud_sql_port" {
-  description = "The Cloud SQL Auth Proxy port for spinnsyn-db."
-  type        = string
-  default     = "5442"
-}

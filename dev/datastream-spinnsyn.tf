@@ -26,7 +26,7 @@ resource "google_datastream_connection_profile" "spinnsyn_postgresql_connection_
 
   postgresql_profile {
     hostname = google_compute_instance.flex_datastream_cloud_sql_proxy_vm.network_interface[0].network_ip
-    port     = var.spinnsyn_cloud_sql_port
+    port     = 5432
     username = local.spinnsyn_datastream_credentials["username"]
     password = local.spinnsyn_datastream_credentials["password"]
     database = "spinnsyn-db"
