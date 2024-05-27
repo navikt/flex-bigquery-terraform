@@ -67,7 +67,7 @@ resource "google_compute_instance" "compute_instance" {
   }
 
   network_interface {
-    network = var.datastream_vpc_name
+    network = var.datastream_vpc_resources.vpc_name
     // Ensures that a Private IP is assigned to the VM.
     access_config {}
   }
@@ -101,7 +101,7 @@ resource "google_datastream_connection_profile" "postgresql_connection_profile" 
   }
 
   private_connectivity {
-    private_connection = var.datastream_private_connection_id
+    private_connection = var.datastream_vpc_resources.private_connection_id
   }
 }
 
@@ -143,7 +143,7 @@ resource "google_datastream_stream" "datastream" {
   }
 
   destination_config {
-    destination_connection_profile = var.bigquery_connection_profile_id
+    destination_connection_profile = var.datastream_vpc_resources.bigquery_connection_profile_id
 
     bigquery_destination_config {
       data_freshness = var.bigquery_table_freshness

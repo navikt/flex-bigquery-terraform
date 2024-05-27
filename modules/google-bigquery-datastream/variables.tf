@@ -29,19 +29,18 @@ variable "gcp_project" {
   type = map(string)
 }
 
-variable "datastream_vpc_name" {
-  description = "The name of the source database VPC."
-  type        = string
-}
+variable "datastream_vpc_resources" {
+  description = "Common resoucres defined by the VPC and used in each individual Datastream."
+  type        = map(string)
 
-variable "datastream_private_connection_id" {
-  description = "The ID of the private connection used for VCP peering."
-  type        = string
-}
-
-variable "bigquery_connection_profile_id" {
-  description = "The ID of the common BigQuery connection profile used as Datastream target."
-  type        = string
+  validation {
+    condition = alltrue([
+      contains(keys(var.datastream_vpc_resources), "vpc_name"),
+      contains(keys(var.datastream_vpc_resources), "private_connection_id"),
+      contains(keys(var.datastream_vpc_resources), "bigquery_connection_profile_id"),
+    ])
+    error_message = "The map in the variable datastream_vpc_resources must contain the keys: datastream_vpc_name, datastream_private_connection_id, and bigquery_connection_profile_id."
+  }
 }
 
 variable "application_name" {
