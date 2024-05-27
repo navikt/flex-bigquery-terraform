@@ -39,7 +39,7 @@ resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
 
   allow {
     protocol = "tcp"
-    ports = ["5432"]
+    ports    = ["5432"]
   }
 
   source_ranges = [google_datastream_private_connection.flex_datastream_private_connection.vpc_peering_config.0.subnet]
@@ -82,9 +82,10 @@ resource "google_compute_instance" "flex_datastream_cloud_sql_proxy_vm" {
 
   network_interface {
     network = google_compute_network.flex_datastream_private_vpc.name
-    // Ensures that a Private IP is assigned to the VM.
+    // Ensures that a Private IP, used for the VPC peering, is assigned to the VM.
     access_config {}
   }
+
 
   service_account {
     scopes = ["cloud-platform"]
