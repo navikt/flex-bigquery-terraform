@@ -7,12 +7,13 @@ locals {
 }
 
 module "spinnsyn_datastream" {
-  source                            = "../modules/google-bigquery-datastream"
-  gcp_project                       = var.gcp_project
-  application_name                  = "spinnsyn"
-  cloud_sql_instance_name           = "spinnsyn-backend"
-  cloud_sql_instance_db_name        = "spinnsyn-db"
-  cloud_sql_instance_db_credentials = local.spinnsyn_datastream_credentials
-  datastream_vpc_resources          = local.datastream_vpc_resources
+  source                                       = "../modules/google-bigquery-datastream"
+  gcp_project                                  = var.gcp_project
+  application_name                             = "spinnsyn"
+  cloud_sql_instance_name                      = "spinnsyn-backend"
+  cloud_sql_instance_db_name                   = "spinnsyn-db"
+  cloud_sql_instance_db_credentials            = local.spinnsyn_datastream_credentials
+  datastream_vpc_resources                     = local.datastream_vpc_resources
+  big_query_dataset_delete_contents_on_destroy = true
 }
 
