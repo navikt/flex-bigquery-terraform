@@ -87,7 +87,6 @@ resource "google_compute_instance" "compute_instance" {
 }
 
 resource "google_datastream_connection_profile" "postgresql_connection_profile" {
-  depends_on            = [google_compute_instance.compute_instance]
   location              = var.gcp_project["region"]
   display_name          = local.postgres_connection_profile_id
   connection_profile_id = local.postgres_connection_profile_id
@@ -106,7 +105,6 @@ resource "google_datastream_connection_profile" "postgresql_connection_profile" 
 }
 
 resource "google_datastream_stream" "datastream" {
-  depends_on    = [google_datastream_connection_profile.postgresql_connection_profile]
   stream_id     = local.datastream_id
   display_name  = local.datastream_id
   desired_state = var.datastream_desired_state
