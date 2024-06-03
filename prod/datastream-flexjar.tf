@@ -30,6 +30,13 @@ resource "google_bigquery_dataset" "flexjar_datastream" {
       table_id   = "flexjar_infoskjerm_view"
     }
   }
+  access {
+    view {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "flexjar_syfooversikt_view"
+    }
+  }
   timeouts {}
 }
 
