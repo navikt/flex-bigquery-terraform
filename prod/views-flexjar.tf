@@ -206,3 +206,71 @@ WHERE tags LIKE '%infoskjerm%'
 AND team = 'flex'
 EOF
 }
+
+
+
+module "flexjar_syfooversikt_view" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "flexjar_syfooversikt_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når feedback ble gitt"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "team"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "app"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tags"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "svar"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "feedbackId"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "feedback"
+        type        = "STRING"
+        description = ""
+      },
+    ]
+  )
+  view_query = <<EOF
+SELECT opprettet,
+       team,
+       app,
+       tags,
+       JSON_VALUE(feedback_json, '$.svar')                              AS svar,
+       JSON_VALUE(feedback_json, '$.feedbackId')                        AS feedbackId,
+       JSON_VALUE(feedback_json, '$.feedback')                          AS feedback
+FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
+WHERE app = 'syfooversikt'
+AND team = 'teamsykefravr'
+AND JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt'
+EOF
+}
