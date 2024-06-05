@@ -164,3 +164,24 @@ FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
 )
 EOF
 }
+
+module "arkivering_oppgave_venter_pa_bomlo" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "arkivering_oppgave_venter_pa_bomlo"
+  view_schema = jsonencode(
+    [
+      {
+        name = "antall"
+        type = "INTEGER"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT count(status) AS antall FROM `${var.gcp_project["project"]}.arkivering_oppgave_datastream.public_oppgavestyring`
+WHERE status = 'VenterPaBomlo'
+GROUP BY status
+EOF
+}
