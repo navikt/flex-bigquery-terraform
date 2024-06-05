@@ -135,36 +135,6 @@ FROM `${var.gcp_project["project"]}.arkivering_oppgave_datastream.public_oppgave
 EOF
 }
 
-module "modia_kontakt_metrikk_henvendelse_avstemming" {
-  source              = "../modules/google-bigquery-view"
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "modia-kontakt-metrikk-henvendelse-avstemming"
-  view_schema = jsonencode(
-    [
-      {
-        name = "id"
-        type = "STRING"
-      }
-    ]
-  )
-  view_query = <<EOF
-SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-modia-kontakt-metrikk",
-  '''
-  SELECT id FROM henvendelse
-  WHERE tidspunkt < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
-    AND tidspunkt > date_trunc('day', current_timestamp) - INTERVAL '2 days'
-  ''')
-WHERE id NOT IN (
-SELECT id
-FROM `${var.gcp_project["project"]}.modia_kontakt_metrikk_datastream.public_henvendelse`
-  WHERE tidspunkt < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
-    AND tidspunkt >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
-)
-EOF
-}
-
 module "flexjar_feedback_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
@@ -192,64 +162,5 @@ FROM `${var.gcp_project["project"]}.flexjar_datastream.public_feedback`
   WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
     AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
 )
-EOF
-}
-
-module "flex_inntektsmelding_status_avstemming" {
-  source              = "../modules/google-bigquery-view"
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "flex-inntektsmelding-status-avstemming"
-  view_schema = jsonencode(
-    [
-      {
-        name = "id"
-        type = "STRING"
-      }
-    ]
-  )
-  view_query = <<EOF
-SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-inntektsmelding-status",
-  '''
-  SELECT id FROM vedtaksperiode
-  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
-    AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
-  ''')
-WHERE id NOT IN (
-SELECT id
-FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode`
-  WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
-    AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
-)
-EOF
-}
-
-module "manglende_inntektsmelding_varsel_morgendagens_prognose" {
-  source              = "../modules/google-bigquery-view"
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "manglende-inntektsmelding-morgendagens-prognose"
-  view_schema = jsonencode(
-    [
-      {
-        name = "id"
-        type = "STRING"
-      }
-    ]
-  )
-  view_query = <<EOF
-SELECT vp.id
-FROM `flex-prod-af40.inntektsmelding_status_datastream.public_vedtaksperiode_status` status
-          INNER JOIN (SELECT vedtaksperiode_db_id, max(opprettet) AS opprettet
-                      FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_status`
-                      GROUP BY vedtaksperiode_db_id) max_status
-                    ON status.vedtaksperiode_db_id = max_status.vedtaksperiode_db_id
-                        AND status.opprettet = max_status.opprettet
-          INNER JOIN `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode` vp ON vp.id = status.vedtaksperiode_db_id
-WHERE status.status IN ('MANGLER_INNTEKTSMELDING')
-AND status.opprettet between timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 15 DAY)
-AND timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL - 14 DAY)
 EOF
 }
