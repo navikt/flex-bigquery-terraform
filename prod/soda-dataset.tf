@@ -174,14 +174,13 @@ module "arkivering_oppgave_venter_pa_bomlo" {
   view_schema = jsonencode(
     [
       {
-        name = "antall"
-        type = "INTEGER"
+        name = "id"
+        type = "STRING"
       }
     ]
   )
   view_query = <<EOF
-SELECT count(status) AS antall FROM `${var.gcp_project["project"]}.arkivering_oppgave_datastream.public_oppgavestyring`
+SELECT id FROM `${var.gcp_project["project"]}.arkivering_oppgave_datastream.public_oppgavestyring`
 WHERE status = 'VenterPaBomlo'
-GROUP BY status
 EOF
 }
