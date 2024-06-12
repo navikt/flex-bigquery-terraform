@@ -7,13 +7,13 @@ locals {
 }
 
 module "spinnsyn_datastream" {
-  source                                       = "../modules/google-bigquery-datastream"
-  gcp_project                                  = var.gcp_project
-  application_name                             = "spinnsyn"
-  cloud_sql_instance_name                      = "spinnsyn-backend"
-  cloud_sql_instance_db_name                   = "spinnsyn-db"
-  cloud_sql_instance_db_credentials            = local.spinnsyn_datastream_credentials
-  datastream_vpc_resources                     = local.datastream_vpc_resources
+  source                            = "../modules/google-bigquery-datastream"
+  gcp_project                       = var.gcp_project
+  application_name                  = "spinnsyn"
+  cloud_sql_instance_name           = "spinnsyn-backend"
+  cloud_sql_instance_db_name        = "spinnsyn-db"
+  cloud_sql_instance_db_credentials = local.spinnsyn_datastream_credentials
+  datastream_vpc_resources          = local.datastream_vpc_resources
 
   authorized_views = [
     {
@@ -23,5 +23,35 @@ module "spinnsyn_datastream" {
         table_id   = "spinnsyn_utbetaling_view"
       }
     }
+  ]
+}
+
+module "arkivering_oppgave_datastream" {
+  source                            = "../modules/google-bigquery-datastream"
+  gcp_project                       = var.gcp_project
+  application_name                  = "arkivering-oppgave"
+  cloud_sql_instance_name           = "sykepengesoknad-arkivering-oppgave"
+  cloud_sql_instance_db_name        = "sykepengesoknad-arkivering-oppgave-db"
+  cloud_sql_instance_db_credentials = local.arkivering_oppgave_datastream_credentials
+  datastream_vpc_resources          = local.datastream_vpc_resources
+
+  authorized_views = [
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
+      }
+    },
+    { view = {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
+    } },
+    { view = {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
+    } }
   ]
 }
