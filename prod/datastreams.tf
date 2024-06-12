@@ -55,3 +55,36 @@ module "arkivering_oppgave_datastream" {
     } }
   ]
 }
+
+module "flexjar_datastream" {
+  source                            = "../modules/google-bigquery-datastream"
+  gcp_project                       = var.gcp_project
+  application_name                  = "flexjar"
+  cloud_sql_instance_name           = "flexjar-backend"
+  cloud_sql_instance_db_name        = "flexjar-backend-db"
+  cloud_sql_instance_db_credentials = local.flexjar_datastream_credentials
+  datastream_vpc_resources          = local.datastream_vpc_resources
+
+  authorized_views = [
+    {
+      view = {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "flexjar_feedback_view"
+    }
+    },
+    {
+      view = {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "flexjar_infoskjerm_view"
+    }},
+    {
+      view = {
+      dataset_id = "flex_dataset"
+      project_id = var.gcp_project["project"]
+      table_id   = "flexjar_syfooversikt_view"
+    }
+    }
+  ]
+}

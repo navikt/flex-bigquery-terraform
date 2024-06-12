@@ -133,7 +133,7 @@ SELECT opprettet,
            WHEN 4 THEN '🙂'
            WHEN 5 THEN '😍'
            END                                                             svar_emoji
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
+FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 where (
   JSON_VALUE(feedback_json, '$.svar') in ('JA', 'NEI', 'FORBEDRING', '1', '2', '3', '4', '5', 'Ja', 'Nei', 'Mangelfull eller uriktig rapportering til A-ordningen')
    OR
@@ -201,13 +201,11 @@ SELECT opprettet,
        JSON_VALUE(feedback_json, '$.svar')                              AS svar,
        JSON_VALUE(feedback_json, '$.feedbackId')                        AS feedbackId,
        JSON_VALUE(feedback_json, '$.feedback')                          AS feedback
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
+FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 WHERE tags LIKE '%infoskjerm%'
 AND team = 'flex'
 EOF
 }
-
-
 
 module "flexjar_syfooversikt_view" {
   source              = "../modules/google-bigquery-view"
@@ -268,7 +266,7 @@ SELECT opprettet,
        JSON_VALUE(feedback_json, '$.svar')                              AS svar,
        JSON_VALUE(feedback_json, '$.feedbackId')                        AS feedbackId,
        JSON_VALUE(feedback_json, '$.feedback')                          AS feedback
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flexjar_datastream.dataset_id}.public_feedback`
+FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 WHERE app = 'syfooversikt'
 AND team = 'teamsykefravr'
 AND JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt'
