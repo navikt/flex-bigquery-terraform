@@ -108,3 +108,57 @@ module "inntektsmelding_status_datastream" {
     }
   ]
 }
+
+module "sykepengesoknad_datastream" {
+  source                            = "../modules/google-bigquery-datastream"
+  gcp_project                       = var.gcp_project
+  application_name                  = "sykepengesoknad"
+  cloud_sql_instance_name           = "sykepengesoknad"
+  cloud_sql_instance_db_name        = "sykepengesoknad"
+  cloud_sql_instance_db_credentials = local.sykepengesoknad_datastream_credentials
+  datastream_vpc_resources          = local.datastream_vpc_resources
+
+  authorized_views = [
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_sykepengesoknad_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_hovedsporsmal_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_sporsmal_svar_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_andre_inntektskilder_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_klipp_metrikk_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_yrkesskade_sykmelding_view"
+    } }
+  ]
+}
