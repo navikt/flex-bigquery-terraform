@@ -21,7 +21,7 @@ module "inntektsmelding_status_event_view" {
   )
   view_query = <<EOF
 SELECT opprettet, status
-FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.inntektsmelding_status_datastream.dataset_id}.public_inntektsmelding_status`
+FROM `${var.gcp_project["project"]}.${module.inntektsmelding_status_datastream.dataset_id}.public_inntektsmelding_status`
 EOF
 
 }

@@ -68,23 +68,43 @@ module "flexjar_datastream" {
   authorized_views = [
     {
       view = {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_feedback_view"
-    }
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "flexjar_feedback_view"
+      }
     },
     {
       view = {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_infoskjerm_view"
-    }},
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "flexjar_infoskjerm_view"
+    } },
     {
       view = {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "flexjar_syfooversikt_view"
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "flexjar_syfooversikt_view"
+      }
     }
+  ]
+}
+
+module "inntektsmelding_status_datastream" {
+  source                            = "../modules/google-bigquery-datastream"
+  gcp_project                       = var.gcp_project
+  application_name                  = "inntektsmelding-status"
+  cloud_sql_instance_name           = "flex-inntektsmelding-status"
+  cloud_sql_instance_db_name        = "flex-inntektsmelding-status-db"
+  cloud_sql_instance_db_credentials = local.inntektsmelding_status_datastream_credentials
+  datastream_vpc_resources          = local.datastream_vpc_resources
+
+  authorized_views = [
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "inntektsmelding_status_event_view"
+      }
     }
   ]
 }
