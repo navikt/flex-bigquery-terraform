@@ -30,7 +30,7 @@ resource "google_datastream_private_connection" "flex_datastream_private_connect
 }
 
 // Use to define the VPC firewall rules that controls traffic to the resouces in our VPC. By default, incoming traffic
-// from outside your network is blocked. Since we are using a Cloud SQL reverse proxy, we need to create an ingress
+// from outside our network is blocked. Since we are using a Cloud SQL reverse proxy, we need to create an ingress
 // firewall rule that allows traffic from the Datastream VPC IP range to the Cloud SQL instance on the specified port.
 resource "google_compute_firewall" "allow_datastream_to_cloud_sql" {
   project = var.gcp_project["project"]
@@ -54,4 +54,3 @@ resource "google_datastream_connection_profile" "datastream_bigquery_connection_
 
   bigquery_profile {}
 }
-
