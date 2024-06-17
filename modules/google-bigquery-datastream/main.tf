@@ -123,18 +123,50 @@ resource "google_datastream_stream" "datastream" {
       replication_slot              = local.cloud_sql_instance_replication_name
 
       exclude_objects {
-        postgresql_schemas {
-          schema = "public"
 
-          postgresql_tables {
-            table = "flyway_schema_history"
+        dynamic "postgresql_schemas" {
+          for_each = var.postgresql_exclude_schemas
+          content {
+            schema = postgresql_schemas.value.schema
+
+            dynamic "postgresql_tables" {
+              for_each = coalesce(postgresql_schemas.value.tables, [])
+              content {
+                table = postgresql_tables.value.table
+
+                dynamic "postgresql_columns" {
+                  for_each = coalesce(postgresql_tables.value.columns, [])
+                  content {
+                    column = postgresql_columns.value
+                  }
+                }
+              }
+            }
           }
         }
       }
 
       include_objects {
-        postgresql_schemas {
-          schema = "public"
+
+        dynamic "postgresql_schemas" {
+          for_each = var.postgresql_include_schemas
+          content {
+            schema = postgresql_schemas.value.schema
+
+            dynamic "postgresql_tables" {
+              for_each = coalesce(postgresql_schemas.value.tables, [])
+              content {
+                table = postgresql_tables.value.table
+
+                dynamic "postgresql_columns" {
+                  for_each = coalesce(postgresql_tables.value.columns, [])
+                  content {
+                    column = postgresql_columns.value
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

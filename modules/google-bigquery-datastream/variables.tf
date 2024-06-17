@@ -30,7 +30,7 @@ variable "gcp_project" {
 }
 
 variable "datastream_vpc_resources" {
-  description = "Common resoucres defined by the VPC and used in each individual Datastream."
+  description = "Common resources defined by the VPC and used in each individual Datastream."
   type        = map(string)
 
   validation {
@@ -143,4 +143,28 @@ variable "authorized_views" {
     })
   }))
   default = []
+}
+
+variable "postgresql_include_schemas" {
+  description = "A list of PostgreSQL schemas to include, each containing an optional list of tables and columns to include."
+  type = list(object({
+    schema = string
+    tables = optional(list(object({
+      table   = string
+      columns = optional(list(string))
+    })))
+  }))
+  default = [{ schema = "public" }]
+}
+
+variable "postgresql_exclude_schemas" {
+  description = "A list of PostgreSQL schemas to exclude, each containing an optional list of tables and columns to exclude."
+  type = list(object({
+    schema = string
+    tables = optional(list(object({
+      table   = string
+      columns = optional(list(string))
+    })))
+  }))
+  default = [{ schema = "public", tables = [{ table = "flyway_schema_history" }] }]
 }
