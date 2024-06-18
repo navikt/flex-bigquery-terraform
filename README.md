@@ -1,18 +1,16 @@
 # flex-biqquery-terraform
 
-Terraform-konfigurasjon for å flytte data fra applikasjonsspesifikke database i [Google Cloud SQL]() til [Google BigQuery]() 
-med [Google Datastream]() for Team Flex.
+Terraform-konfigurasjon for å flytte data fra [Google Cloud SQL](https://cloud.google.com/sql) databaser til [Google BigQuery](https://cloud.google.com/bigquery) med [Google Datastream (Change Data Capture)](https://cloud.google.com/datastream).
 
-Bakgrunnen for at data flyttes til BigQuery er et ønske om å kunne bruke BigQuery som datakilde for analyse og visualisering. 
+Repoet er spesifikk for Team Flex i NAV PO Helse, men har flere [moduler](https://github.com/navikt/flex-bigquery-terraform/tree/main/modules) som kan gjenbrukes utenfor NAV med ingen eller mindre modifikasjoner.
 
-Datastreams er valgt på grunn av at data blir oppdatert så fort de blir skrevet til eller endret i kildedatabasen. Alternativet er
-[Federated Queries](), som typisk flytter data med angitte intervaller, basert på en SQL-spørring. For Team Flex sin del er 
-dataene i kildedatabasen av en sånn art at vi ikke kan avgjøre hva som er nye eller nylig oppdatete data, og dermed må 
-flytte alle data hver gang, noe som medfører flytt av unødveneidg mye data.
+Bakgrunnen for oppsettet er at Team Flex ønsker å kunne bruke BigQuery som datakilde for analyse, visualisering og overvåkning av dataintegritet på tvers av databaser.
 
-Begrunnelsen for å bruke Terraform i stedet for å opprettet ressursene direkte i [Cloud Console]() er todelt. Først og fremst 
-gir det teamet en deterministisk måte å opprette og slette ressurser på. For det andre fungerer konfigurasjonen fungerer som 
-dokumentasjon på hvlke ressurser som er opprettet.
+Datastream er valgt på grunn av at data blir oppdatert så fort de blir skrevet til eller endret i kildedatabasen. Alternativet er
+[federated queries](https://cloud.google.com/bigquery/docs/cloud-sql-federated-queries), som typisk flytter data definert i en SQL-spørring ved angitte intervaller.
 
-## Hvordan logger jeg inn i gcloud før jeg kjører terraform init?
-`gcloud auth login --update-adc`
+Begrunnelsen for bruk av Terraform er todelt. Først og fremst
+gir det teamet en deterministisk måte å opprette og slette ressurser på. For det andre fungerer konfigurasjonen fungerer som
+dokumentasjon på hvilke ressurser som er opprettet.
+
+Et annet alternativ er [nada-datasteram](https://github.com/navikt/nada-datastream), som gjør samme nytte men med en annen tilnærming.
