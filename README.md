@@ -15,7 +15,26 @@ Et alternativ til dette er [nada-datasteram](https://github.com/navikt/nada-data
 
 ## Arkitektur
 
+Diagrammet beskriver ressursene som settes opp når det opprettet en [Google Datastream](https://cloud.google.com/datastream/docs/overview).
+
 ![Arkitektur](./dokumentasjon/bilder/arkitektur.png)
+
+## Innhold
+
+Terraform parser og samler alle .tf-filene i ett prosjekt til én samlet konfigurasjon. Det gjør at man kan fordele ressurser på flere filer uten at det påvirker funksjonalitete. Ved å dele opp ressursene i flere filer kan man organisere konfigurasjonen på en mer strukturert måte, noe som gjør det enklere å finne og vedlikeholde spesifikke ressurser.
+
+Ressursene i dette prosjekter er delt opp i følgende filer:
+
+- `main.tf`: Definerer fellesressurser for prosjektet.
+- `variables.tf`: Definerer input-variabler og default-verdier brukt i prosjektet.
+- `secrets.tf`: Definerer `data`-ressursers som henter data fra Google Secret Manager.
+- `external-connection.tf`: Definerer ressurser brukt til å hentet data fra Cloud SQL-instanser direkte fra Google BigQuery.
+- `flex-dataset.tf`: Definerer et Google BiqQuery datasett med tilhørende tilgangskontroll som er ment å tilby views brukt som dataprodukt i [Datamarkedsplassen](https://data.ansatt.nav.no/).
+- `soda-dataset.tf`: Definerer et Google BigQuery datasett og views brukt til overbåkning og avstemming av data med Soda. Henter både data fra datasett opprettet av Datastreams og fra Cloud SQL-instanser ved hjelp av _external connections_.
+- `datastream-vpc.tf`: Definerer felles ressursers brukt av flere Datastreams.
+- `datastream.tf`: Definerer Google Datastreams som skal settes opp. Bruker modulen `flex-bigquery-datastream`.
+- `tabeller-<applikasjon>.tf`: For eksempel `tabeller-sykepengesoknad.tf` - Definerer Tabeller views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
+- `views-<applikasjon>.tf`: For eksempel `views-spinnsyn.tf` - Definerer BigQuery views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 
 ## Kommandoer
 
