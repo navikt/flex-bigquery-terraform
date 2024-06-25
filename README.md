@@ -11,11 +11,11 @@ Datastream er valgt på grunn av at data blir streamet til BigQuery så fort de 
 
 Begrunnelsen for bruk av Terraform er todelt. Først og fremst gir det teamet en deterministisk måte å opprette og slette ressurser på. For det andre fungerer konfigurasjonen fungerer som dokumentasjon på hvilke ressurser som er opprettet.
 
-Et alternativ til dette er [nada-datastream](https://github.com/navikt/nada-datastream), som gjør samme nytte men, med en annen tilnærming.
+Et alternativ til dette er [nada-datastream](https://github.com/navikt/nada-datastream), som gjør samme nytte, men med en annen tilnærming.
 
 ## Arkitektur
 
-Diagrammet beskriver ressursene som settes opp når det opprettet en [Google Datastream](https://cloud.google.com/datastream/docs/overview):
+Diagrammet beskriver ressursene som settes opp når det opprettes en [Google Datastream](https://cloud.google.com/datastream/docs/overview):
 
 ![Arkitektur](./dokumentasjon/bilder/arkitektur.png)
 
@@ -71,7 +71,7 @@ module "spinnsyn_datastream" {
 }
 ```
 
-Merk at `application_name` her er satt til `spinnsyn`, i stedet for applikasjonens virkelige navn `spinnsyn-backend`. Årsaken er at `application_name` brukes av modulen til å utlede navn på flere ressurser, men for å kunne migrerer ekisterende ressurser inn i modulen uten endring ( ressurser opprettet med andre navn enn det modulen ville ha gjort hvis det faktiske applikasjonsnavn ble brukt), måtte navnet settes sånn at navn på ressurser modulen utleder matcher ekisterende ressurser.
+Merk at `application_name` her er satt til `spinnsyn`, i stedet for applikasjonens virkelige navn `spinnsyn-backend`. Årsaken er at `application_name` brukes av modulen til å utlede navn på flere ressurser, men for å kunne migrerer eksisterende ressurser inn i modulen uten endring ( ressurser opprettet med andre navn enn det modulen ville ha gjort hvis det faktiske applikasjonsnavn ble brukt), måtte navnet settes sånn at navn på ressurser modulen utleder faktisk matcher eksisterende ressurser.
 
 For å slette en opprettet ressurs er det normalt nok å fjerne ressursen fra den aktuelle `*.tf` filen. Det vil ikke fungere for denne modulen da et BigQuery datasett ikke lar seg slette hvis det finnes tabeller med data i datasettet. Det kan endres med å legge til `big_query_dataset_delete_contents_on_destroy = true` i konfigurasjonen og applyen den før man sletter ressursen.
 
