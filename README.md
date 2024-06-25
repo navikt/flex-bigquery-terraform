@@ -11,40 +11,40 @@ Datastream er valgt på grunn av at data blir streamet til BigQuery så fort de 
 
 Begrunnelsen for bruk av Terraform er todelt. Først og fremst gir det teamet en deterministisk måte å opprette og slette ressurser på. For det andre fungerer konfigurasjonen fungerer som dokumentasjon på hvilke ressurser som er opprettet.
 
-Et alternativ til dette er [nada-datasteram](https://github.com/navikt/nada-datastream), som gjør samme nytte men med en annen tilnærming.
+Et alternativ til dette er [nada-datastream](https://github.com/navikt/nada-datastream), som gjør samme nytte men, med en annen tilnærming.
 
 ## Arkitektur
 
-Diagrammet beskriver ressursene som settes opp når det opprettet en [Google Datastream](https://cloud.google.com/datastream/docs/overview).
+Diagrammet beskriver ressursene som settes opp når det opprettet en [Google Datastream](https://cloud.google.com/datastream/docs/overview):
 
 ![Arkitektur](./dokumentasjon/bilder/arkitektur.png)
 
 ## Innhold
 
-Terraform parser og samler alle .tf-filene i ett prosjekt til én samlet konfigurasjon. Det gjør at man kan fordele ressurser på flere filer uten at det påvirker funksjonalitete. Ved å dele opp ressursene i flere filer kan man organisere konfigurasjonen på en mer strukturert måte, noe som gjør det enklere å finne og vedlikeholde spesifikke ressurser.
+Terraform parser og samler alle `.tf`-filene i ett prosjekt til én samlet konfigurasjon. Det gjør at man kan organsiere prosjektet og fordele ressurser på flere filer uten at det påvirker funksjonaliteten.
 
 Ressursene i dette prosjekter er delt opp i følgende filer:
 
-- `main.tf`: Definerer fellesressurser for prosjektet.
-- `variables.tf`: Definerer input-variabler og default-verdier brukt i prosjektet.
-- `secrets.tf`: Definerer `data`-ressursers som henter data fra Google Secret Manager.
-- `external-connection.tf`: Definerer ressurser brukt til å hentet data fra Cloud SQL-instanser direkte fra Google BigQuery.
-- `flex-dataset.tf`: Definerer et Google BiqQuery datasett med tilhørende tilgangskontroll som er ment å tilby views brukt som dataprodukt i [Datamarkedsplassen](https://data.ansatt.nav.no/).
-- `soda-dataset.tf`: Definerer et Google BigQuery datasett og views brukt til overbåkning og avstemming av data med Soda. Henter både data fra datasett opprettet av Datastreams og fra Cloud SQL-instanser ved hjelp av _external connections_.
-- `datastream-vpc.tf`: Definerer felles ressursers brukt av flere Datastreams.
+- `main.tf`: Fellesressurser for prosjektet.
+- `variables.tf`: Input-variabler og default-verdier brukt i prosjektet.
+- `secrets.tf`: `data`-ressursers som henter data fra Google Secret Manager.
+- `external-connection.tf`: Ressurser brukt til å hentet data fra Cloud SQL-instanser direkte fra Google BigQuery.
+- `flex-dataset.tf`: Et Google BiqQuery datasett med tilhørende tilgangskontroll, som tilbyr views brukt som dataprodukt i [Datamarkedsplassen](https://data.ansatt.nav.no/).
+- `soda-dataset.tf`: Et Google BigQuery datasett med views brukt til overvåkning og avstemming av data fra [flex-bigquery-soda](https://github.com/navikt/flex-bigquery-soda). Henter både data fra datasett opprettet av Datastreams og fra Cloud SQL-instanser ved hjelp av _external connections_.
+- `datastream-vpc.tf`: Felles ressursers brukt av flere Datastreams.
 - `datastream.tf`: Definerer Google Datastreams som skal settes opp. Bruker modulen `flex-bigquery-datastream`.
 - `tabeller-<applikasjon>.tf`: For eksempel `tabeller-sykepengesoknad.tf` - Definerer Tabeller views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 - `views-<applikasjon>.tf`: For eksempel `views-spinnsyn.tf` - Definerer BigQuery views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 
 ## Bruk
 
-Terraform-ressuser opprettes nå man kjører kommandoen `terraform apply` i en mappe med én eller flere `*.tf` filer. Dette prosjektet har splittet ressursene i `dev` og `prod`. I praksis er det helt forskjellige prosjekt som provisjonerer ressurser i to forskejllige GCP-prosjekt.
+Terraform-ressuser opprettes nå man kjører kommandoen `terraform apply` i en mappe med én eller flere `*.tf`-filer. Dette prosjektet har to mapper, `dev` og `prod`. som i praksis er to adskilte prosjekt som provisjonerer ressurser i to forskjellige GCP-prosjekt.
 
 - Når kode commites og pushes kjøres alltid `terraform validate` og `terraform plan`.
 - Hvis koden commites til `main` provisjoneres både `dev` og `prod` av GitHub Actions.
 - Hvis man pusher en branch prefixes med `dev-` provisjoneres bare `dev`.
 
-Terraform kan også kjøres lokalt, både for `dev` og `prod`, men det krever autentisering mot Google Cloud, enten med `nais login` eller `cloud auth login --update-adc`.
+Terraform kan også kjøres lokalt, både for `dev` og `prod`, men det krever autentisering mot Google Cloud, enten med `nais login` eller `gcloud auth login --update-adc`.
 
 ## Datastreams
 
@@ -71,9 +71,9 @@ module "spinnsyn_datastream" {
 }
 ```
 
-Merk at `application_name` her er satt til `spinnsyn`, i stedet for applikasjonens virkelige navn `spinnsyn-backend`. Årsaken er at `application_name` brukes av modulen til å utlede navn på flere ressurser, men for å kunne migrerer ekisterende ressurser inn i modulen uten endring, måtte navnet settes sånn at det matcher det som modulen utleder.
+Merk at `application_name` her er satt til `spinnsyn`, i stedet for applikasjonens virkelige navn `spinnsyn-backend`. Årsaken er at `application_name` brukes av modulen til å utlede navn på flere ressurser, men for å kunne migrerer ekisterende ressurser inn i modulen uten endring ( ressurser opprettet med andre navn enn det modulen ville ha gjort hvis det faktiske applikasjonsnavn ble brukt), måtte navnet settes sånn at navn på ressurser modulen utleder matcher ekisterende ressurser.
 
-For å slette en opprettet ressurs skal det normalt holde fjerne ressursen fra den aktuelle `*.tf` filen. Det vil ikke fungere for denne modulen da et BigQuery datadsett normalt ikke lar seg slette hvis det finnes tabeller med data i datasettet. Det kan endres med å legge til `big_query_dataset_delete_contents_on_destroy = true` i konfigurasjonen og applyen den før man sletter ressursen.
+For å slette en opprettet ressurs er det normalt nok å fjerne ressursen fra den aktuelle `*.tf` filen. Det vil ikke fungere for denne modulen da et BigQuery datasett ikke lar seg slette hvis det finnes tabeller med data i datasettet. Det kan endres med å legge til `big_query_dataset_delete_contents_on_destroy = true` i konfigurasjonen og applyen den før man sletter ressursen.
 
 Modulen kan også brukes til å legge til ytterligere tilganger og filtering av hvilke tabeller som skal streams. Se gjerne [datastreams.tf](./prod/datastreams.tf) for eksempler.
 
@@ -111,7 +111,13 @@ Slett BigQuery tabell:
 bq rm -t flex-prod-af40:spinnsyn_datastream.public_utbetaling
 ```
 
-## BigQuery Clustering
+List alle ressurser Terraform vet om:
+
+```sh
+terraform state list
+```
+
+## BigQuery Partitioning og Clustering
 
 _Partitioning_ er når en tabell deles inn i mindre deler basert på en bestemt kolonne, vanligvis en tidskolonne. Dette forbedrer ytelsen og redusere kostnader ved spørringer, da bare relevante partisjoner blir skannet i stedet for hele tabellen.
 
