@@ -113,16 +113,7 @@ resource "google_bigquery_table_iam_binding" "flexjar_feedback_view_iam_binding"
     "serviceAccount:syfo-71ci@knada-gcp.iam.gserviceaccount.com",
   ]
 }
-resource "google_bigquery_table_iam_binding" "flexjar_infoskjerm_view_iam_binding" {
-  depends_on = [module.flexjar_infoskjerm_view]
-  project    = var.gcp_project.project
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.flexjar_infoskjerm_view.bigquery_view_id
-  role       = "roles/bigquery.dataViewer"
-  members = [
-    "serviceAccount:flex-trello-flex-q5mej3i@nais-dev-2e7b.iam.gserviceaccount.com",
-  ]
-}
+
 resource "google_bigquery_table_iam_binding" "flexjar_syfooversikt_view_iam_binding" {
   depends_on = [module.flexjar_syfooversikt_view]
   project    = var.gcp_project.project

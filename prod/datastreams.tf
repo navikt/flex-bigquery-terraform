@@ -77,12 +77,6 @@ module "flexjar_datastream" {
       view = {
         dataset_id = "flex_dataset"
         project_id = var.gcp_project["project"]
-        table_id   = "flexjar_infoskjerm_view"
-    } },
-    {
-      view = {
-        dataset_id = "flex_dataset"
-        project_id = var.gcp_project["project"]
         table_id   = "flexjar_syfooversikt_view"
       }
     }
