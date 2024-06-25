@@ -36,6 +36,47 @@ Ressursene i dette prosjekter er delt opp i følgende filer:
 - `tabeller-<applikasjon>.tf`: For eksempel `tabeller-sykepengesoknad.tf` - Definerer Tabeller views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 - `views-<applikasjon>.tf`: For eksempel `views-spinnsyn.tf` - Definerer BigQuery views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 
+## Bruk
+
+Terraform-ressuser opprettes nå man kjører kommandoen `terraform apply` i en mappe med én eller flere `*.tf` filer. Dette prosjektet har splittet ressursene i `dev` og `prod`. I praksis er det helt forskjellige prosjekt som provisjonerer ressurser i to forskejllige GCP-prosjekt.
+
+- Når kode commites og pushes kjøres alltid `terraform validate` og `terraform plan`.
+- Hvis koden commites til `main` provisjoneres både `dev` og `prod` av GitHub Actions.
+- Hvis man pusher en branch prefixes med `dev-` provisjoneres bare `dev`.
+
+Terraform kan også kjøres lokalt, både for `dev` og `prod`, men det krever autentisering mot Google Cloud, enten med `nais login` eller `cloud auth login --update-adc`.
+
+## Datastreams
+
+Oppsett av en ny datastream kan deles inn i to trinn:
+
+1. Forberedelse av kildedatabasen.
+2. Oppsett av Datastream.
+
+For oppsett av kildedatabasen, følg gjerne [oppskriften i nada-datastream](https://github.com/navikt/nada-datastream?tab=readme-ov-file#forutsetninger-for-bruk).
+
+Når det er gjort kan en ny Datastream opprettes ved å definere en ressurs som bruker modulen [flex-bigquery-datastream](./modules/google-bigquery-datastream/).
+
+Modulen definerer ett sett med standard tilganger for medlemmer av prosjektet (teamet), så med mindre det er behov for å gi tilgang til views eller eksterne brukere, er følgende nok:
+
+```hcl
+module "spinnsyn_datastream" {
+  source                            = "../modules/google-bigquery-datastream"
+  gcp_project                       = var.gcp_project
+  application_name                  = "spinnsyn"
+  cloud_sql_instance_name           = "spinnsyn-backend"
+  cloud_sql_instance_db_name        = "spinnsyn-db"
+  cloud_sql_instance_db_credentials = local.spinnsyn_datastream_credentials
+  datastream_vpc_resources          = local.datastream_vpc_resources
+}
+```
+
+Merk at `application_name` her er satt til `spinnsyn`, i stedet for applikasjonens virkelige navn `spinnsyn-backend`. Årsaken er at `application_name` brukes av modulen til å utlede navn på flere ressurser, men for å kunne migrerer ekisterende ressurser inn i modulen uten endring, måtte navnet settes sånn at det matcher det som modulen utleder.
+
+For å slette en opprettet ressurs skal det normalt holde fjerne ressursen fra den aktuelle `*.tf` filen. Det vil ikke fungere for denne modulen da et BigQuery datadsett normalt ikke lar seg slette hvis det finnes tabeller med data i datasettet. Det kan endres med å legge til `big_query_dataset_delete_contents_on_destroy = true` i konfigurasjonen og applyen den før man sletter ressursen.
+
+Modulen kan også brukes til å legge til ytterligere tilganger og filtering av hvilke tabeller som skal streams. Se gjerne [datastreams.tf](./prod/datastreams.tf) for eksempler.
+
 ## Kommandoer
 
 Eksemplene bruker ressurser relatert til `spinnsyn-datastream` som eksempel.
