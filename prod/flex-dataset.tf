@@ -129,11 +129,11 @@ resource "google_bigquery_table_iam_binding" "spinnsyn_utbetaling_view_iam_bindi
   ]
 }
 
-resource "google_bigquery_table_iam_binding" "inntektsmelding_status_event_view_iam_binding" {
-  depends_on = [module.inntektsmelding_status_event_view]
+resource "google_bigquery_table_iam_binding" "venter_pa_arbeidsgiver_view_iam_binding" {
+  depends_on = [module.venter_pa_arbeidsgiver_view]
   project    = var.gcp_project.project
   dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  table_id   = module.inntektsmelding_status_event_view.bigquery_view_id
+  table_id   = module.venter_pa_arbeidsgiver_view.bigquery_view_id
   role       = "roles/bigquery.dataViewer"
   members = [
     "group:all-users@nav.no",
