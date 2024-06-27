@@ -1,8 +1,8 @@
 module "inntektsmelding_status_event_view" {
-  source = "../modules/google-bigquery-view"
+  source              = "../modules/google-bigquery-view"
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "inntektsmelding_status_event_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "inntektsmelding_status_event_view"
   view_schema = jsonencode(
     [
       {
@@ -27,10 +27,10 @@ EOF
 }
 
 module "venter_pa_arbeidsgiver_view" {
-  source = "../modules/google-bigquery-view"
+  source              = "../modules/google-bigquery-view"
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "venter_pa_arbeidsgiver_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "venter_pa_arbeidsgiver_view"
   view_schema = jsonencode(
     [
       {
@@ -90,10 +90,10 @@ EOF
 
 
 module "varsling_events_view" {
-  source = "../modules/google-bigquery-view"
+  source              = "../modules/google-bigquery-view"
   deletion_protection = false
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "varsling_events_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "varsling_events_view"
   view_schema = jsonencode(
     [
       {
