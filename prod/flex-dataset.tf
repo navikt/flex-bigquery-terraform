@@ -140,3 +140,15 @@ resource "google_bigquery_table_iam_binding" "venter_pa_arbeidsgiver_view_iam_bi
     "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
   ]
 }
+
+resource "google_bigquery_table_iam_binding" "varsling_events_view_iam_binding" {
+  depends_on = [module.varsling_events_view]
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.varsling_events_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "group:all-users@nav.no",
+    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+  ]
+}

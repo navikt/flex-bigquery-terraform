@@ -43,16 +43,20 @@ module "arkivering_oppgave_datastream" {
         table_id   = "sykepengesoknad_arkivering_oppgave_oppgavestyring_view"
       }
     },
-    { view = {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
-    } },
-    { view = {
-      dataset_id = "flex_dataset"
-      project_id = var.gcp_project["project"]
-      table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
-    } }
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_opprettet_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
+      }
+    }
   ]
 }
 
@@ -98,6 +102,13 @@ module "inntektsmelding_status_datastream" {
         dataset_id = "flex_dataset"
         project_id = var.gcp_project["project"]
         table_id   = "venter_pa_arbeidsgiver_view"
+      }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "varsling_events_view"
       }
     }
   ]
@@ -153,6 +164,7 @@ module "sykepengesoknad_datastream" {
         dataset_id = "flex_dataset"
         project_id = var.gcp_project["project"]
         table_id   = "sykepengesoknad_yrkesskade_sykmelding_view"
-    } }
+      }
+    }
   ]
 }
