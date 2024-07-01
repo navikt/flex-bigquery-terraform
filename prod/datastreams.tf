@@ -56,6 +56,13 @@ module "arkivering_oppgave_datastream" {
         project_id = var.gcp_project["project"]
         table_id   = "sykepengesoknad_arkivering_oppgave_gosys_oppgaver_gruppert_view"
       }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "medlemskap_uavklart_gosys_view"
+      }
     }
   ]
 }
@@ -165,6 +172,15 @@ module "sykepengesoknad_datastream" {
         project_id = var.gcp_project["project"]
         table_id   = "sykepengesoknad_yrkesskade_sykmelding_view"
       }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "medlemskap_uavklart_gosys_view"
+      }
     }
   ]
 }
+
+
