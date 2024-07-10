@@ -214,3 +214,35 @@ FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_ved
 )
 EOF
 }
+
+module "forsinket_saksbehandling_varslinger_sendt_nylig" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "forsinket_saksbehandling_varslinger_sendt_nylig"
+  view_schema = jsonencode(
+    [
+      {
+        name = "status"
+        type = "STRING"
+      },
+      {
+        name = "antall"
+        type = "INTEGER"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT status, count(*) antall
+FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_status`
+WHERE tidspunkt >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 96 HOUR)
+AND status in (
+  'VARSLET_MANGLER_INNTEKTSMELDING_FØRSTE',
+  'VARSLET_MANGLER_INNTEKTSMELDING_ANDRE',
+  'VARSLET_VENTER_PÅ_SAKSBEHANDLER_FØRSTE',
+  'REVARSLET_VENTER_PÅ_SAKSBEHANDLER'
+  )
+GROUP BY STATUS
+EOF
+}
