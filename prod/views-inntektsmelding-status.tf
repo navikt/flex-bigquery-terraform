@@ -102,3 +102,35 @@ where vbs.vedtaksperiode_behandling_id = vb.id
 EOF
 
 }
+
+
+module "siste_sis_status_sykepengesoknad" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "siste_sis_status_sykepengesoknad"
+  view_schema = jsonencode(
+    [
+      {
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        name = "siste_spleisstatus"
+        type = "STRING"
+      },
+      {
+        name = "siste_varslingstatus"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT vbs.sykepengesoknad_uuid, max(vb.siste_spleisstatus) siste_spleisstatus, max(vb.siste_varslingstatus) siste_varslingstatus
+FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling` vb ,
+`${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_sykepengesoknad` vbs
+where vb.id = vbs.vedtaksperiode_behandling_id
+group by vbs.sykepengesoknad_uuid
+EOF
+}
