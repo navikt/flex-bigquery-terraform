@@ -260,7 +260,7 @@ module "siste_sis_status_sykepengesoknad" {
         type = "STRING"
       },
       {
-        name = "siste_speil_status"
+        name = "siste_spleisstatus"
         type = "STRING"
       },
       {
