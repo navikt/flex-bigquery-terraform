@@ -117,6 +117,13 @@ module "inntektsmelding_status_datastream" {
         project_id = var.gcp_project["project"]
         table_id   = "varsling_events_view"
       }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "siste_sis_status_sykepengesoknad"
+      }
     }
   ]
 }
