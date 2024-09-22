@@ -123,11 +123,18 @@ module "siste_sis_status_sykepengesoknad" {
       {
         name = "siste_varslingstatus"
         type = "STRING"
+      },
+      {
+        name = "vedtaksperiode_id"
+        type = "STRING"
       }
     ]
   )
   view_query = <<EOF
-SELECT vbs.sykepengesoknad_uuid, max(vb.siste_spleisstatus) siste_spleisstatus, max(vb.siste_varslingstatus) siste_varslingstatus
+SELECT vbs.sykepengesoknad_uuid
+, max(vb.siste_spleisstatus) siste_spleisstatus
+, max(vb.siste_varslingstatus) siste_varslingstatus
+, max(vb.vedtaksperiode_id) vedtaksperiode_id
 FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling` vb ,
 `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_sykepengesoknad` vbs
 where vb.id = vbs.vedtaksperiode_behandling_id
