@@ -4,6 +4,8 @@ Terraform-konfigurasjon for å flytte data fra [Google Cloud SQL](https://cloud.
 
 Repoet er spesifikk for Team Flex i NAV PO Helse, men har flere [moduler](https://github.com/navikt/flex-bigquery-terraform/tree/main/modules) som kan gjenbrukes utenfor NAV med ingen eller mindre modifikasjoner.
 
+Repoet bruker også modulen [terraform-google-bigquery-datastream](https://github.com/navikt/terraform-google-bigquery-datastream).
+
 Bakgrunnen for oppsettet er at Team Flex ønsker å kunne bruke BigQuery som datakilde for analyse, visualisering og overvåkning av dataintegritet på tvers av databaser.
 
 Datastream er valgt på grunn av at data blir streamet til BigQuery så fort de blir skrevet til eller endret i kildedatabasen. Alternativet er
@@ -32,7 +34,7 @@ Ressursene i dette prosjekter er delt opp i følgende filer:
 - `flex-dataset.tf`: Et Google BiqQuery datasett med tilhørende tilgangskontroll, som tilbyr views brukt som dataprodukt i [Datamarkedsplassen](https://data.ansatt.nav.no/).
 - `soda-dataset.tf`: Et Google BigQuery datasett med views brukt til overvåkning og avstemming av data fra [flex-bigquery-soda](https://github.com/navikt/flex-bigquery-soda). Henter både data fra datasett opprettet av Datastreams og fra Cloud SQL-instanser ved hjelp av _external connections_.
 - `datastream-vpc.tf`: Felles ressursers brukt av flere Datastreams.
-- `datastream.tf`: Definerer Google Datastreams som skal settes opp. Bruker modulen `flex-bigquery-datastream`.
+- `datastreams.tf`: Definerer Google Datastreams som skal settes opp.
 - `tabeller-<applikasjon>.tf`: For eksempel `tabeller-sykepengesoknad.tf` - Definerer Tabeller views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 - `views-<applikasjon>.tf`: For eksempel `views-spinnsyn.tf` - Definerer BigQuery views i `flex-dataset` som henter data fra datasett opprettet av datastreamen for den respektive applikasjonen.
 
@@ -40,9 +42,9 @@ Ressursene i dette prosjekter er delt opp i følgende filer:
 
 Terraform-ressuser opprettes nå man kjører kommandoen `terraform apply` i en mappe med én eller flere `*.tf`-filer. Dette prosjektet har to mapper, `dev` og `prod`. som i praksis er to adskilte prosjekt som provisjonerer ressurser i to forskjellige GCP-prosjekt.
 
-- Når kode commites og pushes kjøres alltid `terraform validate` og `terraform plan`.
+- `terraform validate` og `terraform plan` kjøres for hver commit som pushes.
 - Hvis koden commites til `main` provisjoneres både `dev` og `prod` av GitHub Actions.
-- Hvis man pusher en branch prefixes med `dev-` provisjoneres bare `dev`.
+- Hvis en branch prefixes med `dev-` provisjoneres bare `dev`.
 
 Terraform kan også kjøres lokalt, både for `dev` og `prod`, men det krever autentisering mot Google Cloud, enten med `nais login` eller `gcloud auth login --update-adc`.
 
@@ -61,7 +63,7 @@ Modulen definerer ett sett med standard tilganger for medlemmer av prosjektet (t
 
 ```hcl
 module "spinnsyn_datastream" {
-  source                            = "../modules/google-bigquery-datastream"
+  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
   gcp_project                       = var.gcp_project
   application_name                  = "spinnsyn"
   cloud_sql_instance_name           = "spinnsyn-backend"
