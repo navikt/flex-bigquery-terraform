@@ -7,7 +7,7 @@ locals {
 }
 
 module "spinnsyn_datastream" {
-  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
   gcp_project                                  = var.gcp_project
   application_name                             = "spinnsyn"
   cloud_sql_instance_name                      = "spinnsyn-backend"

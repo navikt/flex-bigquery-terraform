@@ -7,7 +7,7 @@ locals {
 }
 
 module "spinnsyn_datastream" {
-  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
+  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
   gcp_project                       = var.gcp_project
   application_name                  = "spinnsyn"
   cloud_sql_instance_name           = "spinnsyn-backend"
@@ -27,7 +27,7 @@ module "spinnsyn_datastream" {
 }
 
 module "arkivering_oppgave_datastream" {
-  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
+  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
   gcp_project                       = var.gcp_project
   application_name                  = "arkivering-oppgave"
   cloud_sql_instance_name           = "sykepengesoknad-arkivering-oppgave"
@@ -68,7 +68,7 @@ module "arkivering_oppgave_datastream" {
 }
 
 module "flexjar_datastream" {
-  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
+  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
   gcp_project                       = var.gcp_project
   application_name                  = "flexjar"
   cloud_sql_instance_name           = "flexjar-backend"
@@ -95,7 +95,7 @@ module "flexjar_datastream" {
 }
 
 module "inntektsmelding_status_datastream" {
-  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
+  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
   gcp_project                       = var.gcp_project
   application_name                  = "inntektsmelding-status"
   cloud_sql_instance_name           = "flex-inntektsmelding-status"
@@ -129,7 +129,7 @@ module "inntektsmelding_status_datastream" {
 }
 
 module "sykepengesoknad_datastream" {
-  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.0"
+  source                            = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
   gcp_project                       = var.gcp_project
   application_name                  = "sykepengesoknad"
   cloud_sql_instance_name           = "sykepengesoknad"
