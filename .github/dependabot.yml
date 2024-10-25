@@ -13,5 +13,5 @@ updates:
       - "/prod"
     schedule:
       interval: "daily"
-      time: "03:00"
+      time: "04:00"
     open-pull-requests-limit: 5
