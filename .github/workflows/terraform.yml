@@ -9,6 +9,7 @@ env:
 jobs:
   terraform-plan-dev:
     name: "terraform plan gcp-dev"
+    if: "!startsWith(github.ref_name, 'dependabot')"
     runs-on: ubuntu-latest
     concurrency: terraform-plan-dev
     defaults:
@@ -38,6 +39,7 @@ jobs:
 
   terraform-plan-prod:
     name: "terraform plan gcp-prod"
+    if: "!startsWith(github.ref_name, 'dependabot')"
     runs-on: ubuntu-latest
     concurrency: terraform-plan-prod
     defaults:
