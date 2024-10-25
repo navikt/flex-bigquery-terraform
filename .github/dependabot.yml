@@ -6,3 +6,12 @@ updates:
       interval: daily
       time: "03:00"
     open-pull-requests-limit: 5
+
+  - package-ecosystem: "terraform"
+    directories:
+      - "/dev"
+      - "/prod"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+    open-pull-requests-limit: 5
