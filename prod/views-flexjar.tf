@@ -202,7 +202,7 @@ SELECT opprettet,
        JSON_VALUE(feedback_json, '$.feedbackId')                        AS feedbackId,
        JSON_VALUE(feedback_json, '$.feedback')                          AS feedback
 FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
-WHERE app = 'syfooversikt'
+WHERE (app = 'syfooversikt' or app = 'syfomodiaperson')
 AND team = 'teamsykefravr'
 AND (JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'SenFase')
 EOF
