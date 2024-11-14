@@ -190,4 +190,12 @@ module "sykepengesoknad_datastream" {
   ]
 }
 
-
+module "spinnsyn_arkivering_datastream" {
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.1"
+  gcp_project                                  = var.gcp_project
+  application_name                             = "spinnsyn-arkivering"
+  cloud_sql_instance_name                      = "spinnsyn-arkivering"
+  cloud_sql_instance_db_name                   = "spinnsyn-arkivering-db"
+  cloud_sql_instance_db_credentials            = local.spinnsyn_arkivering_datastream_credentials
+  datastream_vpc_resources                     = local.datastream_vpc_resources
+}
