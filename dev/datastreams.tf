@@ -15,6 +15,9 @@ module "spinnsyn_datastream" {
   cloud_sql_instance_db_credentials            = local.spinnsyn_datastream_credentials
   datastream_vpc_resources                     = local.datastream_vpc_resources
   big_query_dataset_delete_contents_on_destroy = true
+  postgresql_exclude_schemas = [
+    { schema = "public", tables = [{ table = "flyway_schema_history" }, { table = "annullering" }] }
+  ]
 }
 
 module "spinnsyn_arkivering_datastream" {
