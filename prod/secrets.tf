@@ -128,4 +128,12 @@ locals {
   )
 }
 
+data "google_secret_manager_secret_version" "spinnsyn_arkivering_bigquery_secret" {
+  secret = "spinnsyn-arkivering-bigquery-credentials"
+}
 
+locals {
+  spinnsyn_arkivering_bigquery_credentials = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_arkivering_bigquery_secret.secret_data
+  )
+}

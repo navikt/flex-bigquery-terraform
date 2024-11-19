@@ -63,3 +63,14 @@ module "flex_inntektsmelding_status_bigquery_connection" {
   username      = local.inntektsmelding_status_bigquery_credentials.username
   password      = local.inntektsmelding_status_bigquery_credentials.password
 }
+
+module "spinnsyn_arkivering_bigquery_connection" {
+  source = "../modules/google-bigquery-connection"
+
+  connection_id = "spinnsyn-arkivering"
+  location      = var.gcp_project["region"]
+  instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:spinnsyn-arkivering"
+  database      = "spinnsyn-arkivering-db"
+  username      = local.spinnsyn_arkivering_bigquery_credentials.username
+  password      = local.spinnsyn_arkivering_bigquery_credentials.password
+}
