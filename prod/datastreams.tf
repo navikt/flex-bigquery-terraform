@@ -188,6 +188,9 @@ module "sykepengesoknad_datastream" {
       }
     }
   ]
+  postgresql_exclude_schemas = [
+    { schema = "public", tables = [{ table = "flyway_schema_history" }, { table = "julesoknadkandidat" }] }
+  ]
 }
 
 module "spinnsyn_arkivering_datastream" {
