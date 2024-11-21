@@ -23,7 +23,7 @@ module "sendt_sykepengesoknad_arkivering_oppgave_avstemming" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "sendt-sykepengesoknad-arkivering-oppgave-avstemming"
+  view_id    = "sendt_sykepengesoknad_arkivering_oppgave_avstemming"
   view_schema = jsonencode(
     [
       {
@@ -50,7 +50,7 @@ module "spinnsyn_vedtak_datastream_avstemming" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "spinnsyn-vedtak-datastream-avstemming"
+  view_id    = "spinnsyn_vedtak_datastream_avstemming"
   view_schema = jsonencode(
     [
       {
@@ -75,12 +75,12 @@ FROM `${var.gcp_project["project"]}.spinnsyn_datastream.public_vedtak_v2`
 EOF
 }
 
-module "sykepengesoknad-sykepengesoknad-avstemming" {
+module "sykepengesoknad_sykepengesoknad_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "sykepengesoknad-sykepengesoknad-avstemming"
+  view_id    = "sykepengesoknad_sykepengesoknad_avstemming"
   view_schema = jsonencode(
     [
       {
@@ -110,7 +110,7 @@ module "arkivering_oppgave_oppgavestyring_avstemming" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "arkivering-oppgave-oppgavestyring-avstemming"
+  view_id    = "arkivering_oppgave_oppgavestyring_avstemming"
   view_schema = jsonencode(
     [
       {
@@ -140,7 +140,7 @@ module "flexjar_feedback_avstemming" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "flexjar-feedback-avstemming"
+  view_id    = "flexjar_feedback_avstemming"
   view_schema = jsonencode(
     [
       {
@@ -190,7 +190,7 @@ module "flex_inntektsmelding_status_datastream_avstemming" {
   deletion_protection = false
 
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "flex-inntektsmelding-status-datastream-avstemming"
+  view_id    = "flex_inntektsmelding_status_datastream_avstemming"
   view_schema = jsonencode(
     [
       {
@@ -247,7 +247,7 @@ GROUP BY STATUS
 EOF
 }
 
-module "spinnsyn-utbetaling-spinnsyn-arkivering-avstemming" {
+module "spinnsyn_utbetaling_spinnsyn_arkivering_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
 
@@ -272,37 +272,6 @@ FROM `${var.gcp_project["project"]}.spinnsyn_datastream.public_utbetaling`
 WHERE motatt_publisert IS NOT NULL
   AND opprettet < timestamp_sub(current_timestamp, INTERVAL 2 HOUR)
   AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL -4 DAY)
-)
-EOF
-}
-
-module "spinnsyn-arkivering-datastream-avstemming" {
-  source              = "../modules/google-bigquery-view"
-  deletion_protection = false
-
-  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id    = "spinnsyn_arkivering_datastream_avstemming"
-  view_schema = jsonencode(
-    [
-      {
-        name = "id"
-        type = "STRING"
-      }
-    ]
-  )
-  view_query = <<EOF
-SELECT vedtak_id AS id
-FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.spinnsyn-arkivering",
-  '''
-  SELECT vedtak_id FROM arkivert_vedtak
-  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
-  AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
-  ''')
-WHERE vedtak_id NOT IN (
-SELECT vedtak_id
-FROM `${var.gcp_project["project"]}.spinnsyn_arkivering_datastream.public_arkivert_vedtak`
-WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
-AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
 )
 EOF
 }
