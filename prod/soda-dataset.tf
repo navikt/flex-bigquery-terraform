@@ -246,3 +246,32 @@ AND status in (
 GROUP BY STATUS
 EOF
 }
+
+module "spinnsyn-utbetaling-spinnsyn-arkivering-avstemming" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "spinnsyn_utbetaling_spinnsyn_arkivering_avstemming"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT vedtak_id AS id
+FROM `${var.gcp_project["project"]}.spinnsyn_arkivering_datastream.public_arkivert_vedtak`
+WHERE opprettet < timestamp_sub(current_timestamp, INTERVAL 2 HOUR)
+  AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL -4 DAY)
+AND vedtak_id NOT IN (
+  SELECT id
+FROM `${var.gcp_project["project"]}.spinnsyn_datastream.public_utbetaling`
+WHERE motatt_publisert IS NOT NULL
+  AND opprettet < timestamp_sub(current_timestamp, INTERVAL 2 HOUR)
+  AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp(), DAY), INTERVAL -4 DAY)
+)
+EOF
+}
