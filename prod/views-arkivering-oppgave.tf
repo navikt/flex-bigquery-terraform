@@ -191,3 +191,32 @@ GROUP BY date(os.modifisert), os.status, sv.soknadstype
 EOF
 
 }
+
+module "sykepengesoknad_arkivering_oppgave_venter_paa_bomlo_view" {
+  source = "../modules/google-bigquery-view"
+
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id    = "sykepengesoknad_arkivering_oppgave_venter_paa_bomlo_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "opprettet"
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT sykepengesoknad_id AS sykepengesoknad_uuid, opprettet
+FROM `${var.gcp_project["project"]}.${module.arkivering_oppgave_datastream.dataset_id}.public_oppgavestyring`
+WHERE status = 'VenterPaBomlo'
+ORDER BY opprettet DESC
+EOF
+
+}
