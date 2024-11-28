@@ -63,6 +63,13 @@ module "arkivering_oppgave_datastream" {
         project_id = var.gcp_project["project"]
         table_id   = "medlemskap_uavklart_gosys_view"
       }
+    },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_arkivering_oppgave_venter_paa_bomlo_view"
+      }
     }
   ]
 }
