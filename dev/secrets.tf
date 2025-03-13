@@ -1,5 +1,6 @@
 data "google_secret_manager_secret_version" "spinnsyn_datastream_secret" {
-  secret = "spinnsyn-datastream-credentials"
+  secret  = "spinnsyn-datastream-credentials"
+  version = "2"
 }
 
 locals {
@@ -9,7 +10,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "spinnsyn_arkivering_datastream_secret" {
-  secret = "spinnsyn-arkivering-datastream-credentials"
+  secret  = "spinnsyn-arkivering-datastream-credentials"
+  version = "3"
 }
 
 locals {

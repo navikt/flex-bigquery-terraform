@@ -11,7 +11,7 @@ locals {
 
 data "google_secret_manager_secret_version" "spinnsyn_datastream_secret" {
   secret  = "spinnsyn-datastream-credentials"
-  version = "4"
+  version = "5"
 }
 
 locals {
@@ -33,7 +33,7 @@ locals {
 
 data "google_secret_manager_secret_version" "sykepengesoknad_datastream_secret" {
   secret  = "sykepengesoknad-datastream-credentials"
-  version = "3"
+  version = "4"
 }
 
 locals {
