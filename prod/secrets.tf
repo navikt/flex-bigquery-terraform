@@ -1,5 +1,6 @@
 data "google_secret_manager_secret_version" "spinnsyn_bigquery_secret" {
-  secret = "spinnsyn-bigquery-credentials"
+  secret  = "spinnsyn-bigquery-credentials"
+  version = "2"
 }
 
 locals {
@@ -9,7 +10,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "spinnsyn_datastream_secret" {
-  secret = "spinnsyn-datastream-credentials"
+  secret  = "spinnsyn-datastream-credentials"
+  version = "4"
 }
 
 locals {
@@ -19,7 +21,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "sykepengesoknad_bigquery_secret" {
-  secret = "sykepengesoknad-bigquery-credentials"
+  secret  = "sykepengesoknad-bigquery-credentials"
+  version = "2"
 }
 
 locals {
@@ -29,7 +32,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "sykepengesoknad_datastream_secret" {
-  secret = "sykepengesoknad-datastream-credentials"
+  secret  = "sykepengesoknad-datastream-credentials"
+  version = "3"
 }
 
 locals {
@@ -39,7 +43,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "arkivering_oppgave_bigquery_secret" {
-  secret = "arkivering-oppgave-bigquery-credentials"
+  secret  = "arkivering-oppgave-bigquery-credentials"
+  version = "3"
 }
 
 locals {
@@ -49,7 +54,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "arkivering_oppgave_datastream_secret" {
-  secret = "arkivering-oppgave-datastream-credentials"
+  secret  = "arkivering-oppgave-datastream-credentials"
+  version = "3"
 }
 
 locals {
@@ -59,7 +65,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "flexjar_bigquery_secret" {
-  secret = "flexjar-bigquery-credentials"
+  secret  = "flexjar-bigquery-credentials"
+  version = "2"
 }
 
 locals {
@@ -69,7 +76,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "flexjar_datastream_secret" {
-  secret = "flexjar-datastream-credentials"
+  secret  = "flexjar-datastream-credentials"
+  version = "2"
 }
 
 locals {
@@ -78,28 +86,9 @@ locals {
   )
 }
 
-data "google_secret_manager_secret_version" "modia_kontakt_metrikk_bigquery_secret" {
-  secret = "modia-kontakt-metrikk-bigquery-credentials"
-}
-
-locals {
-  modia_kontakt_metrikk_bigquery_credentials = jsondecode(
-    data.google_secret_manager_secret_version.modia_kontakt_metrikk_bigquery_secret.secret_data
-  )
-}
-
-data "google_secret_manager_secret_version" "modia_kontakt_metrikk_datastream_secret" {
-  secret = "modia-kontakt-metrikk-datastream-credentials"
-}
-
-locals {
-  modia_kontakt_metrikk_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.modia_kontakt_metrikk_datastream_secret.secret_data
-  )
-}
-
 data "google_secret_manager_secret_version" "inntektsmelding_status_bigquery_secret" {
-  secret = "inntektsmelding-status-bigquery-credentials"
+  secret  = "inntektsmelding-status-bigquery-credentials"
+  version = "3"
 }
 
 locals {
@@ -109,7 +98,8 @@ locals {
 }
 
 data "google_secret_manager_secret_version" "inntektsmelding_status_datastream_secret" {
-  secret = "inntektsmelding-status-datastream-credentials"
+  secret  = "inntektsmelding-status-datastream-credentials"
+  version = "2"
 }
 
 locals {
@@ -118,22 +108,24 @@ locals {
   )
 }
 
-data "google_secret_manager_secret_version" "spinnsyn_arkivering_datastream_secret" {
-  secret = "spinnsyn-arkivering-datastream-credentials"
-}
-
-locals {
-  spinnsyn_arkivering_datastream_credentials = jsondecode(
-    data.google_secret_manager_secret_version.spinnsyn_arkivering_datastream_secret.secret_data
-  )
-}
-
 data "google_secret_manager_secret_version" "spinnsyn_arkivering_bigquery_secret" {
-  secret = "spinnsyn-arkivering-bigquery-credentials"
+  secret  = "spinnsyn-arkivering-bigquery-credentials"
+  version = "2"
 }
 
 locals {
   spinnsyn_arkivering_bigquery_credentials = jsondecode(
     data.google_secret_manager_secret_version.spinnsyn_arkivering_bigquery_secret.secret_data
+  )
+}
+
+data "google_secret_manager_secret_version" "spinnsyn_arkivering_datastream_secret" {
+  secret  = "spinnsyn-arkivering-datastream-credentials"
+  version = "2"
+}
+
+locals {
+  spinnsyn_arkivering_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.spinnsyn_arkivering_datastream_secret.secret_data
   )
 }
