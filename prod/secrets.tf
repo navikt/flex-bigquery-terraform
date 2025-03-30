@@ -129,3 +129,14 @@ locals {
     data.google_secret_manager_secret_version.spinnsyn_arkivering_datastream_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "flex_arbeidssokerregister_oppdatering_datastream_secret" {
+  secret  = "flex-arbeidssokerregister-oppdatering-datastream-credentials"
+  version = "1"
+}
+
+locals {
+  flex_arbeidssokerregister_oppdatering_credentials = jsondecode(
+    data.google_secret_manager_secret_version.flex_arbeidssokerregister_oppdatering_datastream_secret.secret_data
+  )
+}

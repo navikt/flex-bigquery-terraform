@@ -31,3 +31,13 @@ module "spinnsyn_arkivering_datastream" {
   big_query_dataset_delete_contents_on_destroy = true
 }
 
+module "flex_arbeidssokerregister_oppdatering_datastream" {
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.4"
+  gcp_project                                  = var.gcp_project
+  application_name                             = "flex-arbeidssokerregister-oppdatering"
+  cloud_sql_instance_name                      = "flex-arbeidssokerregister-oppdatering"
+  cloud_sql_instance_db_name                   = "flex-arbeidssokerregister-oppdatering-db"
+  cloud_sql_instance_db_credentials            = local.flex_arbeidssokerregister_oppdatering_credentials
+  datastream_vpc_resources                     = local.datastream_vpc_resources
+  big_query_dataset_delete_contents_on_destroy = true
+}
