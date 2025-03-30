@@ -275,3 +275,67 @@ WHERE motatt_publisert IS NOT NULL
 )
 EOF
 }
+
+module "frisk_til_arbeid_vedtak_overlapp" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "frisk_til_arbeid_vedtak_overlapp"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_frisk_til_arbeid_vedtak`
+WHERE behandlet_status = 'OVERLAPP'
+EOF
+}
+
+module "frisk_til_arbeid_vedtak_arbeidssokerperiode" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "frisk_til_arbeid_vedtak_arbeidssokerperiode"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_frisk_til_arbeid_vedtak`
+WHERE behandlet_status IN (
+  'SISTE_ARBEIDSSOKERPERIODE_AVSLUTTET',
+  'INGEN_ARBEIDSSOKERPERIODE'
+)
+EOF
+}
+
+module "frisk_til_arbeid_vedtak_ubehandlet" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "frisk_til_arbeid_vedtak_ubehandlet"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_frisk_til_arbeid_vedtak`
+WHERE behandlet_status = 'NY'
+  AND opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+EOF
+}
