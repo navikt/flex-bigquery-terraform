@@ -32,13 +32,13 @@ locals {
 }
 
 
- data "google_secret_manager_secret_version" "flex_sykmeldinger_datastream_credentials_secret" {
-   secret  = "flex_sykmeldinger_datastream_credentials"
-   version = "1"
- }
+data "google_secret_manager_secret_version" "flex_sykmeldinger_datastream_credentials_secret" {
+  secret  = "flex_sykmeldinger_datastream_credentials"
+  version = "1"
+}
 
- locals {
-   flex_sykmeldinger_datastream_credentials = jsondecode(
-     data.google_secret_manager_secret_version.flex_sykmeldinger_datastream_credentials_secret.secret_data
-   )
- }
+locals {
+  flex_sykmeldinger_datastream_credentials = jsondecode(
+    data.google_secret_manager_secret_version.flex_sykmeldinger_datastream_credentials_secret.secret_data
+  )
+}
