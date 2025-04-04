@@ -41,3 +41,17 @@ module "flex_arbeidssokerregister_oppdatering_datastream" {
   datastream_vpc_resources                     = local.datastream_vpc_resources
   big_query_dataset_delete_contents_on_destroy = true
 }
+
+
+# todo credentials, de må sikkert legges inn et sted, manuelt??
+# todo sjekke navn? dette skjer nok automatisk når vi kjører?
+module "flex_sykmeldinger_datastream" {
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.4"
+  gcp_project                                  = var.gcp_project
+  application_name                             = "flex-sykmeldinger"
+  cloud_sql_instance_name                      = "flex-sykmeldinger-backend"
+  cloud_sql_instance_db_name                   = "flex-sykmeldinger-db"
+  cloud_sql_instance_db_credentials            = local.flex_sykmeldinger_datastream_credentials
+  datastream_vpc_resources                     = local.datastream_vpc_resources
+  big_query_dataset_delete_contents_on_destroy = true
+}
