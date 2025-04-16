@@ -218,7 +218,6 @@ module "flex_arbeidssokerregister_oppdatering_datastream" {
   cloud_sql_instance_db_name                   = "flex-arbeidssokerregister-oppdatering-db"
   cloud_sql_instance_db_credentials            = local.flex_arbeidssokerregister_oppdatering_credentials
   datastream_vpc_resources                     = local.datastream_vpc_resources
-  big_query_dataset_delete_contents_on_destroy = true
 }
 
 module "flex_sykmeldinger_backend_datastream" {
@@ -229,5 +228,4 @@ module "flex_sykmeldinger_backend_datastream" {
   cloud_sql_instance_db_name                   = "flex-sykmeldinger-backend-db"
   cloud_sql_instance_db_credentials            = local.flex_sykmeldinger_datastream_backend_credentials
   datastream_vpc_resources                     = local.datastream_vpc_resources
-  big_query_dataset_delete_contents_on_destroy = true
 }
