@@ -161,12 +161,18 @@ module "sykepengesoknad_sykepengesoknad_view" {
         name        = "forstegangssoknad"
         type        = "BOOLEAN"
         description = "Om søknaden var den første i dette sykeforløpet"
-      }
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "selvstendig_naringsdrivende"
+        type        = "STRING"
+        description = "Selvstendig næringsdrivende JSON-data."
+      },
     ]
   )
 
   view_query = <<EOF
-SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo, sendt, utenlandsk_sykmelding, forstegangssoknad
+SELECT id, sykepengesoknad_uuid, soknadstype, status, fom, tom, sykmelding_uuid, aktivert_dato, korrigerer, korrigert_av, avbrutt_dato, arbeidssituasjon, start_sykeforlop, sendt_arbeidsgiver, sendt_nav, sykmelding_skrevet, opprettet, opprinnelse, avsendertype, egenmeldt_sykmelding, merknader_fra_sykmelding, utlopt_publisert, avbrutt_feilinfo, sendt, utenlandsk_sykmelding, forstegangssoknad, selvstendig_naringsdrivende
 FROM `${var.gcp_project["project"]}.${module.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad`
 EOF
 
