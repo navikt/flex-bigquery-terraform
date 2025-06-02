@@ -105,6 +105,37 @@ FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_sykepenges
 EOF
 }
 
+module "flex_sykmeldinger_backend_avstemming" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "flex_sykmeldinger_backend_avstemming"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id FROM EXTERNAL_QUERY(""${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-sykmeldinger-backend,
+  '''
+  SELECT id FROM sykmelding
+  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
+  AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
+  ''')
+WHERE id NOT IN (
+SELECT id
+FROM `${var.gcp_project["project"]}.flex_sykmeldinger_backend_datastream.public_sykmelding`
+  WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
+    AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
+)
+EOF
+
+}
+
 module "arkivering_oppgave_oppgavestyring_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
