@@ -171,7 +171,7 @@ module "sykmeldinger_korrelerer_med_tsm" {
 
   view_query = <<EOF
     SELECT
-      sh.sykmelding_id,
+      COALESCE(sh.sykmelding_id, tsm.sykmelding_id) AS sykmelding_id,
       sm.fnr,
       sh.id AS hendelse_id,
       sh.status,
@@ -179,10 +179,12 @@ module "sykmeldinger_korrelerer_med_tsm" {
       sh.opprettet AS hendelse_opprettet,
       tsm.timestamp
     FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmelding` sm
-    INNER JOIN `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
+    FULL OUTER JOIN `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
       ON sm.sykmelding_id = sh.sykmelding_id
-    INNER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.public_temp_tsm_historisk_sykmeldingstatus` tsm
+    FULL OUTER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.public_temp_tsm_historisk_sykmeldingstatus` tsm
       ON sh.sykmelding_id = tsm.sykmelding_id
-    WHERE sh.status != tsm.event OR sh.opprettet != tsm.timestamp
+      AND sh.opprettet = tsm.timestamp
+    WHERE (sh.sykmelding_id IS NULL OR tsm.sykmelding_id IS NULL OR sh.status != tsm.event)
+      AND (sh.opprettet IS NULL OR sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR))
   EOF
 }
