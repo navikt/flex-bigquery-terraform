@@ -26,7 +26,7 @@ module "sykmeldinger_bigquery_connection" {
   connection_id = "flex-sykmeldinger-backend"
   location      = var.gcp_project["region"]
   instance_id   = "${var.gcp_project["project"]}:${var.gcp_project["region"]}:flex-sykmeldinger-backend"
-  database      = "sykepengesoknad"
+  database      = "flex-sykmeldinger-backend"
   username      = local.sykepengesoknad_bigquery_credentials.username
   password      = local.sykepengesoknad_bigquery_credentials.password
 }
