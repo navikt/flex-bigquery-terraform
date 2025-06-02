@@ -2,7 +2,7 @@ resource "google_bigquery_dataset" "soda_dataset" {
   dataset_id    = "soda_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "soda_dataset"
-  labels        = {}
+  labels = {}
 
   access {
     role          = "OWNER"
@@ -134,6 +134,72 @@ FROM `${var.gcp_project["project"]}.flex_sykmeldinger_backend_datastream.public_
 )
 EOF
 
+}
+
+module "sykmeldinger_korrelerer_med_tsm" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykmeldinger_korrelerer_med_tsm_view"
+  view_schema = jsonencode(
+    [
+      {
+        name = "sykmelding_id",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "fnr",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "hendelse_id",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "status",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "event",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "hendelse_opprettet",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      },
+      {
+        name = "timestamp",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+    SELECT
+      COALESCE(sh.sykmelding_id, tsm.sykmelding_id) AS sykmelding_id,
+      sm.fnr,
+      sh.id AS hendelse_id,
+      sh.status,
+      tsm.event,
+      sh.opprettet AS hendelse_opprettet,
+      tsm.timestamp
+    FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmelding` sm
+    FULL OUTER JOIN `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
+      ON sm.sykmelding_id = sh.sykmelding_id
+    FULL OUTER JOIN `${var.tsm_sykmeldingstatus_view}` tsm
+      ON sh.sykmelding_id = tsm.sykmelding_id
+      AND sh.opprettet = tsm.timestamp
+    WHERE (sh.sykmelding_id IS NULL OR tsm.sykmelding_id IS NULL OR sh.status != tsm.event)
+      AND (sh.opprettet IS NULL OR sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR))
+  EOF
 }
 
 module "arkivering_oppgave_oppgavestyring_avstemming" {
