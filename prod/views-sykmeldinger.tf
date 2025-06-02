@@ -181,7 +181,7 @@ module "sykmeldinger_korrelerer_med_tsm" {
     FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmelding` sm
     FULL OUTER JOIN `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
       ON sm.sykmelding_id = sh.sykmelding_id
-    FULL OUTER JOIN `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.public_temp_tsm_historisk_sykmeldingstatus` tsm
+    FULL OUTER JOIN `${var.tsm_sykmeldingstatus_view}` tsm
       ON sh.sykmelding_id = tsm.sykmelding_id
       AND sh.opprettet = tsm.timestamp
     WHERE (sh.sykmelding_id IS NULL OR tsm.sykmelding_id IS NULL OR sh.status != tsm.event)
