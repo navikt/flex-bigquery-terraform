@@ -7,11 +7,6 @@ module "sykmeldinger_med_hendelser_view" {
   view_schema = jsonencode(
     [
       {
-        name = "id",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
         name = "sykmelding_id",
         mode = "NULLABLE",
         type = "STRING"
@@ -27,14 +22,9 @@ module "sykmeldinger_med_hendelser_view" {
         type = "JSON"
       },
       {
-        name = "opprettet",
+        name = "sykmelding_opprettet",
         mode = "NULLABLE",
         type = "TIMESTAMP"
-      },
-      {
-        name = "hendelse_id",
-        mode = "NULLABLE",
-        type = "STRING"
       },
       {
         name = "status",
@@ -100,25 +90,25 @@ module "sykmeldinger_med_hendelser_view" {
   )
 
   view_query = <<EOF
-    SELECT
-      public_sykmelding.sykmelding_id,
-      public_sykmelding.fnr,
-      public_sykmelding.sykmelding,
-      public_sykmelding.opprettet AS sykmelding_opprettet,
-      public_sykmeldinghendelse.status,
-      public_sykmeldinghendelse.tidligere_arbeidsgiver,
-      public_sykmeldinghendelse.arbeidstaker_info,
-      public_sykmeldinghendelse.bruker_svar,
-      public_sykmeldinghendelse.tilleggsinfo,
-      public_sykmeldinghendelse.source,
-      public_sykmeldinghendelse.opprettet AS hendelse_opprettet,
-      public_sykmeldinghendelse.lokalt_opprettet,
-      public_sykmeldinghendelse.meldingsinformasjon,
-      public_sykmeldinghendelse.validation,
-      public_sykmeldinghendelse.sykmelding_grunnlag_oppdatert,
-      public_sykmeldinghendelse.validation_oppdatert
-    FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmelding`
-    INNER JOIN `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse`
-    ON public_sykmelding.sykmelding_id = public_sykmeldinghendelse.sykmelding_id
+     SELECT
+        sm.sykmelding_id,
+        sm.fnr,
+        sm.sykmelding,
+        sm.opprettet AS sykmelding_opprettet,
+        sm.meldingsinformasjon,
+        sm.validation,
+        sm.sykmelding_grunnlag_oppdatert,
+        sm.validation_oppdatert,
+        smh.status,
+        smh.tidligere_arbeidsgiver,
+        smh.arbeidstaker_info,
+        smh.bruker_svar,
+        smh.tilleggsinfo,
+        smh.source,
+        smh.opprettet AS hendelse_opprettet,
+        smh.lokalt_opprettet
+      FROM `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmelding` sm
+      INNER JOIN `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmeldinghendelse` smh
+        ON sm.sykmelding_id = smh.sykmelding_id
   EOF
 }
