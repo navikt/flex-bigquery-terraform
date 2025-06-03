@@ -2,7 +2,7 @@ resource "google_bigquery_dataset" "soda_dataset" {
   dataset_id    = "soda_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "soda_dataset"
-  labels = {}
+  labels        = {}
 
   access {
     role          = "OWNER"
@@ -120,88 +120,97 @@ module "flex_sykmeldinger_backend_avstemming" {
     ]
   )
   view_query = <<EOF
-SELECT id FROM EXTERNAL_QUERY(""${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-sykmeldinger-backend,
-  '''
-  SELECT id FROM sykmelding
-  WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
-  AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
-  ''')
-WHERE id NOT IN (
-SELECT id
-FROM `${var.gcp_project["project"]}.flex_sykmeldinger_backend_datastream.public_sykmelding`
-  WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
-    AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
-)
+  SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-sykmeldinger-backend",
+    '''
+    SELECT id FROM sykmelding
+    WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
+    AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
+    ''')
+  WHERE id NOT IN (
+  SELECT id
+  FROM `${var.gcp_project["project"]}.flex_sykmeldinger_backend_datastream.public_sykmelding`
+    WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
+      AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
+  )
 EOF
-
 }
 
 module "sykmeldinger_korrelerer_med_tsm" {
   source = "../modules/google-bigquery-view"
 
   deletion_protection = false
-  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id             = "sykmeldinger_korrelerer_med_tsm_view"
+  dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id             = "sykmeldinger_korrelerer_med_tsm"
   view_schema = jsonencode(
     [
       {
-        name = "sykmelding_id",
+        name = "match_type",
         mode = "NULLABLE",
         type = "STRING"
       },
       {
-        name = "fnr",
+        name = "count",
         mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "hendelse_id",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "status",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "event",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "hendelse_opprettet",
-        mode = "NULLABLE",
-        type = "TIMESTAMP"
-      },
-      {
-        name = "timestamp",
-        mode = "NULLABLE",
-        type = "TIMESTAMP"
+        type = "INTEGER"
       }
     ]
   )
 
   view_query = <<EOF
-    SELECT
-      COALESCE(sh.sykmelding_id, tsm.sykmelding_id) AS sykmelding_id,
-      sm.fnr,
-      sh.id AS hendelse_id,
-      sh.status,
-      tsm.event,
-      sh.opprettet AS hendelse_opprettet,
-      tsm.timestamp
-    FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmelding` sm
-    FULL OUTER JOIN `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
-      ON sm.sykmelding_id = sh.sykmelding_id
-    FULL OUTER JOIN `${var.tsm_sykmeldingstatus_view}` tsm
-      ON sh.sykmelding_id = tsm.sykmelding_id
-      AND sh.opprettet = tsm.timestamp
-    WHERE (sh.sykmelding_id IS NULL OR tsm.sykmelding_id IS NULL OR sh.status != tsm.event)
-      AND (sh.opprettet IS NULL OR sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR))
+    WITH all_sykmeldinger AS (
+      SELECT
+        sh.sykmelding_id,
+        sh.id AS hendelse_id,
+        sh.status,
+        TIMESTAMP_TRUNC(sh.opprettet, SECOND) AS hendelse_opprettet
+      FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
+      WHERE sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
+    ),
+    all_tsm AS (
+      SELECT
+        tsm.sykmelding_id,
+        tsm.event,
+        TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS timestamp
+      FROM `${var.tsm_sykmeldingstatus_view}` tsm
+      WHERE tsm.event IS NOT NULL
+        AND tsm.timestamp IS NOT NULL
+    ),
+    matching AS (
+      SELECT
+        sh.sykmelding_id,
+        sh.hendelse_id,
+        sh.status,
+        sh.hendelse_opprettet,
+        tsm.event,
+        tsm.timestamp
+      FROM all_sykmeldinger sh
+      JOIN all_tsm tsm
+        ON sh.sykmelding_id = tsm.sykmelding_id
+        AND sh.hendelse_opprettet = tsm.timestamp
+    ),
+    unmatched_tsm AS (
+      SELECT tsm.sykmelding_id
+      FROM all_tsm tsm
+      LEFT JOIN all_sykmeldinger sh
+        ON tsm.sykmelding_id = sh.sykmelding_id
+        AND tsm.timestamp = sh.hendelse_opprettet
+      WHERE sh.sykmelding_id IS NULL
+    )
+
+    SELECT 'matching_records' AS match_type, COUNT(*) AS count
+    FROM matching
+
+    UNION ALL
+
+    SELECT 'unmatched_tsm_records' AS match_type, COUNT(*) AS count
+    FROM unmatched_tsm
+
+    UNION ALL
+
+    SELECT 'unmatched_sykmeldinger_records' AS match_type,
+      (SELECT COUNT(*) FROM all_sykmeldinger) - (SELECT COUNT(*) FROM matching) AS count
   EOF
 }
-
 module "arkivering_oppgave_oppgavestyring_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
