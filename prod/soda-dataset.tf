@@ -2,7 +2,7 @@ resource "google_bigquery_dataset" "soda_dataset" {
   dataset_id    = "soda_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "soda_dataset"
-  labels = {}
+  labels        = {}
 
   access {
     role          = "OWNER"
