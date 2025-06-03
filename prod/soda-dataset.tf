@@ -2,7 +2,7 @@ resource "google_bigquery_dataset" "soda_dataset" {
   dataset_id    = "soda_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "soda_dataset"
-  labels = {}
+  labels        = {}
 
   access {
     role          = "OWNER"
@@ -135,12 +135,12 @@ module "flex_sykmeldinger_backend_avstemming" {
 EOF
 }
 
-module "sykmeldinger_korrelerer_med_tsm_raw" {
+module "sykmeldinger_korrelerer_med_tsm" {
   source = "../modules/google-bigquery-view"
 
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id             = "sykmeldinger_korrelerer_med_tsm_raw"
+  view_id             = "sykmeldinger_korrelerer_med_tsm"
   view_schema = jsonencode(
     [
       {
@@ -164,7 +164,12 @@ module "sykmeldinger_korrelerer_med_tsm_raw" {
         type = "STRING"
       },
       {
-        name = "hendelse_tidspunkt",
+        name = "tsm_tidspunkt",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      },
+      {
+        name = "flex_tidspunkt",
         mode = "NULLABLE",
         type = "TIMESTAMP"
       }
@@ -255,92 +260,6 @@ module "sykmeldinger_korrelerer_med_tsm_raw" {
           WHEN sh.status = 'SENDT_TIL_NAV' THEN tsm.event != 'BEKREFTET'
           WHEN sh.status = 'UTGATT' THEN tsm.event != 'UTGATT'
         END
-  EOF
-}
-
-module "sykmeldinger_korrelerer_med_tsm" {
-  source = "../modules/google-bigquery-view"
-
-  deletion_protection = false
-  dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id             = "sykmeldinger_korrelerer_med_tsm"
-  view_schema = jsonencode(
-    [
-      {
-        name = "uoverensstemmelse_type",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "antall",
-        mode = "NULLABLE",
-        type = "INTEGER"
-      }
-    ]
-  )
-
-  view_query = <<EOF
-    -- Dette viewet vil returnere aggregerte tall basert på rådata fra sykmeldinger_korrelerer_med_tsm_raw
-    WITH raw_data AS (
-      SELECT
-        uoverensstemmelse_type,
-        flex_status,
-        tsm_event
-      FROM
-        `${var.gcp_project["project"]}.${google_bigquery_dataset.soda_dataset.dataset_id}.sykmeldinger_korrelerer_med_tsm_raw`
-    )
-
-    -- Aggregerte tall for hver uoverensstemmelsestype
-    (
-      SELECT
-        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
-        COUNT(*) AS antall
-      FROM
-        raw_data
-      WHERE
-        uoverensstemmelse_type = 'sykmeldingstatus_ikke_i_flex'
-      HAVING
-        COUNT(*) > 0
-    )
-    UNION ALL
-    (
-      SELECT
-        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
-        COUNT(*) AS antall
-      FROM
-        raw_data
-      WHERE
-        uoverensstemmelse_type = 'sykmeldinghendelser_ikke_i_tsm'
-      HAVING
-        COUNT(*) > 0
-    )
-    UNION ALL
-    (
-      SELECT
-        'status_mismatch_total' AS uoverensstemmelse_type,
-        COUNT(*) AS antall
-      FROM
-        raw_data
-      WHERE
-        uoverensstemmelse_type = 'status_mismatch'
-      HAVING
-        COUNT(*) > 0
-    )
-    UNION ALL
-    (
-      SELECT
-        CONCAT('status_mismatch: flex_status: ', flex_status, ' vs tsm_event: ', tsm_event) AS uoverensstemmelse_type,
-        COUNT(*) AS antall
-      FROM
-        raw_data
-      WHERE
-        uoverensstemmelse_type = 'status_mismatch'
-      GROUP BY
-        flex_status,
-        tsm_event
-      HAVING
-        COUNT(*) > 0
-    );
   EOF
 }
 
