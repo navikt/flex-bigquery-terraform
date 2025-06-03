@@ -2,7 +2,7 @@ resource "google_bigquery_dataset" "soda_dataset" {
   dataset_id    = "soda_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "soda_dataset"
-  labels        = {}
+  labels = {}
 
   access {
     role          = "OWNER"
@@ -157,60 +157,72 @@ module "sykmeldinger_korrelerer_med_tsm" {
   )
 
   view_query = <<EOF
-    WITH all_sykmeldinger AS (
+    -- Dette viewet vil kun returnere rader dersom det finnes poster som ikke er matchet.
+    WITH alle_sykmeldinger AS (
       SELECT
         sh.sykmelding_id,
-        sh.id AS hendelse_id,
-        sh.status,
-        TIMESTAMP_TRUNC(sh.opprettet, SECOND) AS hendelse_opprettet
-      FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
-      WHERE sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
+        TIMESTAMP_TRUNC(sh.opprettet, SECOND) AS hendelse_opprettet_tidspunkt
+      FROM
+        `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
+      WHERE
+        sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
     ),
-    all_tsm AS (
+    alle_tsm_statuser AS (
       SELECT
         tsm.sykmelding_id,
-        tsm.event,
-        TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS timestamp
-      FROM `${var.tsm_sykmeldingstatus_view}` tsm
-      WHERE tsm.event IS NOT NULL
-        AND tsm.timestamp IS NOT NULL
+        TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt
+      FROM
+        `${var.tsm_sykmeldingstatus_view}` tsm
+      WHERE
+        tsm.event IS NOT NULL AND tsm.timestamp IS NOT NULL
+        AND tsm.event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
     ),
-    matching AS (
+    -- CTE for å identifisere TSM-statuser som IKKE har en korresponderende sykmeldinghendelse (Flex).
+    detaljer_sykmeldingstatus_ikke_i_flex AS (
       SELECT
-        sh.sykmelding_id,
-        sh.hendelse_id,
-        sh.status,
-        sh.hendelse_opprettet,
-        tsm.event,
-        tsm.timestamp
-      FROM all_sykmeldinger sh
-      JOIN all_tsm tsm
-        ON sh.sykmelding_id = tsm.sykmelding_id
-        AND sh.hendelse_opprettet = tsm.timestamp
+        tsm.sykmelding_id -- Velg kolonner som trengs for inspeksjon, eller bare én for ANTALL (COUNT).
+      FROM
+        alle_tsm_statuser tsm
+      LEFT JOIN
+        alle_sykmeldinger sh
+        ON tsm.sykmelding_id = sh.sykmelding_id AND tsm.tsm_tidspunkt = sh.hendelse_opprettet_tidspunkt
+      WHERE
+        sh.sykmelding_id IS NULL -- TSM-statusen har ingen match i sykmeldinghendelser (Flex).
     ),
-    unmatched_tsm AS (
-      SELECT tsm.sykmelding_id
-      FROM all_tsm tsm
-      LEFT JOIN all_sykmeldinger sh
-        ON tsm.sykmelding_id = sh.sykmelding_id
-        AND tsm.timestamp = sh.hendelse_opprettet
-      WHERE sh.sykmelding_id IS NULL
+    -- CTE for å identifisere sykmeldinghendelser (Flex) som IKKE har en korresponderende TSM-status.
+    detaljer_sykmeldinghendelser_ikke_i_tsm AS (
+      SELECT
+        sh.sykmelding_id -- Velg kolonner som trengs for inspeksjon, eller bare én for ANTALL (COUNT).
+      FROM
+        alle_sykmeldinger sh
+      LEFT JOIN
+        alle_tsm_statuser tsm
+        ON sh.sykmelding_id = tsm.sykmelding_id AND sh.hendelse_opprettet_tidspunkt = tsm.tsm_tidspunkt
+      WHERE
+        tsm.sykmelding_id IS NULL -- Sykmeldinghendelsen (Flex) har ingen match i TSM-statuser.
     )
-
-    SELECT 'matching_records' AS match_type, COUNT(*) AS count
-    FROM matching
-
+    -- Endelig utvalg:
+    -- Inkluder kun en rad for 'sykmeldingstatus_ikke_i_flex' dersom antallet er > 0.
+    -- Inkluder kun en rad for 'sykmeldinghendelser_ikke_i_tsm' dersom antallet er > 0.
+    -- Dersom begge antallene er 0, vil hele denne spørringen produsere 0 rader.
+    (
+      SELECT
+        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type, -- Type uoverensstemmelse
+        COUNT(*) AS antall -- Antall forekomster
+      FROM detaljer_sykmeldingstatus_ikke_i_flex
+      HAVING COUNT(*) > 0
+    )
     UNION ALL
-
-    SELECT 'unmatched_tsm_records' AS match_type, COUNT(*) AS count
-    FROM unmatched_tsm
-
-    UNION ALL
-
-    SELECT 'unmatched_sykmeldinger_records' AS match_type,
-      (SELECT COUNT(*) FROM all_sykmeldinger) - (SELECT COUNT(*) FROM matching) AS count
+    (
+      SELECT
+        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type, -- Type uoverensstemmelse
+        COUNT(*) AS antall -- Antall forekomster
+      FROM detaljer_sykmeldinghendelser_ikke_i_tsm
+      HAVING COUNT(*) > 0
+    );
   EOF
 }
+
 module "arkivering_oppgave_oppgavestyring_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
