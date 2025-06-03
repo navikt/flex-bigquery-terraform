@@ -2,7 +2,7 @@ resource "google_bigquery_dataset" "soda_dataset" {
   dataset_id    = "soda_dataset"
   location      = var.gcp_project["region"]
   friendly_name = "soda_dataset"
-  labels        = {}
+  labels = {}
 
   access {
     role          = "OWNER"
@@ -135,6 +135,129 @@ module "flex_sykmeldinger_backend_avstemming" {
 EOF
 }
 
+module "sykmeldinger_korrelerer_med_tsm_raw" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id             = "sykmeldinger_korrelerer_med_tsm_raw"
+  view_schema = jsonencode(
+    [
+      {
+        name = "sykmelding_id",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "uoverensstemmelse_type",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "flex_status",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "tsm_event",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "hendelse_tidspunkt",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+    -- Dette viewet viser detaljerte data for uoverensstemmelser mellom systemer
+    WITH
+      alle_sykmeldinger AS (
+        SELECT
+          sh.sykmelding_id,
+          sh.status,
+          sh.opprettet AS hendelse_opprettet_tidspunkt,
+          TIMESTAMP_TRUNC(sh.opprettet, SECOND) AS hendelse_opprettet_tidspunkt_truncated
+        FROM
+          `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
+        WHERE
+          opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
+      ),
+      alle_tsm_statuser AS (
+        SELECT
+          tsm.sykmelding_id,
+          tsm.event,
+          tsm.timestamp AS tsm_tidspunkt,
+          TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt_truncated
+        FROM
+          `${var.tsm_sykmeldingstatus_view}` tsm
+        WHERE
+          event IS NOT NULL
+          AND timestamp IS NOT NULL
+          AND event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
+      )
+
+      -- Uoverensstemmelse type 1: TSM statuser som ikke har matching i Flex
+      SELECT
+        tsm.sykmelding_id,
+        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
+        NULL AS flex_status,
+        tsm.event AS tsm_event,
+        NULL AS flex_tidspunkt,
+        tsm.tsm_tidspunkt AS tsm_tidspunkt
+      FROM
+        alle_tsm_statuser tsm
+        LEFT JOIN alle_sykmeldinger sh
+          ON tsm.sykmelding_id = sh.sykmelding_id
+          AND tsm.tsm_tidspunkt_truncated = sh.hendelse_opprettet_tidspunkt_truncated
+      WHERE
+        sh.sykmelding_id IS NULL
+
+    UNION ALL
+
+      -- Uoverensstemmelse type 2: Flex hendelser som ikke har matching i TSM
+      SELECT
+        sh.sykmelding_id,
+        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
+        sh.status AS flex_status,
+        NULL AS tsm_event,
+        sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
+        NULL AS tsm_tidspunkt
+      FROM
+        alle_sykmeldinger sh
+        LEFT JOIN alle_tsm_statuser tsm
+          ON sh.sykmelding_id = tsm.sykmelding_id
+          AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
+      WHERE
+        tsm.sykmelding_id IS NULL
+
+    UNION ALL
+
+      -- Uoverensstemmelse type 3: Status/event verdier er ulike
+      SELECT
+        sh.sykmelding_id,
+        'status_mismatch' AS uoverensstemmelse_type,
+        sh.status AS flex_status,
+        tsm.event AS tsm_event,
+        sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
+        tsm.tsm_tidspunkt AS tsm_tidspunkt
+      FROM
+        alle_sykmeldinger sh
+        JOIN alle_tsm_statuser tsm
+          ON sh.sykmelding_id = tsm.sykmelding_id
+          AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
+      WHERE
+        CASE
+          WHEN sh.status = 'APEN' THEN tsm.event != 'APEN'
+          WHEN sh.status = 'SENDT_TIL_ARBEIDSGIVER' THEN tsm.event != 'SENDT'
+          WHEN sh.status = 'SENDT_TIL_NAV' THEN tsm.event != 'BEKREFTET'
+          WHEN sh.status = 'UTGATT' THEN tsm.event != 'UTGATT'
+        END
+  EOF
+}
+
 module "sykmeldinger_korrelerer_med_tsm" {
   source = "../modules/google-bigquery-view"
 
@@ -144,12 +267,12 @@ module "sykmeldinger_korrelerer_med_tsm" {
   view_schema = jsonencode(
     [
       {
-        name = "match_type",
+        name = "uoverensstemmelse_type",
         mode = "NULLABLE",
         type = "STRING"
       },
       {
-        name = "count",
+        name = "antall",
         mode = "NULLABLE",
         type = "INTEGER"
       }
@@ -157,68 +280,66 @@ module "sykmeldinger_korrelerer_med_tsm" {
   )
 
   view_query = <<EOF
-    -- Dette viewet vil kun returnere rader dersom det finnes poster som ikke er matchet.
-    WITH alle_sykmeldinger AS (
+    -- Dette viewet vil returnere aggregerte tall basert på rådata fra sykmeldinger_korrelerer_med_tsm_raw
+    WITH raw_data AS (
       SELECT
-        sh.sykmelding_id,
-        TIMESTAMP_TRUNC(sh.opprettet, SECOND) AS hendelse_opprettet_tidspunkt
+        uoverensstemmelse_type,
+        flex_status,
+        tsm_event
       FROM
-        `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
-      WHERE
-        sh.opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
-    ),
-    alle_tsm_statuser AS (
-      SELECT
-        tsm.sykmelding_id,
-        TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt
-      FROM
-        `${var.tsm_sykmeldingstatus_view}` tsm
-      WHERE
-        tsm.event IS NOT NULL AND tsm.timestamp IS NOT NULL
-        AND tsm.event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
-    ),
-    -- CTE for å identifisere TSM-statuser som IKKE har en korresponderende sykmeldinghendelse (Flex).
-    detaljer_sykmeldingstatus_ikke_i_flex AS (
-      SELECT
-        tsm.sykmelding_id -- Velg kolonner som trengs for inspeksjon, eller bare én for ANTALL (COUNT).
-      FROM
-        alle_tsm_statuser tsm
-      LEFT JOIN
-        alle_sykmeldinger sh
-        ON tsm.sykmelding_id = sh.sykmelding_id AND tsm.tsm_tidspunkt = sh.hendelse_opprettet_tidspunkt
-      WHERE
-        sh.sykmelding_id IS NULL -- TSM-statusen har ingen match i sykmeldinghendelser (Flex).
-    ),
-    -- CTE for å identifisere sykmeldinghendelser (Flex) som IKKE har en korresponderende TSM-status.
-    detaljer_sykmeldinghendelser_ikke_i_tsm AS (
-      SELECT
-        sh.sykmelding_id -- Velg kolonner som trengs for inspeksjon, eller bare én for ANTALL (COUNT).
-      FROM
-        alle_sykmeldinger sh
-      LEFT JOIN
-        alle_tsm_statuser tsm
-        ON sh.sykmelding_id = tsm.sykmelding_id AND sh.hendelse_opprettet_tidspunkt = tsm.tsm_tidspunkt
-      WHERE
-        tsm.sykmelding_id IS NULL -- Sykmeldinghendelsen (Flex) har ingen match i TSM-statuser.
+        `${var.gcp_project["project"]}.${google_bigquery_dataset.soda_dataset.dataset_id}.sykmeldinger_korrelerer_med_tsm_raw`
     )
-    -- Endelig utvalg:
-    -- Inkluder kun en rad for 'sykmeldingstatus_ikke_i_flex' dersom antallet er > 0.
-    -- Inkluder kun en rad for 'sykmeldinghendelser_ikke_i_tsm' dersom antallet er > 0.
-    -- Dersom begge antallene er 0, vil hele denne spørringen produsere 0 rader.
+
+    -- Aggregerte tall for hver uoverensstemmelsestype
     (
       SELECT
-        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type, -- Type uoverensstemmelse
-        COUNT(*) AS antall -- Antall forekomster
-      FROM detaljer_sykmeldingstatus_ikke_i_flex
-      HAVING COUNT(*) > 0
+        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
+        COUNT(*) AS antall
+      FROM
+        raw_data
+      WHERE
+        uoverensstemmelse_type = 'sykmeldingstatus_ikke_i_flex'
+      HAVING
+        COUNT(*) > 0
     )
     UNION ALL
     (
       SELECT
-        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type, -- Type uoverensstemmelse
-        COUNT(*) AS antall -- Antall forekomster
-      FROM detaljer_sykmeldinghendelser_ikke_i_tsm
-      HAVING COUNT(*) > 0
+        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
+        COUNT(*) AS antall
+      FROM
+        raw_data
+      WHERE
+        uoverensstemmelse_type = 'sykmeldinghendelser_ikke_i_tsm'
+      HAVING
+        COUNT(*) > 0
+    )
+    UNION ALL
+    (
+      SELECT
+        'status_mismatch_total' AS uoverensstemmelse_type,
+        COUNT(*) AS antall
+      FROM
+        raw_data
+      WHERE
+        uoverensstemmelse_type = 'status_mismatch'
+      HAVING
+        COUNT(*) > 0
+    )
+    UNION ALL
+    (
+      SELECT
+        CONCAT('status_mismatch: flex_status: ', flex_status, ' vs tsm_event: ', tsm_event) AS uoverensstemmelse_type,
+        COUNT(*) AS antall
+      FROM
+        raw_data
+      WHERE
+        uoverensstemmelse_type = 'status_mismatch'
+      GROUP BY
+        flex_status,
+        tsm_event
+      HAVING
+        COUNT(*) > 0
     );
   EOF
 }
