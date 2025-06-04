@@ -49,3 +49,9 @@ variable "inntektsmelding_status_cloud_sql_port" {
   type        = string
   default     = "5492"
 }
+
+variable "tsm_sykmeldingstatus_view" {
+  description = "View for TSM sykmeldinger."
+  type        = string
+  default     = "teamsykmelding-prod-2acd.teamsykmelding_data.sykmeldingstatus_flex"
+}

@@ -105,6 +105,164 @@ FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_sykepenges
 EOF
 }
 
+module "flex_sykmeldinger_backend_avstemming" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "flex_sykmeldinger_backend_avstemming"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      }
+    ]
+  )
+  view_query = <<EOF
+  SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-sykmeldinger-backend",
+    '''
+    SELECT id FROM sykmelding
+    WHERE opprettet < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
+    AND opprettet > date_trunc('day', current_timestamp) - INTERVAL '2 days'
+    ''')
+  WHERE id NOT IN (
+  SELECT id
+  FROM `${var.gcp_project["project"]}.flex_sykmeldinger_backend_datastream.public_sykmelding`
+    WHERE opprettet < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
+      AND opprettet >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
+  )
+EOF
+}
+
+module "sykmeldinger_korrelerer_med_tsm" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id             = "sykmeldinger_korrelerer_med_tsm"
+  view_schema = jsonencode(
+    [
+      {
+        name = "sykmelding_id",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "uoverensstemmelse_type",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "flex_status",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "tsm_event",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "tsm_tidspunkt",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      },
+      {
+        name = "flex_tidspunkt",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+    -- Dette viewet viser detaljerte data for uoverensstemmelser mellom systemer
+    WITH
+      alle_sykmeldinger AS (
+        SELECT
+          sh.sykmelding_id,
+          sh.status,
+          sh.opprettet AS hendelse_opprettet_tidspunkt,
+          TIMESTAMP_TRUNC(sh.opprettet, SECOND) AS hendelse_opprettet_tidspunkt_truncated
+        FROM
+          `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
+        WHERE
+          opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR)
+      ),
+      alle_tsm_statuser AS (
+        SELECT
+          tsm.sykmelding_id,
+          tsm.event,
+          tsm.timestamp AS tsm_tidspunkt,
+          TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt_truncated
+        FROM
+          `${var.tsm_sykmeldingstatus_view}` tsm
+        WHERE
+          event IS NOT NULL
+          AND timestamp IS NOT NULL
+          AND event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
+      )
+
+      -- Uoverensstemmelse type 1: TSM statuser som ikke har matching i Flex
+      SELECT
+        tsm.sykmelding_id,
+        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
+        NULL AS flex_status,
+        tsm.event AS tsm_event,
+        NULL AS flex_tidspunkt,
+        tsm.tsm_tidspunkt AS tsm_tidspunkt
+      FROM
+        alle_tsm_statuser tsm
+        LEFT JOIN alle_sykmeldinger sh
+          ON tsm.sykmelding_id = sh.sykmelding_id
+          AND tsm.tsm_tidspunkt_truncated = sh.hendelse_opprettet_tidspunkt_truncated
+      WHERE
+        sh.sykmelding_id IS NULL
+
+    UNION ALL
+
+      -- Uoverensstemmelse type 2: Flex hendelser som ikke har matching i TSM
+      SELECT
+        sh.sykmelding_id,
+        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
+        sh.status AS flex_status,
+        NULL AS tsm_event,
+        sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
+        NULL AS tsm_tidspunkt
+      FROM
+        alle_sykmeldinger sh
+        LEFT JOIN alle_tsm_statuser tsm
+          ON sh.sykmelding_id = tsm.sykmelding_id
+          AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
+      WHERE
+        tsm.sykmelding_id IS NULL
+
+    UNION ALL
+
+      -- Uoverensstemmelse type 3: Status/event verdier er ulike
+      SELECT
+        sh.sykmelding_id,
+        'status_mismatch' AS uoverensstemmelse_type,
+        sh.status AS flex_status,
+        tsm.event AS tsm_event,
+        sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
+        tsm.tsm_tidspunkt AS tsm_tidspunkt
+      FROM
+        alle_sykmeldinger sh
+        JOIN alle_tsm_statuser tsm
+          ON sh.sykmelding_id = tsm.sykmelding_id
+          AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
+      WHERE
+        CASE
+          WHEN sh.status = 'APEN' THEN tsm.event != 'APEN'
+          WHEN sh.status = 'SENDT_TIL_ARBEIDSGIVER' THEN tsm.event != 'SENDT'
+          WHEN sh.status = 'SENDT_TIL_NAV' THEN tsm.event != 'BEKREFTET'
+          WHEN sh.status = 'UTGATT' THEN tsm.event != 'UTGATT'
+        END
+  EOF
+}
+
 module "arkivering_oppgave_oppgavestyring_avstemming" {
   source              = "../modules/google-bigquery-view"
   deletion_protection = false
