@@ -143,7 +143,7 @@ locals {
 
 data "google_secret_manager_secret_version" "flex_sykmeldinger_backend_datastream_credentials_secret" {
   secret  = "flex-sykmeldinger-backend-datastream-credentials"
-  version = "2"
+  version = "3"
 }
 
 locals {
@@ -154,7 +154,7 @@ locals {
 
 data "google_secret_manager_secret_version" "flex_sykmeldinger_backend_bigquery_secret" {
   secret  = "flex-sykmeldinger-backend-bigquery-credentials"
-  version = "3"
+  version = "4"
 }
 
 locals {
