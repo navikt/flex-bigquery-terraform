@@ -188,7 +188,7 @@ module "sykmeldinger_korrelerer_med_tsm" {
         FROM
           `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
         WHERE
-          opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 HOUR)
+          opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
       ),
       alle_tsm_statuser AS (
         SELECT
