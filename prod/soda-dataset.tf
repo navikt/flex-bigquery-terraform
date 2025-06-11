@@ -202,6 +202,7 @@ module "sykmeldinger_korrelerer_med_tsm" {
           event IS NOT NULL
           AND timestamp IS NOT NULL
           AND event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
+          AND tsm.timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
       )
 
       -- Uoverensstemmelse type 1: TSM statuser som ikke har matching i Flex
