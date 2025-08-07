@@ -498,3 +498,59 @@ WHERE behandlet_status = 'NY'
   AND opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
 EOF
 }
+
+module "flex_inntektsmelding_status_forelagte_opplysninger_forsinket" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "flex_inntektsmelding_status_forelagte_opplysninger_forsinket"
+
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      },
+      {
+        name = "vedtaksperiode_id"
+        type = "STRING"
+      },
+      {
+        name = "behandling_id"
+        type = "STRING"
+      },
+      {
+        name = "opprinnelig_opprettet"
+        type = "TIMESTAMP"
+      },
+      {
+        name = "forsinket_dager"
+        type = "INTEGER"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+WITH
+  forelagte_opplysninger AS (
+    SELECT *
+    FROM `flex-prod-af40.inntektsmelding_status_datastream.public_forelagte_opplysninger_ainntekt`
+  ),
+  forsinkede AS (
+    SELECT
+      *,
+      TIMESTAMP_DIFF(CURRENT_TIMESTAMP(), opprinnelig_opprettet, DAY) AS forsinket_dager
+    FROM forelagte_opplysninger
+    WHERE status = 'NY'
+  )
+SELECT
+  id,
+  vedtaksperiode_id,
+  behandling_id,
+  opprinnelig_opprettet,
+  forsinket_dager
+FROM forsinkede
+WHERE forsinket_dager > 5
+EOF
+}
