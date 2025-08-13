@@ -177,90 +177,99 @@ module "sykmeldinger_korrelerer_med_tsm" {
   )
 
   view_query = <<EOF
+
     -- Dette viewet viser detaljerte data for uoverensstemmelser mellom systemer
     WITH
-      alle_sykmeldinger AS (
-        SELECT
-          sh.sykmelding_id,
-          sh.status,
-          sh.hendelse_opprettet AS hendelse_opprettet_tidspunkt,
-          TIMESTAMP_TRUNC(sh.hendelse_opprettet, SECOND) AS hendelse_opprettet_tidspunkt_truncated
-        FROM
-          `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse` sh
-        WHERE
-          hendelse_opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-      ),
-      alle_tsm_statuser AS (
-        SELECT
-          tsm.sykmelding_id,
-          tsm.event,
-          tsm.timestamp AS tsm_tidspunkt,
-          TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt_truncated
-        FROM
-          `${var.tsm_sykmeldingstatus_view}` tsm
-        WHERE
-          event IS NOT NULL
-          AND timestamp IS NOT NULL
-          AND event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
-          AND tsm.timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-      )
-
-      -- Uoverensstemmelse type 1: TSM statuser som ikke har matching i Flex
+    flex_sykmeldinghendelse AS (
+      SELECT *
+      FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse`
+    ),
+    tsm_sykmeldingstatus AS (
+      SELECT *
+      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.team_sykmelding_sykmeldingstatuser`
+    ),
+    alle_sykmeldinger AS (
+      SELECT
+        sh.sykmelding_id,
+        sh.status,
+        sh.hendelse_opprettet AS hendelse_opprettet_tidspunkt,
+        TIMESTAMP_TRUNC(sh.hendelse_opprettet, SECOND) AS hendelse_opprettet_tidspunkt_truncated
+      FROM
+        flex_sykmeldinghendelse sh
+      WHERE
+        hendelse_opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+    ),
+    alle_tsm_statuser AS (
       SELECT
         tsm.sykmelding_id,
-        'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
-        NULL AS flex_status,
-        tsm.event AS tsm_event,
-        NULL AS flex_tidspunkt,
-        tsm.tsm_tidspunkt AS tsm_tidspunkt
+        tsm.event,
+        tsm.timestamp AS tsm_tidspunkt,
+        TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt_truncated
       FROM
-        alle_tsm_statuser tsm
-        LEFT JOIN alle_sykmeldinger sh
-          ON tsm.sykmelding_id = sh.sykmelding_id
-          AND tsm.tsm_tidspunkt_truncated = sh.hendelse_opprettet_tidspunkt_truncated
+        tsm_sykmeldingstatus tsm
       WHERE
-        sh.sykmelding_id IS NULL
+        event IS NOT NULL
+        AND timestamp IS NOT NULL
+        AND event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
+        AND tsm.timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+    )
+
+    -- Uoverensstemmelse type 1: TSM statuser som ikke har matching i Flex
+    SELECT
+      tsm.sykmelding_id,
+      'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
+      NULL AS flex_status,
+      tsm.event AS tsm_event,
+      NULL AS flex_tidspunkt,
+      tsm.tsm_tidspunkt AS tsm_tidspunkt
+    FROM
+      alle_tsm_statuser tsm
+      LEFT JOIN alle_sykmeldinger sh
+        ON tsm.sykmelding_id = sh.sykmelding_id
+        AND tsm.tsm_tidspunkt_truncated = sh.hendelse_opprettet_tidspunkt_truncated
+    WHERE
+      sh.sykmelding_id IS NULL
 
     UNION ALL
 
-      -- Uoverensstemmelse type 2: Flex hendelser som ikke har matching i TSM
-      SELECT
-        sh.sykmelding_id,
-        'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
-        sh.status AS flex_status,
-        NULL AS tsm_event,
-        sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
-        NULL AS tsm_tidspunkt
-      FROM
-        alle_sykmeldinger sh
-        LEFT JOIN alle_tsm_statuser tsm
-          ON sh.sykmelding_id = tsm.sykmelding_id
-          AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
-      WHERE
-        tsm.sykmelding_id IS NULL
+    -- Uoverensstemmelse type 2: Flex hendelser som ikke har matching i TSM
+    SELECT
+      sh.sykmelding_id,
+      'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
+      sh.status AS flex_status,
+      NULL AS tsm_event,
+      sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
+      NULL AS tsm_tidspunkt
+    FROM
+      alle_sykmeldinger sh
+      LEFT JOIN alle_tsm_statuser tsm
+        ON sh.sykmelding_id = tsm.sykmelding_id
+        AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
+    WHERE
+      tsm.sykmelding_id IS NULL
 
     UNION ALL
 
-      -- Uoverensstemmelse type 3: Status/event verdier er ulike
-      SELECT
-        sh.sykmelding_id,
-        'status_mismatch' AS uoverensstemmelse_type,
-        sh.status AS flex_status,
-        tsm.event AS tsm_event,
-        sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
-        tsm.tsm_tidspunkt AS tsm_tidspunkt
-      FROM
-        alle_sykmeldinger sh
-        JOIN alle_tsm_statuser tsm
-          ON sh.sykmelding_id = tsm.sykmelding_id
-          AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
-      WHERE
-        CASE
-          WHEN sh.status = 'APEN' THEN tsm.event != 'APEN'
-          WHEN sh.status = 'SENDT_TIL_ARBEIDSGIVER' THEN tsm.event != 'SENDT'
-          WHEN sh.status = 'SENDT_TIL_NAV' THEN tsm.event != 'BEKREFTET'
-          WHEN sh.status = 'UTGATT' THEN tsm.event != 'UTGATT'
-        END
+    -- Uoverensstemmelse type 3: Status/event verdier er ulike
+    SELECT
+      sh.sykmelding_id,
+      'status_mismatch' AS uoverensstemmelse_type,
+      sh.status AS flex_status,
+      tsm.event AS tsm_event,
+      sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
+      tsm.tsm_tidspunkt AS tsm_tidspunkt
+    FROM
+      alle_sykmeldinger sh
+      JOIN alle_tsm_statuser tsm
+        ON sh.sykmelding_id = tsm.sykmelding_id
+        AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
+    WHERE
+      CASE
+        WHEN sh.status = 'APEN' THEN tsm.event != 'APEN'
+        WHEN sh.status = 'SENDT_TIL_ARBEIDSGIVER' THEN tsm.event != 'SENDT'
+        WHEN sh.status = 'SENDT_TIL_NAV' THEN tsm.event != 'BEKREFTET'
+        WHEN sh.status = 'UTGATT' THEN tsm.event != 'UTGATT'
+      END
   EOF
 }
 

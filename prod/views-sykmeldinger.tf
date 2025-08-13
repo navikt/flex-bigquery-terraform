@@ -113,6 +113,47 @@ module "sykmeldinger_med_hendelser_view" {
   EOF
 }
 
+module "team_sykmelding_sykmeldingstatuser" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "team_sykmelding_sykmeldingstatuser"
+  view_schema = jsonencode(
+    [
+      {
+        name = "sykmelding_id",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "event",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "timestamp",
+        mode = "NULLABLE",
+        type = "TIMESTAMP"
+      },
+      {
+        name = "alle_spm",
+        mode = "NULLABLE",
+        type = "JSON"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT
+  sykmelding_id,
+  event,
+  timestamp,
+  alle_spm,
+FROM `teamsykmelding-prod-2acd.teamsykmelding_data.sykmeldingstatus_flex`
+  EOF
+}
+
 module "sykmeldinger_korrelerer_med_tsm_aggregert" {
   source = "../modules/google-bigquery-view"
 
