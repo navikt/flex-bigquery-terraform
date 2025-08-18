@@ -204,6 +204,6 @@ SELECT opprettet,
 FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 WHERE (app = 'syfooversikt' or app = 'syfomodiaperson')
 AND team = 'teamsykefravr'
-AND (JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'SenFase' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Historikk')
+AND (JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'SenFase' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Historikk' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt - Ruting' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Enhetens oversikt - Ruting')
 EOF
 }
