@@ -563,3 +563,72 @@ FROM forsinkede
 WHERE forsinket_dager > 5
 EOF
 }
+
+module "sykepengesoknad_aktivering_forsinket" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "sykepengesoknad_aktivering_forsinket"
+
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      },
+      {
+        name = "sykepengesoknad_uuid"
+        type = "STRING"
+      },
+      {
+        name = "aktivering_forsinket_dager"
+        type = "INTEGER"
+      },
+      {
+        name = "soknadstype"
+        type = "STRING"
+      },
+      {
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        name = "tom"
+        type = "DATE"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+WITH
+sykepengesoknad AS (
+  SELECT *
+  FROM `flex-prod-af40.flex_dataset.sykepengesoknad_sykepengesoknad_view`
+),
+fremtidig_sykepengesoknad AS (
+  SELECT
+    DATE_DIFF(
+      CURRENT_DATE(),
+      DATE_ADD(tom, INTERVAL 1 DAY),
+      DAY
+    ) AS aktivering_forsinket_dager,
+    *
+  FROM sykepengesoknad
+  WHERE status = 'FREMTIDIG'
+),
+ikke_aktivert AS (
+  SELECT *
+  FROM fremtidig_sykepengesoknad
+  WHERE aktivering_forsinket_dager >= 1
+)
+SELECT
+  id,
+  sykepengesoknad_uuid,
+  aktivering_forsinket_dager,
+  soknadstype,
+  fom,
+  tom,
+FROM ikke_aktivert
+EOF
+}
