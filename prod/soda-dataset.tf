@@ -608,19 +608,17 @@ sykepengesoknad AS (
 ),
 fremtidig_sykepengesoknad AS (
   SELECT
-    DATE_DIFF(
-      CURRENT_DATE(),
-      DATE_ADD(tom, INTERVAL 1 DAY),
-      DAY
-    ) AS aktivering_forsinket_dager,
+    DATE_ADD(tom, INTERVAL 1 DAY) AS aktivering_dato,
     *
   FROM sykepengesoknad
   WHERE status = 'FREMTIDIG'
 ),
 ikke_aktivert AS (
-  SELECT *
+  SELECT
+    *,
+    DATE_DIFF(CURRENT_DATE(), aktivering_dato, DAY) AS aktivering_forsinket_dager
   FROM fremtidig_sykepengesoknad
-  WHERE aktivering_forsinket_dager >= 1
+  WHERE aktivering_dato < CURRENT_DATE()
 )
 SELECT
   id,
@@ -629,6 +627,7 @@ SELECT
   soknadstype,
   fom,
   tom,
+  sykmelding_uuid,
 FROM ikke_aktivert
 EOF
 }
