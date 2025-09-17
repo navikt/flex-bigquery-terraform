@@ -135,11 +135,6 @@ module "team_sykmelding_sykmeldingstatuser" {
         name = "timestamp",
         mode = "NULLABLE",
         type = "TIMESTAMP"
-      },
-      {
-        name = "alle_spm",
-        mode = "NULLABLE",
-        type = "JSON"
       }
     ]
   )
@@ -148,8 +143,7 @@ module "team_sykmelding_sykmeldingstatuser" {
 SELECT
   sykmelding_id,
   event,
-  timestamp,
-  alle_spm,
+  timestamp
 FROM `teamsykmelding-prod-2acd.teamsykmelding_data.sykmeldingstatus_flex`
   EOF
 }
