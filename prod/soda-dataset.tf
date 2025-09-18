@@ -582,8 +582,8 @@ module "sykepengesoknad_aktivering_forsinket" {
         type = "STRING"
       },
       {
-          name = "forventet_aktivering_dato",
-          type = "DATE"
+        name = "forventet_aktivering_dato",
+        type = "DATE"
       },
       {
         name = "aktivering_forsinket_dager"
