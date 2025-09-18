@@ -631,8 +631,7 @@ SELECT
   aktivering_forsinket_dager,
   soknadstype,
   fom,
-  tom,
-  sykmelding_uuid,
+  tom
 FROM ikke_aktivert
 EOF
 }
