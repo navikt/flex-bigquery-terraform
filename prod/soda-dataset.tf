@@ -582,6 +582,10 @@ module "sykepengesoknad_aktivering_forsinket" {
         type = "STRING"
       },
       {
+          name = "forventet_aktivering_dato",
+          type = "DATE"
+      },
+      {
         name = "aktivering_forsinket_dager"
         type = "INTEGER"
       },
@@ -608,7 +612,7 @@ sykepengesoknad AS (
 ),
 fremtidig_sykepengesoknad AS (
   SELECT
-    DATE_ADD(tom, INTERVAL 1 DAY) AS aktivering_dato,
+    DATE_ADD(tom, INTERVAL 1 DAY) AS forventet_aktivering_dato,
     *
   FROM sykepengesoknad
   WHERE status = 'FREMTIDIG'
@@ -616,13 +620,14 @@ fremtidig_sykepengesoknad AS (
 ikke_aktivert AS (
   SELECT
     *,
-    DATE_DIFF(CURRENT_DATE(), aktivering_dato, DAY) AS aktivering_forsinket_dager
+    DATE_DIFF(CURRENT_DATE(), forventet_aktivering_dato, DAY) AS aktivering_forsinket_dager
   FROM fremtidig_sykepengesoknad
-  WHERE aktivering_dato < CURRENT_DATE()
+  WHERE forventet_aktivering_dato < CURRENT_DATE()
 )
 SELECT
   id,
   sykepengesoknad_uuid,
+  forventet_aktivering_dato,
   aktivering_forsinket_dager,
   soknadstype,
   fom,
