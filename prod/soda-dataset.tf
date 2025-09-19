@@ -144,132 +144,208 @@ module "sykmeldinger_korrelerer_med_tsm" {
   view_schema = jsonencode(
     [
       {
+        name = "flex_summary",
+        type = "STRING"
+      },
+      {
+        name = "tsm_summary",
+        type = "STRING"
+      },
+      {
+        name = "feiltype",
+        type = "STRING"
+      },
+      {
         name = "sykmelding_id",
-        mode = "NULLABLE",
         type = "STRING"
       },
       {
-        name = "uoverensstemmelse_type",
-        mode = "NULLABLE",
+        name = "sykmelding_type",
         type = "STRING"
       },
       {
-        name = "flex_status",
-        mode = "NULLABLE",
+        name = "flex_alle_statuser",
+        mode = "REPEATED",
         type = "STRING"
       },
       {
-        name = "tsm_event",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "tsm_tidspunkt",
-        mode = "NULLABLE",
+        name = "flex_alle_opprettet",
+        mode = "REPEATED",
         type = "TIMESTAMP"
       },
       {
-        name = "flex_tidspunkt",
-        mode = "NULLABLE",
+        name = "tsm_alle_statuser",
+        mode = "REPEATED",
+        type = "STRING"
+      },
+      {
+        name = "tsm_alle_opprettet",
+        mode = "REPEATED",
         type = "TIMESTAMP"
-      }
+      },
     ]
   )
 
   view_query = <<EOF
+WITH
+flex_sykmeldinghendelse AS (
+  SELECT
+    sykmelding_id,
+    hendelse_opprettet,
+    lokalt_opprettet,
+    status,
+  FROM `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmeldinghendelse`
+  WHERE lokalt_opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+),
+tsm_sykmeldingstatus AS (
+  SELECT
+    sykmelding_id,
+    timestamp,
+    event,
+  FROM `teamsykmelding-prod-2acd.teamsykmelding_data.sykmeldingstatus_flex`
+  WHERE CASE
+      WHEN event = 'APEN'
+        -- APEN statuser har timestamp knytta til sykmelding mottattDato
+        THEN TIMESTAMP_MILLIS(datastream_source_timestamp) < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+      ELSE timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+    END
+),
+flex_sykmelding_type AS (
+  SELECT
+    sykmelding_id,
+    JSON_VALUE(sykmelding, '$.type') as sykmelding_type,
+  FROM `flex_sykmeldinger_backend_datastream.public_sykmelding`
+),
 
-    -- Dette viewet viser detaljerte data for uoverensstemmelser mellom systemer
-    WITH
-    flex_sykmeldinghendelse AS (
-      SELECT *
-      FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_sykmeldinghendelse`
-    ),
-    tsm_sykmeldingstatus AS (
-      SELECT *
-      FROM `${var.gcp_project["project"]}.${google_bigquery_dataset.flex_dataset.dataset_id}.team_sykmelding_sykmeldingstatuser`
-    ),
-    alle_sykmeldinger AS (
-      SELECT
-        sh.sykmelding_id,
-        sh.status,
-        sh.hendelse_opprettet AS hendelse_opprettet_tidspunkt,
-        TIMESTAMP_TRUNC(sh.hendelse_opprettet, SECOND) AS hendelse_opprettet_tidspunkt_truncated
-      FROM
-        flex_sykmeldinghendelse sh
-      WHERE
-        hendelse_opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-    ),
-    alle_tsm_statuser AS (
-      SELECT
-        tsm.sykmelding_id,
-        tsm.event,
-        tsm.timestamp AS tsm_tidspunkt,
-        TIMESTAMP_TRUNC(tsm.timestamp, SECOND) AS tsm_tidspunkt_truncated
-      FROM
-        tsm_sykmeldingstatus tsm
-      WHERE
-        event IS NOT NULL
-        AND timestamp IS NOT NULL
-        AND event != 'AVBRUTT' -- Ekskluderer AVBRUTT-statuser
-        AND tsm.timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-    )
-
-    -- Uoverensstemmelse type 1: TSM statuser som ikke har matching i Flex
-    SELECT
-      tsm.sykmelding_id,
-      'sykmeldingstatus_ikke_i_flex' AS uoverensstemmelse_type,
-      NULL AS flex_status,
-      tsm.event AS tsm_event,
-      NULL AS flex_tidspunkt,
-      tsm.tsm_tidspunkt AS tsm_tidspunkt
-    FROM
-      alle_tsm_statuser tsm
-      LEFT JOIN alle_sykmeldinger sh
-        ON tsm.sykmelding_id = sh.sykmelding_id
-        AND tsm.tsm_tidspunkt_truncated = sh.hendelse_opprettet_tidspunkt_truncated
-    WHERE
-      sh.sykmelding_id IS NULL
-
-    UNION ALL
-
-    -- Uoverensstemmelse type 2: Flex hendelser som ikke har matching i TSM
-    SELECT
-      sh.sykmelding_id,
-      'sykmeldinghendelser_ikke_i_tsm' AS uoverensstemmelse_type,
-      sh.status AS flex_status,
-      NULL AS tsm_event,
-      sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
-      NULL AS tsm_tidspunkt
-    FROM
-      alle_sykmeldinger sh
-      LEFT JOIN alle_tsm_statuser tsm
-        ON sh.sykmelding_id = tsm.sykmelding_id
-        AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
-    WHERE
-      tsm.sykmelding_id IS NULL
-
-    UNION ALL
-
-    -- Uoverensstemmelse type 3: Status/event verdier er ulike
-    SELECT
-      sh.sykmelding_id,
-      'status_mismatch' AS uoverensstemmelse_type,
-      sh.status AS flex_status,
-      tsm.event AS tsm_event,
-      sh.hendelse_opprettet_tidspunkt AS flex_tidspunkt,
-      tsm.tsm_tidspunkt AS tsm_tidspunkt
-    FROM
-      alle_sykmeldinger sh
-      JOIN alle_tsm_statuser tsm
-        ON sh.sykmelding_id = tsm.sykmelding_id
-        AND sh.hendelse_opprettet_tidspunkt_truncated = tsm.tsm_tidspunkt_truncated
-    WHERE
-      CASE
-        WHEN sh.status = 'APEN' THEN tsm.event != 'APEN'
-        WHEN sh.status = 'SENDT_TIL_ARBEIDSGIVER' THEN tsm.event != 'SENDT'
-        WHEN sh.status = 'SENDT_TIL_NAV' THEN tsm.event != 'BEKREFTET'
-        WHEN sh.status = 'UTGATT' THEN tsm.event != 'UTGATT'
-      END
+flex_hendelse AS (
+  SELECT
+    sykmelding_id,
+    hendelse_opprettet,
+    lokalt_opprettet,
+    status AS flex_status,
+    CASE status
+      WHEN 'SENDT_TIL_NAV' THEN 'BEKREFTET'
+      WHEN 'SENDT_TIL_ARBEIDSGIVER' THEN 'SENDT'
+      WHEN 'BEKREFTET_AVVIST' THEN 'BEKREFTET'
+      ELSE status
+    END AS tsm_status,
+  FROM flex_sykmeldinghendelse
+),
+tsm_hendelse AS (
+  SELECT
+    sykmelding_id,
+    timestamp AS hendelse_opprettet,
+    event AS tsm_status,
+  FROM tsm_sykmeldingstatus
+),
+flex_hendelser AS (
+  SELECT
+    sykmelding_id,
+    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC)[OFFSET(0)] as siste_status,
+    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC)[OFFSET(0)] as siste_opprettet,
+    COUNT(*) AS antall_hendelser,
+    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC) as alle_statuser,
+    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC) as alle_opprettet,
+  FROM flex_hendelse
+  GROUP BY sykmelding_id
+),
+tsm_hendelser AS (
+  SELECT
+    sykmelding_id,
+    MAX_BY(tsm_status, hendelse_opprettet) as siste_status,
+    MAX(hendelse_opprettet) as siste_opprettet,
+    COUNT(*) AS antall_hendelser,
+    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC) as alle_statuser,
+    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC) as alle_opprettet,
+  FROM tsm_hendelse
+  GROUP BY sykmelding_id
+),
+forskjellig_siste_status AS (
+  SELECT
+    sykmelding_id,
+    'FORSKJELLIG' AS feiltype,
+    flex_hendelser.siste_status AS flex_siste_status,
+    tsm_hendelser.siste_status AS tsm_siste_status,
+    flex_hendelser.siste_opprettet AS flex_siste_opprettet,
+    tsm_hendelser.siste_opprettet AS tsm_siste_opprettet,
+    flex_hendelser.antall_hendelser AS flex_antall_hendelser,
+    flex_hendelser.alle_statuser AS flex_alle_statuser,
+    flex_hendelser.alle_opprettet AS flex_alle_opprettet,
+    tsm_hendelser.antall_hendelser AS tsm_antall_hendelser,
+    tsm_hendelser.alle_statuser AS tsm_alle_statuser,
+    tsm_hendelser.alle_opprettet AS tsm_alle_opprettet,
+  FROM flex_hendelser
+  INNER JOIN tsm_hendelser
+    USING (sykmelding_id)
+  WHERE
+    flex_hendelser.siste_status != tsm_hendelser.siste_status
+),
+manglende_status AS (
+  SELECT
+    sykmelding_id,
+    CASE
+      WHEN flex_hendelser.sykmelding_id is null then 'MANGLER_I_FLEX'
+      WHEN tsm_hendelser.sykmelding_id is null then 'MANGLER_I_TSM'
+    END AS feiltype,
+    flex_hendelser.siste_status AS flex_siste_status,
+    tsm_hendelser.siste_status AS tsm_siste_status,
+    flex_hendelser.siste_opprettet AS flex_siste_opprettet,
+    tsm_hendelser.siste_opprettet AS tsm_siste_opprettet,
+    flex_hendelser.antall_hendelser AS flex_antall_hendelser,
+    flex_hendelser.alle_statuser AS flex_alle_statuser,
+    flex_hendelser.alle_opprettet AS flex_alle_opprettet,
+    tsm_hendelser.antall_hendelser AS tsm_antall_hendelser,
+    tsm_hendelser.alle_statuser AS tsm_alle_statuser,
+    tsm_hendelser.alle_opprettet AS tsm_alle_opprettet,
+  FROM flex_hendelser
+  FULL OUTER JOIN tsm_hendelser
+    USING (sykmelding_id)
+  WHERE
+    flex_hendelser.sykmelding_id is null or tsm_hendelser.sykmelding_id is null
+),
+alle_feil AS (
+  select *
+  from forskjellig_siste_status
+  UNION ALL
+  select *
+  from manglende_status
+),
+alle_feil_oversikt as (
+  SELECT
+    CONCAT(flex_siste_status, ' ', format_timestamp('%Y-%m-%d %H:%M:%S', flex_siste_opprettet, 'UTC'), ' [', flex_antall_hendelser, ']') AS flex_summary,
+    CONCAT(tsm_siste_status, ' ', format_timestamp('%Y-%m-%d %H:%M:%S', tsm_siste_opprettet, 'UTC'), ' [', tsm_antall_hendelser, ']') AS tsm_summary,
+    flex_sykmelding_type.sykmelding_type,
+    alle_feil.*
+  FROM alle_feil
+  left join flex_sykmelding_type
+    using (sykmelding_id)
+),
+sykmelding_type_oversikt AS (
+  SELECT
+    sykmelding_type,
+    feiltype,
+    count(*) as antall,
+    min(COALESCE(tsm_siste_opprettet, flex_siste_opprettet)) as tidligste_status,
+    max(COALESCE(tsm_siste_opprettet, flex_siste_opprettet)) as seneste_status,
+  FROM alle_feil_oversikt
+  GROUP BY sykmelding_type, feiltype
+),
+final as (
+  select
+    flex_summary,
+    tsm_summary,
+    feiltype,
+    sykmelding_id,
+    sykmelding_type,
+    flex_alle_statuser,
+    flex_alle_opprettet,
+    tsm_alle_statuser,
+    tsm_alle_opprettet
+  from alle_feil_oversikt
+  ORDER BY tsm_siste_opprettet DESC
+)
+SELECT *
+FROM final
   EOF
 }
 
