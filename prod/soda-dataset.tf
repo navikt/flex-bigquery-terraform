@@ -241,11 +241,11 @@ tsm_hendelse AS (
 flex_hendelser AS (
   SELECT
     sykmelding_id,
-    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC)[OFFSET(0)] as siste_status,
-    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC)[OFFSET(0)] as siste_opprettet,
+    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC, tsm_status)[OFFSET(0)] as siste_status,
+    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC, tsm_status)[OFFSET(0)] as siste_opprettet,
     COUNT(*) AS antall_hendelser,
-    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC) as alle_statuser,
-    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC) as alle_opprettet,
+    ARRAY_AGG(tsm_status ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC, tsm_status) as alle_statuser,
+    ARRAY_AGG(hendelse_opprettet ORDER BY hendelse_opprettet DESC, lokalt_opprettet DESC, tsm_status) as alle_opprettet,
   FROM flex_hendelse
   GROUP BY sykmelding_id
 ),
@@ -310,6 +310,9 @@ alle_feil AS (
   select *
   from manglende_status
 ),
+manuelt_sjekket AS (
+  SELECT '86ef6c53-cdb7-4196-b2b6-1f5fc6abdbfb' AS sykmelding_id
+),
 alle_feil_oversikt as (
   SELECT
     CONCAT(flex_siste_status, ' ', format_timestamp('%Y-%m-%d %H:%M:%S', flex_siste_opprettet, 'UTC'), ' [', flex_antall_hendelser, ']') AS flex_summary,
@@ -319,6 +322,9 @@ alle_feil_oversikt as (
   FROM alle_feil
   left join flex_sykmelding_type
     using (sykmelding_id)
+  WHERE sykmelding_id NOT IN (
+    SELECT sykmelding_id FROM manuelt_sjekket
+  )
 ),
 sykmelding_type_oversikt AS (
   SELECT
