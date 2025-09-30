@@ -27,49 +27,9 @@ module "sykmeldinger_med_hendelser_view" {
         type = "TIMESTAMP"
       },
       {
-        name = "status",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "tidligere_arbeidsgiver",
-        mode = "NULLABLE",
-        type = "JSON"
-      },
-      {
-        name = "arbeidstaker_info",
-        mode = "NULLABLE",
-        type = "JSON"
-      },
-      {
-        name = "bruker_svar",
-        mode = "NULLABLE",
-        type = "JSON"
-      },
-      {
-        name = "tilleggsinfo",
-        mode = "NULLABLE",
-        type = "JSON"
-      },
-      {
-        name = "source",
-        mode = "NULLABLE",
-        type = "STRING"
-      },
-      {
-        name = "hendelse_opprettet",
+        name = "sykmelding_hendelse_oppdatert",
         mode = "NULLABLE",
         type = "TIMESTAMP"
-      },
-      {
-        name = "lokalt_opprettet",
-        mode = "NULLABLE",
-        type = "TIMESTAMP"
-      },
-      {
-        name = "meldingsinformasjon",
-        mode = "NULLABLE",
-        type = "JSON"
       },
       {
         name = "validation",
@@ -85,6 +45,48 @@ module "sykmeldinger_med_hendelser_view" {
         name = "validation_oppdatert",
         mode = "NULLABLE",
         type = "TIMESTAMP"
+      },
+      {
+        name = "statuses",
+        mode = "REPEATED",
+        type = "RECORD",
+        fields = [
+          {
+            name = "status",
+            mode = "NULLABLE",
+            type = "STRING"
+          },
+          {
+            name = "tidligere_arbeidsgiver",
+            mode = "NULLABLE",
+            type = "JSON"
+          },
+          {
+            name = "bruker_svar",
+            mode = "NULLABLE",
+            type = "JSON"
+          },
+          {
+            name = "tilleggsinfo",
+            mode = "NULLABLE",
+            type = "JSON"
+          },
+          {
+            name = "source",
+            mode = "NULLABLE",
+            type = "STRING"
+          },
+          {
+            name = "hendelse_opprettet_timestamp",
+            mode = "NULLABLE",
+            type = "TIMESTAMP"
+          },
+          {
+            name = "lokalt_opprettet",
+            mode = "NULLABLE",
+            type = "TIMESTAMP"
+          }
+        ]
       }
     ]
   )
@@ -93,23 +95,32 @@ module "sykmeldinger_med_hendelser_view" {
      SELECT
         sm.sykmelding_id,
         sm.fnr,
-        sm.sykmelding,
-        sm.opprettet AS sykmelding_opprettet,
-        sm.meldingsinformasjon,
-        sm.validation,
-        sm.sykmelding_grunnlag_oppdatert,
-        sm.validation_oppdatert,
-        smh.status,
-        smh.tidligere_arbeidsgiver,
-        smh.arbeidstaker_info,
-        smh.bruker_svar,
-        smh.tilleggsinfo,
-        smh.source,
-        smh.opprettet AS hendelse_opprettet,
-        smh.lokalt_opprettet
-      FROM `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmelding` sm
-      INNER JOIN `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmeldinghendelse` smh
+        ANY_VALUE(sm.sykmelding) AS sykmelding,
+        ANY_VALUE(sm.opprettet) AS sykmelding_opprettet,
+        ANY_VALUE(sm.hendelse_oppdatert) AS sykmelding_hendelse_oppdatert,
+        ANY_VALUE(sm.validation) AS validation,
+        ANY_VALUE(sm.sykmelding_grunnlag_oppdatert) AS sykmelding_grunnlag_oppdatert,
+        ANY_VALUE(sm.validation_oppdatert) AS validation_oppdatert,
+        ARRAY_AGG(
+            STRUCT(
+                smh.status,
+                smh.tidligere_arbeidsgiver,
+                smh.bruker_svar,
+                smh.tilleggsinfo,
+                smh.source,
+                smh.hendelse_opprettet AS hendelse_opprettet_timestamp,
+                smh.lokalt_opprettet
+            ) IGNORE NULLS
+            ORDER BY smh.hendelse_opprettet
+        ) AS statuses
+    FROM
+        `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmelding` sm
+    LEFT JOIN
+        `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmeldinghendelse` smh
         ON sm.sykmelding_id = smh.sykmelding_id
+    GROUP BY
+        sm.sykmelding_id,
+        sm.fnr
   EOF
 }
 
