@@ -717,3 +717,78 @@ SELECT
 FROM ikke_aktivert
 EOF
 }
+
+module "sykmelding_sykepengesoknad_avstemming" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "sykmelding_sykepengesoknad_avstemming"
+
+  view_schema = jsonencode(
+    [
+      { name = "sykmelding_id", type = "STRING" },
+      { name = "hendelse_opprettet", type = "TIMESTAMP" },
+      { name = "lokalt_opprettet", type = "TIMESTAMP" },
+      { name = "status", type = "STRING" },
+      { name = "source", type = "STRING" }
+    ]
+  )
+
+  view_query = <<EOF
+WITH
+sykmeldinghendelse AS (
+  SELECT
+    sykmelding_id,
+    hendelse_opprettet,
+    lokalt_opprettet,
+    status,
+    source,
+  FROM `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmeldinghendelse`
+  WHERE lokalt_opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+),
+
+sykepengesoknad AS (
+  SELECT
+    sykmelding_uuid AS sykmelding_id
+  FROM `flex-prod-af40.sykepengesoknad_datastream.public_sykepengesoknad`
+  WHERE opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+),
+
+sendt_sykmelding AS (
+  SELECT
+    *
+  FROM sykmeldinghendelse
+  WHERE
+    status IN ('SENDT_TIL_NAV', 'SENDT_TIL_ARBEIDSGIVER')
+    AND source = 'flex-sykmeldinger-backend'
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY sykmelding_id
+    ORDER BY hendelse_opprettet DESC
+  ) = 1
+),
+
+sykmelding_i_soknad AS (
+  SELECT
+    sykmelding_id
+  FROM sykepengesoknad
+  GROUP BY sykmelding_id
+),
+
+sykmelding_soknad_avstemming AS (
+  SELECT sendt_sykmelding.*
+  FROM sendt_sykmelding
+  LEFT JOIN sykmelding_i_soknad
+    USING (sykmelding_id)
+  WHERE sykmelding_i_soknad.sykmelding_id IS NULL
+)
+
+SELECT
+  sykmelding_id,
+  hendelse_opprettet,
+  lokalt_opprettet,
+  status,
+FROM sykmelding_soknad_avstemming
+ORDER BY hendelse_opprettet DESC
+EOF
+}
