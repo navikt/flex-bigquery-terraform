@@ -162,3 +162,12 @@ locals {
     data.google_secret_manager_secret_version.flex_sykmeldinger_backend_bigquery_secret.secret_data
   )
 }
+
+data "google_secret_manager_secret_version" "slack_app_access_token" {
+  secret  = "slack_app_access_token"
+  version = "latest"
+}
+
+locals {
+  slack_app_access_token = data.google_secret_manager_secret_version.slack_app_access_token.secret_data
+}
