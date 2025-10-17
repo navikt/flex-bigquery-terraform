@@ -15,16 +15,13 @@ resource "google_monitoring_alert_policy" "alert_policy" {
     notification_rate_limit {
       period = var.notification_rate_limit_period
     }
-    auto_close = var.auto_close_period
+    auto_close           = var.auto_close_period
     notification_prompts = ["OPENED"]
   }
 
-  dynamic "documentation" {
-    for_each = var.documentation != "" ? [1] : []
-    content {
-      content   = var.documentation
-      mime_type = "text/markdown"
-    }
+  documentation {
+    content   = var.documentation
+    mime_type = "text/markdown"
   }
 
   notification_channels = var.notification_channels

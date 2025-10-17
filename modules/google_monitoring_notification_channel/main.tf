@@ -1,5 +1,4 @@
-resource "google_monitoring_notification_channel" "slack" {
-  count        = var.type == "slack" ? 1 : 0
+resource "google_monitoring_notification_channel" "notification_channel" {
   display_name = var.display_name
   type         = var.type
   description  = var.description
