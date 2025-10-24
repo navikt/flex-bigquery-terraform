@@ -135,12 +135,12 @@ module "flex_sykmeldinger_backend_avstemming" {
 EOF
 }
 
-module "sykmeldinghendelser_korrelerer_med_tsm" {
+module "sykmeldinghendelser_korrelerer_med_syfosmregister" {
   source = "../modules/google-bigquery-view"
 
   deletion_protection = false
   dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
-  view_id             = "sykmeldinghendelser_korrelerer_med_tsm"
+  view_id             = "sykmeldinghendelser_korrelerer_med_syfosmregister"
   view_schema = jsonencode(
     [
       {
