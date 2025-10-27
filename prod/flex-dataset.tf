@@ -117,6 +117,17 @@ resource "google_bigquery_table_iam_binding" "flexjar_syfooversikt_view_iam_bind
   ]
 }
 
+resource "google_bigquery_table_iam_binding" "flexjar_esyfo_oppfolgingsplan_frontend_view_iam_binding" {
+  depends_on = [module.flexjar_esyfo_oppfolgingsplan_frontend_view]
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.flexjar_esyfo_oppfolgingsplan_frontend_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "serviceAccount:syfo-71ci@knada-gcp.iam.gserviceaccount.com",
+  ]
+}
+
 resource "google_bigquery_table_iam_binding" "spinnsyn_utbetaling_view_iam_binding" {
   depends_on = [module.spinnsyn_utbetaling_view]
   project    = var.gcp_project.project
