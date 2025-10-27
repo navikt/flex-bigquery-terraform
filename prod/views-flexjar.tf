@@ -207,3 +207,74 @@ AND team = 'teamsykefravr'
 AND (JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'SenFase' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Historikk' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Min oversikt - Ruting' OR JSON_VALUE(feedback_json, '$.feedbackId') = 'Enhetens oversikt - Ruting')
 EOF
 }
+
+module "flexjar_esyfo_oppfolgingsplan_frontend_view" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "flexjar_esyfo_oppfolgingsplan_frontend_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode        = "NULLABLE"
+        name        = "opprettet"
+        type        = "TIMESTAMP"
+        description = "Når feedback ble gitt"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "tags"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "feedbackId"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sporsmal_1"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "svar_1"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "sporsmal_2"
+        type        = "STRING"
+        description = ""
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "svar_emoji"
+        type        = "STRING"
+        description = ""
+      },
+    ]
+  )
+  view_query = <<EOF
+SELECT opprettet,
+       tags,
+       JSON_VALUE(feedback_json, '$.feedbackId')                        AS feedbackId,
+       JSON_VALUE(feedback_json, '$.question__feedback')                AS sporsmal_1,
+       JSON_VALUE(feedback_json, '$.feedback')                          AS svar_1,
+       JSON_VALUE(feedback_json, '$.question__svar')                    AS sporsmal_2,
+       CASE SAFE_CAST(JSON_VALUE(feedback_json, '$.svar') AS INTEGER)
+           WHEN 1 THEN '😡'
+           WHEN 2 THEN '🙁'
+           WHEN 3 THEN '😐'
+           WHEN 4 THEN '🙂'
+           WHEN 5 THEN '😍'
+           END                                                          AS svar_emoji
+FROM `flex-prod-af40.flexjar_datastream.public_feedback`
+where team = 'team-esyfo'
+  and app='oppfolgingsplan-frontend'
+EOF
+}
