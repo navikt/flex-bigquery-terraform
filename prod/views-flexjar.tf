@@ -273,7 +273,7 @@ SELECT opprettet,
            WHEN 4 THEN '🙂'
            WHEN 5 THEN '😍'
            END                                                          AS svar_emoji
-FROM `flex-prod-af40.flexjar_datastream.public_feedback`
+FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 where team = 'team-esyfo'
   and app='oppfolgingsplan-frontend'
 EOF
