@@ -262,17 +262,11 @@ module "flexjar_esyfo_oppfolgingsplan_frontend_view" {
   view_query = <<EOF
 SELECT opprettet,
        tags,
-       JSON_VALUE(feedback_json, '$.feedbackId')                        AS feedbackId,
-       JSON_VALUE(feedback_json, '$.question__feedback')                AS sporsmal_1,
-       JSON_VALUE(feedback_json, '$.feedback')                          AS svar_1,
-       JSON_VALUE(feedback_json, '$.question__svar')                    AS sporsmal_2,
-       CASE SAFE_CAST(JSON_VALUE(feedback_json, '$.svar') AS INTEGER)
-           WHEN 1 THEN '😡'
-           WHEN 2 THEN '🙁'
-           WHEN 3 THEN '😐'
-           WHEN 4 THEN '🙂'
-           WHEN 5 THEN '😍'
-           END                                                          AS svar_emoji
+       JSON_VALUE(feedback_json, '$.feedbackId')          AS feedbackId,
+       JSON_VALUE(feedback_json, '$.question__feedback')  AS sporsmal_1,
+       JSON_VALUE(feedback_json, '$.feedback')            AS svar_1,
+       JSON_VALUE(feedback_json, '$.question__svar')      AS sporsmal_2,
+       JSON_VALUE(feedback_json, '$.svar')                AS svar_2
 FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 where team = 'team-esyfo'
   and app='oppfolgingsplan-frontend'
