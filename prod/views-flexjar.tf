@@ -253,7 +253,7 @@ module "flexjar_esyfo_oppfolgingsplan_frontend_view" {
       },
       {
         mode        = "NULLABLE"
-        name        = "svar_emoji"
+        name        = "svar_2"
         type        = "STRING"
         description = ""
       },
