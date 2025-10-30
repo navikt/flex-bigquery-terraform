@@ -6,7 +6,7 @@ module "auditlog_flex_alert" {
   notification_channels          = [module.flex_slack_notification.notification_channel_id]
   enabled                        = true
   combiner                       = "OR"
-  notification_rate_limit_period = "3600s"
+  notification_rate_limit_period = "300s"
   auto_close_period              = "604800s"
   condition_display_name         = "Manuell aktivitet"
 
