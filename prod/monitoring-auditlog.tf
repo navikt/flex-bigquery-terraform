@@ -21,9 +21,9 @@ module "auditlog_flex_alert" {
 
   Noen har utført en manuell operasjon i GCP som krever oppmerksomhet:
 
-  * *Bruker:* $${log.extracted_label.user}
-  * *Database:* $${log.extracted_label.database}
-  * *SQL Kommando:* $${log.extracted_label.command}
+  *Bruker:* $${log.extracted_label.user}
+  *Database:* $${log.extracted_label.database}
+  *SQL Kommando:* $${log.extracted_label.command}
 
   ⚠️ Vennligst undersøk om denne handlingen er autorisert.
   EOT
