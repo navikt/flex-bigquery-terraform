@@ -106,6 +106,12 @@ module "flexjar_feedback_view" {
         name        = "svar_emoji"
         type        = "STRING"
         description = "Hva som er svart på feedbacken som emoji."
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "aarsak"
+        type        = "STRING"
+        description = "Valgt årsak til svar."
       }
     ]
   )
@@ -132,12 +138,13 @@ SELECT opprettet,
            WHEN 3 THEN '😐'
            WHEN 4 THEN '🙂'
            WHEN 5 THEN '😍'
-           END                                                             svar_emoji
+           END                                                             svar_emoji,
+       JSON_VALUE(feedback_json, '$.aarsak')                            AS aarsak
 FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 where (
   JSON_VALUE(feedback_json, '$.svar') in ('JA', 'NEI', 'FORBEDRING', '1', '2', '3', '4', '5', 'Ja', 'Nei', 'Mangelfull eller uriktig rapportering til A-ordningen')
    OR
-  JSON_VALUE(feedback_json, '$.feedbackId') in ('sykpengesoknad-avbryt-survey', 'sykpengesoknad-gjenapne-survey')
+  JSON_VALUE(feedback_json, '$.feedbackId') in ('sykpengesoknad-avbryt-survey', 'sykpengesoknad-gjenapne-survey', 'sykepengesoknad-sporsmal-v2')
 )
 EOF
 }
