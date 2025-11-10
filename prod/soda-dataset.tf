@@ -691,9 +691,7 @@ WITH
 sykepengesoknad AS (
   SELECT *
   FROM `flex-prod-af40.flex_dataset.sykepengesoknad_sykepengesoknad_view`
-  WHERE
-    -- Kjent feil før dette tidspunktet
-    opprettet > '2025-01-01'
+  WHERE DATE(opprettet) >= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH)
 ),
 fremtidig_sykepengesoknad AS (
   SELECT
