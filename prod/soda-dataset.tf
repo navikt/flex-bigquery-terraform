@@ -691,7 +691,7 @@ WITH
 sykepengesoknad AS (
   SELECT *
   FROM `flex-prod-af40.flex_dataset.sykepengesoknad_sykepengesoknad_view`
-  WHERE tom BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND CURRENT_DATE()
+  WHERE DATE(opprettet) >= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH)
 ),
 fremtidig_sykepengesoknad AS (
   SELECT
