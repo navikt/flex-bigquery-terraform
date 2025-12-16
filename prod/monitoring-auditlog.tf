@@ -2,7 +2,7 @@ module "auditlog_flex_alert" {
   source = "../modules/google_monitoring_alert_policy"
 
   display_name                   = "Auditlog GCP"
-  filter                         = "protoPayload.request.user=~\".*@nav.no\"\nlogName=\"projects/flex-prod-af40/logs/cloudaudit.googleapis.com%2Fdata_access\""
+  filter                         = "protoPayload.request.user=~\".*@nav.no\" logName=\"projects/flex-prod-af40/logs/cloudaudit.googleapis.com%2Fdata_access\" -protoPayload.methodName=\"cloudsql.instances.login\""
   notification_channels          = [module.flex_slack_notification.notification_channel_id]
   enabled                        = true
   combiner                       = "OR"
