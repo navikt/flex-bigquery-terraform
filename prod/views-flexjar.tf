@@ -151,7 +151,7 @@ FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.publ
 where (
   JSON_VALUE(feedback_json, '$.svar') in ('JA', 'NEI', 'FORBEDRING', '1', '2', '3', '4', '5', 'Ja', 'Nei', 'Mangelfull eller uriktig rapportering til A-ordningen')
    OR
-  JSON_VALUE(feedback_json, '$.feedbackId') in ('sykpengesoknad-avbryt-survey', 'sykpengesoknad-gjenapne-survey', 'sykepengesoknad-sporsmal-v2')
+  JSON_VALUE(feedback_json, '$.feedbackId') in ('sykpengesoknad-avbryt-survey', 'sykpengesoknad-gjenapne-survey', 'sykepengesoknad-sporsmal-v2', 'spinnsyn-vedtak-v2')
 )
 EOF
 }
