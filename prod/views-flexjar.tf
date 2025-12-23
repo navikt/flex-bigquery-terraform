@@ -283,6 +283,6 @@ SELECT opprettet,
        JSON_VALUE(feedback_json, '$.svar')                AS svar_2
 FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 where team = 'team-esyfo'
-  and app='oppfolgingsplan-frontend'
+  and app in('oppfolgingsplan-frontend', 'syfo-oppfolgingsplan-frontend')
 EOF
 }
