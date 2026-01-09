@@ -235,4 +235,14 @@ module "flex_sykmeldinger_backend_datastream" {
   cloud_sql_instance_db_name        = "flex-sykmeldinger-backend-db"
   cloud_sql_instance_db_credentials = local.flex_sykmeldinger_datastream_backend_credentials
   datastream_vpc_resources          = local.datastream_vpc_resources
+
+  authorized_views = [
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykmeldinger_siste_hendelse_brukersvar_view"
+      }
+    },
+  ]
 }
