@@ -118,6 +118,12 @@ module "flexjar_feedback_view" {
         name        = "julesoknad"
         type        = "BOOLEAN"
         description = "Er julesøknad"
+      },
+      {
+        mode        = "NULLABLE"
+        name        = "ventetidssoknad"
+        type        = "BOOLEAN"
+        description = "Er ventetidssøknad"
       }
     ]
   )
@@ -146,7 +152,8 @@ SELECT opprettet,
            WHEN 5 THEN '😍'
            END                                                             svar_emoji,
        JSON_VALUE(feedback_json, '$.aarsak')                            AS aarsak,
-       CAST(JSON_VALUE(feedback_json, '$.julesøknad') AS BOOL)          AS julesoknad
+       CAST(JSON_VALUE(feedback_json, '$.julesøknad') AS BOOL)          AS julesoknad,
+       CAST(JSON_VALUE(feedback_json, '$.ventetidsSøknad') AS BOOL)     AS ventetidssoknad
 FROM `${var.gcp_project["project"]}.${module.flexjar_datastream.dataset_id}.public_feedback`
 where (
   JSON_VALUE(feedback_json, '$.svar') in ('JA', 'NEI', 'FORBEDRING', '1', '2', '3', '4', '5', 'Ja', 'Nei', 'Mangelfull eller uriktig rapportering til A-ordningen')
