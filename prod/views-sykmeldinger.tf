@@ -173,6 +173,11 @@ module "sykmeldinger_siste_hendelse_brukersvar_view" {
         type = "BOOL"
       },
       {
+        name = "sykFoerSykmeldingen",
+        mode = "NULLABLE",
+        type = "BOOL"
+      },
+      {
         name = "harBruktEgenmelding",
         mode = "NULLABLE",
         type = "BOOL"
@@ -194,6 +199,7 @@ module "sykmeldinger_siste_hendelse_brukersvar_view" {
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.erOpplysningeneRiktige.svar') AS BOOL) AS erOpplysningeneRiktige,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.riktigNarmesteLeder.svar') AS BOOL)    AS riktigNarmesteLeder,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.harEgenmeldingsdager.svar') AS BOOL)   AS harEgenmeldingsdager,
+             CAST(JSON_VALUE(siste_smh.bruker_svar, '$.sykFoerSykmeldingen.svar') AS BOOL)    AS sykFoerSykmeldingen,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.harBruktEgenmelding.svar') AS BOOL)    AS harBruktEgenmelding,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.harForsikring.svar') AS BOOL)          AS harForsikring
 
