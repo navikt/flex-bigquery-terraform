@@ -17,14 +17,12 @@ module "auditlog_flex_alert" {
   }
 
   documentation = <<-EOT
-  *🚨 Manuell aktivitet oppdaget*
-
-  Noen har utført en manuell operasjon i GCP som krever oppmerksomhet:
+  *🚨 Manuell db-aktivitet oppdaget*
 
   *Bruker:* $${log.extracted_label.user}
   *Database:* $${log.extracted_label.database}
   *SQL Kommando:* $${log.extracted_label.command}
 
-  ⚠️ Vennligst undersøk om denne handlingen er autorisert.
+  ⚠️ [Vurder om denne handlingen er autorisert i GAAL](https://audit-approval.iap.nav.cloud.nais.io/).
   EOT
 }
