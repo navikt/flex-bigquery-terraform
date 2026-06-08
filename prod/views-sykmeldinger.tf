@@ -158,6 +158,16 @@ module "sykmeldinger_siste_hendelse_brukersvar_view" {
         type = "STRING"
       },
       {
+        name = "blad",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
+        name = "lottOgHyre",
+        mode = "NULLABLE",
+        type = "STRING"
+      },
+      {
         name = "erOpplysningeneRiktige",
         mode = "NULLABLE",
         type = "BOOL"
@@ -196,6 +206,8 @@ module "sykmeldinger_siste_hendelse_brukersvar_view" {
              siste_smh.hendelse_opprettet                                                     AS hendelse_opprettet,
              siste_smh.status                                                                 as status,
              JSON_VALUE(siste_smh.bruker_svar, '$.arbeidssituasjon.svar')                     AS arbeidssituasjon,
+             JSON_VALUE(siste_smh.bruker_svar, '$.blad.svar')                                 AS blad,
+             JSON_VALUE(siste_smh.bruker_svar, '$.lottOgHyre.svar')                           AS lottOgHyre,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.erOpplysningeneRiktige.svar') AS BOOL) AS erOpplysningeneRiktige,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.riktigNarmesteLeder.svar') AS BOOL)    AS riktigNarmesteLeder,
              CAST(JSON_VALUE(siste_smh.bruker_svar, '$.harEgenmeldingsdager.svar') AS BOOL)   AS harEgenmeldingsdager,
