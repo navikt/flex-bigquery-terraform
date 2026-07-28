@@ -452,13 +452,13 @@ module "flex_inntektsmelding_status_datastream_avstemming" {
   view_query = <<EOF
 SELECT id FROM EXTERNAL_QUERY("${var.gcp_project["project"]}.${var.gcp_project["region"]}.flex-inntektsmelding-status",
   '''
-  SELECT id FROM vedtaksperiode_behandling_status
+  SELECT id FROM vedtaksperiode_behandling_status_v2
   WHERE opprettet_database < date_trunc('hour', current_timestamp) - INTERVAL '2 hours'
     AND opprettet_database > date_trunc('day', current_timestamp) - INTERVAL '2 days'
   ''')
 WHERE id NOT IN (
 SELECT id
-FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_status`
+FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_status_v2`
   WHERE opprettet_database < timestamp_add(timestamp_trunc(current_timestamp, HOUR), INTERVAL -2 HOUR)
     AND opprettet_database >= timestamp_add(timestamp_trunc(current_timestamp, DAY), INTERVAL -2 DAY)
 )
@@ -485,7 +485,7 @@ module "forsinket_saksbehandling_varslinger_sendt_nylig" {
   )
   view_query = <<EOF
 SELECT status, count(*) antall
-FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_status`
+FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling_status_v2`
 WHERE tidspunkt >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 96 HOUR)
 AND status in (
   'VARSLET_MANGLER_INNTEKTSMELDING_FØRSTE',

@@ -96,7 +96,7 @@ module "varsling_events_view" {
   )
   view_query = <<EOF
 SELECT vb.vedtaksperiode_id, vb.behandling_id, vbs.status, vbs.tidspunkt 
-FROM `${var.gcp_project["project"]}.${module.inntektsmelding_status_datastream.dataset_id}.public_vedtaksperiode_behandling_status` vbs,
+FROM `${var.gcp_project["project"]}.${module.inntektsmelding_status_datastream.dataset_id}.public_vedtaksperiode_behandling_status_v2` vbs,
 `${var.gcp_project["project"]}.${module.inntektsmelding_status_datastream.dataset_id}.public_vedtaksperiode_behandling`  vb
 where vbs.vedtaksperiode_behandling_id = vb.id
 EOF
