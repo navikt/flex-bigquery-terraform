@@ -7,7 +7,7 @@ locals {
 }
 
 module "spinnsyn_datastream" {
-  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.4"
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.5"
   gcp_project                                  = var.gcp_project
   application_name                             = "spinnsyn"
   cloud_sql_instance_name                      = "spinnsyn-backend"
@@ -21,7 +21,7 @@ module "spinnsyn_datastream" {
 }
 
 module "spinnsyn_arkivering_datastream" {
-  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.4"
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.5"
   gcp_project                                  = var.gcp_project
   application_name                             = "spinnsyn-arkivering"
   cloud_sql_instance_name                      = "spinnsyn-arkivering"
@@ -32,7 +32,7 @@ module "spinnsyn_arkivering_datastream" {
 }
 
 module "flex_sykmeldinger_backend_datastream" {
-  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.4"
+  source                                       = "git::https://github.com/navikt/terraform-google-bigquery-datastream.git?ref=v1.0.5"
   gcp_project                                  = var.gcp_project
   application_name                             = "flex-sykmeldinger-backend"
   cloud_sql_instance_name                      = "flex-sykmeldinger-backend"
@@ -40,5 +40,4 @@ module "flex_sykmeldinger_backend_datastream" {
   cloud_sql_instance_db_credentials            = local.flex_sykmeldinger_datastream_backend_credentials
   datastream_vpc_resources                     = local.datastream_vpc_resources
   big_query_dataset_delete_contents_on_destroy = true
-
 }
