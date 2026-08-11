@@ -19,14 +19,3 @@ locals {
     data.google_secret_manager_secret_version.spinnsyn_arkivering_datastream_secret.secret_data
   )
 }
-
-data "google_secret_manager_secret_version" "flex_sykmeldinger_backend_datastream_credentials_secret" {
-  secret  = "flex-sykmeldinger-backend-datastream-credentials"
-  version = "3"
-}
-
-locals {
-  flex_sykmeldinger_datastream_backend_credentials = jsondecode(
-    data.google_secret_manager_secret_version.flex_sykmeldinger_backend_datastream_credentials_secret.secret_data
-  )
-}
