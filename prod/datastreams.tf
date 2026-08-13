@@ -140,9 +140,6 @@ module "inntektsmelding_status_datastream" {
       }
     }
   ]
-  postgresql_exclude_schemas = [
-    { schema = "public", tables = [{ table = "flyway_schema_history" }, { table = "vedtaksperiode_behandling_status" }] }
-  ]
 }
 
 module "sykepengesoknad_datastream" {
