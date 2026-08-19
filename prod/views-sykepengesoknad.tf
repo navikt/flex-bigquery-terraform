@@ -665,3 +665,49 @@ WHERE ss.sykmelding_uuid = ys.sykmelding_id
 EOF
 
 }
+
+module "sykepengesoknad_hag_soknadsperioder_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id             = "sykepengesoknad_hag_soknadsperioder_view"
+  view_schema = jsonencode(
+    [
+      {
+        mode = "NULLABLE"
+        name = "periode_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "sykepengesoknad_id"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "fom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "tom"
+        type = "DATE"
+      },
+      {
+        mode = "NULLABLE"
+        name = "grad"
+        type = "INTEGER"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+
+SELECT a.id AS periode_id, b.sykepengesoknad_uuid AS sykepengesoknad_id, a.fom, a.tom, a.grad
+FROM `${var.gcp_project["project"]}.${module.sykepengesoknad_datastream.dataset_id}.public_soknadperiode` a
+INNER JOIN `${var.gcp_project["project"]}.${module.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad` b
+ON b.id = a.sykepengesoknad_id
+EOF
+
+}
