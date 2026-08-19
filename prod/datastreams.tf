@@ -200,6 +200,13 @@ module "sykepengesoknad_datastream" {
         project_id = var.gcp_project["project"]
         table_id   = "medlemskap_uavklart_gosys_view"
       }
+    },
+    {
+      view = {
+        dataset_id = "soda_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykepengesoknad_hag_soknadsperioder_view"
+      }
     }
   ]
   postgresql_exclude_schemas = [
