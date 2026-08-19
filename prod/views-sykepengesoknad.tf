@@ -686,6 +686,16 @@ module "sykepengesoknad_hag_soknadsperioder_view" {
       },
       {
         mode = "NULLABLE"
+        name = "fnr"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
+        name = "status"
+        type = "STRING"
+      },
+      {
+        mode = "NULLABLE"
         name = "fom"
         type = "DATE"
       },
@@ -704,7 +714,7 @@ module "sykepengesoknad_hag_soknadsperioder_view" {
 
   view_query = <<EOF
 
-SELECT a.id AS periode_id, b.sykepengesoknad_uuid AS sykepengesoknad_id, a.fom, a.tom, a.grad
+SELECT a.id AS periode_id, b.sykepengesoknad_uuid AS sykepengesoknad_id, b.fnr, b.status, a.fom, a.tom, a.grad
 FROM `${var.gcp_project["project"]}.${module.sykepengesoknad_datastream.dataset_id}.public_soknadperiode` a
 INNER JOIN `${var.gcp_project["project"]}.${module.sykepengesoknad_datastream.dataset_id}.public_sykepengesoknad` b
 ON b.id = a.sykepengesoknad_id
