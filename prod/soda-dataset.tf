@@ -196,6 +196,12 @@ flex_sykmeldinghendelse AS (
     status,
   FROM `flex-prod-af40.flex_sykmeldinger_backend_datastream.public_sykmeldinghendelse`
   WHERE lokalt_opprettet < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+  AND sykmelding_id NOT IN (
+    '87c49a1b-217a-4a57-b6ed-fc2f3742a0df',
+    'c5d90aa4-91c4-479f-ac2f-c7814e57715a',
+    '21a72a50-a1eb-4511-a8af-5fb1a3366328',
+    '799cf486-85b7-46d8-be74-ea23ae342871'
+  )
 ),
 tsm_sykmeldingstatus AS (
   SELECT
@@ -209,6 +215,12 @@ tsm_sykmeldingstatus AS (
         THEN TIMESTAMP_MILLIS(datastream_source_timestamp) < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
       ELSE timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
     END
+  AND sykmelding_id NOT IN (
+    '87c49a1b-217a-4a57-b6ed-fc2f3742a0df',
+    'c5d90aa4-91c4-479f-ac2f-c7814e57715a',
+    '21a72a50-a1eb-4511-a8af-5fb1a3366328',
+    '799cf486-85b7-46d8-be74-ea23ae342871'
+  )
 ),
 flex_sykmelding_type AS (
   SELECT
