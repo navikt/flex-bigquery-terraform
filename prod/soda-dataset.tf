@@ -730,3 +730,51 @@ SELECT
 FROM ikke_aktivert
 EOF
 }
+
+module "sykepengesoknad_vedtaksperiode_oppdatert_siste_dogn" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "sykepengesoknad_vedtaksperiode_oppdatert_siste_dogn"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      },
+      {
+        name = "siste_spleisstatus_tidspunkt"
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id, siste_spleisstatus_tidspunkt FROM `${var.gcp_project["project"]}.sykepengesoknad_datastream.public_vedtaksperiode_behandling`
+  WHERE siste_spleisstatus_tidspunkt > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+EOF
+}
+
+module "innteksmelding_status_vedtaksperiode_oppdatert_siste_dogn" {
+  source              = "../modules/google-bigquery-view"
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
+  view_id    = "innteksmelding_status_vedtaksperiode_oppdatert_siste_dogn"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        type = "STRING"
+      },
+      {
+        name = "siste_spleisstatus_tidspunkt"
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+  view_query = <<EOF
+SELECT id, siste_spleisstatus_tidspunkt FROM `${var.gcp_project["project"]}.inntektsmelding_status_datastream.public_vedtaksperiode_behandling`
+  WHERE siste_spleisstatus_tidspunkt > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+EOF
+}
