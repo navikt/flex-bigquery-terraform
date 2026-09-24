@@ -170,32 +170,32 @@ module "sykmeldinger_siste_hendelse_brukersvar_view" {
       {
         name = "erOpplysningeneRiktige",
         mode = "NULLABLE",
-        type = "BOOL"
+        type = "BOOLEAN"
       },
       {
         name = "riktigNarmesteLeder",
         mode = "NULLABLE",
-        type = "BOOL"
+        type = "BOOLEAN"
       },
       {
         name = "harEgenmeldingsdager",
         mode = "NULLABLE",
-        type = "BOOL"
+        type = "BOOLEAN"
       },
       {
         name = "sykFoerSykmeldingen",
         mode = "NULLABLE",
-        type = "BOOL"
+        type = "BOOLEAN"
       },
       {
         name = "harBruktEgenmelding",
         mode = "NULLABLE",
-        type = "BOOL"
+        type = "BOOLEAN"
       },
       {
         name = "harForsikring",
         mode = "NULLABLE",
-        type = "BOOL"
+        type = "BOOLEAN"
       }
     ]
   )
@@ -225,4 +225,39 @@ module "sykmeldinger_siste_hendelse_brukersvar_view" {
                          ) = 1) siste_smh ON sm.sykmelding_id = siste_smh.sykmelding_id
       where siste_smh.bruker_svar is not null
     EOF
+}
+
+module "sykmeldinger_opt_in_view" {
+  source = "../modules/google-bigquery-view"
+
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "sykmeldinger_opt_in_view"
+  view_schema = jsonencode(
+    [
+      {
+        name = "id"
+        mode = "NULLABLE"
+        type = "INTEGER"
+      },
+      {
+        name = "sykmelding_id"
+        mode = "NULLABLE"
+        type = "STRING"
+      },
+      {
+        name = "opprettet"
+        mode = "NULLABLE"
+        type = "TIMESTAMP"
+      }
+    ]
+  )
+
+  view_query = <<EOF
+SELECT
+  id,
+  sykmelding_id,
+  opprettet
+FROM `${var.gcp_project["project"]}.${module.flex_sykmeldinger_backend_datastream.dataset_id}.public_opt_in`
+EOF
 }

@@ -198,6 +198,17 @@ resource "google_bigquery_table_iam_binding" "sykmeldinger_siste_hendelse_bruker
   ]
 }
 
+resource "google_bigquery_table_iam_binding" "sykmeldinger_opt_in_view_iam_binding" {
+  project    = var.gcp_project.project
+  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
+  table_id   = module.sykmeldinger_opt_in_view.bigquery_view_id
+  role       = "roles/bigquery.dataViewer"
+  members = [
+    "group:all-users@nav.no",
+    "serviceAccount:nada-metabase@nada-prod-6977.iam.gserviceaccount.com",
+  ]
+}
+
 resource "google_bigquery_table_iam_binding" "sykepengesoknad_hag_soknadsperioder_view_iam_binding" {
   project    = var.gcp_project.project
   dataset_id = google_bigquery_dataset.soda_dataset.dataset_id
