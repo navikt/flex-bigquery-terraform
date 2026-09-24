@@ -241,5 +241,12 @@ module "flex_sykmeldinger_backend_datastream" {
         table_id   = "sykmeldinger_siste_hendelse_brukersvar_view"
       }
     },
+    {
+      view = {
+        dataset_id = "flex_dataset"
+        project_id = var.gcp_project["project"]
+        table_id   = "sykmeldinger_opt_in_view"
+      }
+    },
   ]
 }
