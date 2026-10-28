@@ -46,6 +46,8 @@ Terraform-ressuser opprettes nå man kjører kommandoen `terraform apply` i en m
 - Hvis koden commites til `main` provisjoneres både `dev` og `prod` av GitHub Actions.
 - Hvis en branch prefixes med `dev-` provisjoneres bare `dev`.
 
+Terraform i GitHub Actions autentiserer mot Google Cloud med Workload Identity Federation. Se [IAM-runbook for Terraform via GitHub WIF](./dokumentasjon/iam-runbook.md) for oppsett av nødvendige IAM-tilganger i `dev` og `prod`.
+
 Terraform kan også kjøres lokalt, både for `dev` og `prod`, men det krever autentisering mot Google Cloud, enten med `nais login` eller `gcloud auth login --update-adc`.
 
 ## Datastreams
