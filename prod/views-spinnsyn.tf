@@ -207,8 +207,9 @@ EOF
 module "spinnsyn_test_view" {
   source = "../modules/google-bigquery-view"
 
-  dataset_id = google_bigquery_dataset.flex_dataset.dataset_id
-  view_id    = "spinnsyn_test_view"
+  dataset_id          = google_bigquery_dataset.flex_dataset.dataset_id
+  view_id             = "spinnsyn_test_view"
+  deletion_protection = false
   view_schema = jsonencode(
     [
       {
