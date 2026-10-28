@@ -1,118 +1,138 @@
 name: "Terraform"
-on: push
+
+on:
+  push:
 
 env:
-  DEV_DIR: './dev'
-  PROD_DIR: './prod'
-  VAR_FILE:  '../terraform.tfvars'
+  DEV_DIR: "./dev"
+  DEV_PROJECT: "flex-dev-2b16"
+  PROD_DIR: "./prod"
+  PROD_PROJECT: "flex-prod-af40"
+  VAR_FILE: "../terraform.tfvars"
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   terraform-plan-dev:
     name: "terraform plan gcp-dev"
-    if: "!startsWith(github.ref_name, 'dependabot')"
+    if: github.repository == 'navikt/flex-bigquery-terraform' && !startsWith(github.ref_name, 'dependabot')
     runs-on: ubuntu-latest
-    concurrency: terraform-plan-dev
+    concurrency:
+      group: terraform-dev
+      cancel-in-progress: false
     defaults:
       run:
         working-directory: ${{ env.DEV_DIR }}
-
-    env:
-      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_DEV }}
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+      - name: "Authenticate to Google Cloud"
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.DEV_PROJECT }}
+          workload_identity_provider: "projects/621342450460/locations/global/workloadIdentityPools/github-actions/providers/github-oidc"
 
-      - name: Run 'terraform setup'
+      - name: "Set up Terraform"
         uses: hashicorp/setup-terraform@v4
 
-      - name: Run 'terraform init'
-        run: terraform init --upgrade
+      - name: "Terraform init"
+        run: terraform init -upgrade
 
-      - name: Run 'terraform fmt'
+      - name: "Terraform fmt"
         run: terraform fmt -check
 
-      - name: Run 'terraform validate'
+      - name: "Terraform validate"
         run: terraform validate
 
-      - name: Run 'terraform plan'
+      - name: "Terraform plan"
         run: terraform plan -var-file=${{ env.VAR_FILE }}
 
   terraform-plan-prod:
     name: "terraform plan gcp-prod"
-    if: "!startsWith(github.ref_name, 'dependabot')"
+    if: github.repository == 'navikt/flex-bigquery-terraform' && !startsWith(github.ref_name, 'dependabot')
     runs-on: ubuntu-latest
-    concurrency: terraform-plan-prod
+    concurrency:
+      group: terraform-prod
+      cancel-in-progress: false
     defaults:
       run:
         working-directory: ${{ env.PROD_DIR }}
-
-    env:
-      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_PROD }}
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+      - name: "Authenticate to Google Cloud"
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.PROD_PROJECT }}
+          workload_identity_provider: "projects/1002409980618/locations/global/workloadIdentityPools/github-actions/providers/github-oidc"
 
-      - name: Run 'terraform setup'
+      - name: "Set up Terraform"
         uses: hashicorp/setup-terraform@v4
 
-      - name: Run 'terraform init'
+      - name: "Terraform init"
         run: terraform init -upgrade
 
-      - name: Run 'terraform fmt'
+      - name: "Terraform fmt"
         run: terraform fmt -check
 
-      - name: Run 'terraform validate'
+      - name: "Terraform validate"
         run: terraform validate
 
-      - name: Run 'terraform plan'
+      - name: "Terraform plan"
         run: terraform plan -var-file=${{ env.VAR_FILE }}
 
   terraform-apply-dev:
-    needs: terraform-plan-dev
-    if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev-')
     name: "terraform apply gcp-dev"
+    needs: terraform-plan-dev
+    if: github.repository == 'navikt/flex-bigquery-terraform' && (github.ref_name == 'main' || startsWith(github.ref_name, 'dev-'))
     runs-on: ubuntu-latest
-    concurrency: terraform-plan-dev, terraform-apply-dev
+    concurrency:
+      group: terraform-dev
+      cancel-in-progress: false
     defaults:
       run:
         working-directory: ${{ env.DEV_DIR }}
-
-    env:
-      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_DEV }}
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+      - name: "Authenticate to Google Cloud"
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.DEV_PROJECT }}
+          workload_identity_provider: "projects/621342450460/locations/global/workloadIdentityPools/github-actions/providers/github-oidc"
 
-      - name: Run 'terraform setup'
+      - name: "Set up Terraform"
         uses: hashicorp/setup-terraform@v4
 
-      - name: Run 'terraform init'
-        run: terraform init --upgrade
+      - name: "Terraform init"
+        run: terraform init -upgrade
 
-      - name: Run 'terraform apply'
+      - name: "Terraform apply"
         run: terraform apply -auto-approve -var-file=${{ env.VAR_FILE }}
 
   terraform-apply-prod:
-    needs: terraform-plan-prod
-    if: github.ref_name == 'main'
     name: "terraform apply gcp-prod"
+    needs: terraform-plan-prod
+    if: github.repository == 'navikt/flex-bigquery-terraform' && github.ref_name == 'main'
     runs-on: ubuntu-latest
-    concurrency: terraform-plan-prod, terraform-apply-prod
+    concurrency:
+      group: terraform-prod
+      cancel-in-progress: false
     defaults:
       run:
         working-directory: ${{ env.PROD_DIR }}
-
-    env:
-      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SECRET_PROD }}
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+      - name: "Authenticate to Google Cloud"
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.PROD_PROJECT }}
+          workload_identity_provider: "projects/1002409980618/locations/global/workloadIdentityPools/github-actions/providers/github-oidc"
 
-      - name: Run 'terraform setup'
+      - name: "Set up Terraform"
         uses: hashicorp/setup-terraform@v4
 
-      - name: Run 'terraform init'
+      - name: "Terraform init"
         run: terraform init -upgrade
 
-      - name: Run 'terraform apply'
+      - name: "Terraform apply"
         run: terraform apply -auto-approve -var-file=${{ env.VAR_FILE }}
